@@ -116,3 +116,10 @@
 - passed: fixed revision/URL, HEAD/effective host/content type, revision-root + `extracted/` layout, local/upstream clean commit, resource facts and all other listed curl 7.68 options
 - blocked defects: curl lacked OS `RLIMIT_FSIZE` and `--disable`; no-redirect conflicted with the checkpoint; a retained stage hardlink could mutate the formal archive; completion publication was not crash-safe and downstream semantics only tested existence; JSONL validation lacked exact paths and a pre-parse line-byte limit
 - remediation design: D-004-A freezes `prlimit` plus curl `--disable`, direct no-redirect codeload matching, independent O_EXCL archive copy and rehash, 1 MiB JSONL line cap, exact checksum coverage, fsync plus atomic no-replace completion publication, and mandatory downstream full validation. These rules require staged documentation/code re-audit before any download.
+
+## 2026-07-22 — Phase 01 acquisition-helper first implementation preflight
+
+- verdict: BLOCKED; no helper code, test or raw data was written
+- passed: pure-standard-library no-network API/CLI split, independent archive copy direction, line cap, checksum-cycle exclusions, completion private-temp/no-replace direction and broad failure-test matrix
+- blocked defects: production accepted arbitrary paths and did not require held root dirfds; copy/tree/hash lacked complete source/destination fingerprints and hardlink rejection; completion did not fsync all extracted data/directories; helper-local resource/path bounds and unambiguous checksum path grammar were incomplete; atomic publication needed inode/temp-specific checks; HTTP observation omitted strict curl-exit schema
+- remediation design: D-004-A now fixes production paths, fd-relative traversal, stable fstat/SHA snapshots, `st_nlink=1`, full-tree fsync, independent helper limits, NFC/control-safe checksum grammar, exact temp inode/name semantics and strict HTTP observation. A revised plan and staged implementation require separate audits; download remains unapproved.

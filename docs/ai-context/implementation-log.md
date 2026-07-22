@@ -42,3 +42,5 @@
 - 提交后恢复状态以 `8b5c64e653de0aaa87cf0dd43122d446ae395169` 普通推送；工作树 clean。GSM8K 固定快照 HEAD 预检为 200/`application/x-gzip`，effective host 为 `codeload.github.com`，/data0 当时可用 227100254208 bytes，raw root 与目标不存在。
 - 智能体 1提交 GSM8K 单源执行单；主智能体在提交审计前删除 curl 7.68 不支持的 `--retry-all-errors`/`--no-clobber` 并修正为 revision-root + `extracted/` 布局。
 - 智能体 2仍以 `BLOCKED` 阻止实际下载：`--max-filesize` 不是未知 HTTP 长度的传输硬上限，curl 默认可读 `.curlrc`，无跳转策略与检查点冲突，hardlink stage alias 可破坏正式归档，completion 存在不能证明完整，JSONL 缺单行上限。已在 D-004-A 冻结修复语义，仍未创建 raw 数据。
+- D-004-A 以 `efb0cfd3add3b3b1bec6209ad5ab6066ec88aba0` 提交并普通推送，本地/远程 SHA 一致。智能体 1随后提交无网络 acquisition helper API/CLI 与 45–60 项故障测试计划。
+- 智能体 2对 helper 实施预审为 `BLOCKED`：任意生产路径、path-based reopen、未完整的 copy/tree fingerprint、未拒绝 hardlink、completion 前未 fsync 全树、helper 未独立执行全部硬上限，以及清单路径文法未充分冻结。补充规格已追加到 D-004-A，代码尚未实施。

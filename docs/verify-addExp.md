@@ -28,6 +28,8 @@ archive validator 已在智能体 2独立重放篡改反例后通过最终安全
 
 GSM8K 首次实际获取预审为 `BLOCKED`，未创建 raw 目录。阻塞项涉及传输硬上限、curl 局部配置隔离、archive 别名完整性、completion 崩溃一致性和 JSONL 内存上限；修复规格已冻结到 D-004-A，在代码与执行复审前仍不获取数据。
 
+acquisition helper 的首次实施预审同样为 `BLOCKED`：完成语义还必须抵抗路径替换、未知 hardlink、hash 期间变更和掉电后数据未持久化，并在 helper 内重复实施全部字节、成员、路径与清单上限。扩展规格已追加到 D-004-A，未下载、未产生数据统计。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
