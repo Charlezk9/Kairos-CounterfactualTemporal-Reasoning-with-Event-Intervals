@@ -1,8 +1,8 @@
 # Phase 01 Official Data Acquisition Checkpoint
 
-- status: PLANNED
+- status: IMPLEMENTATION COMPLETE; ACQUISITION NOT STARTED
 - branch: `experiment/reproduction-additional-evaluation`
-- planning_commit: pending
+- planning_commit: `b6491ec501ad18115bf5d3588cb250e01891d1e2`
 - implementation_agent: agent 1
 - boundary_agent: agent 2
 
@@ -57,8 +57,9 @@ MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 1
 ## Acquisition helper implementation checkpoint
 
 - protocol commits: `efb0cfd3add3b3b1bec6209ad5ab6066ec88aba0`, `f3003a290d01f1ce72e77cb973c3aa9aefc3776a`
+- implementation commit: `ca759ac26bfc0bd64ee25a9732c20d8ea335a362`
 - implementation: `src/kairos/acquisition.py`
 - production CLI: fixed-path `validate-stage`, `finalize`, `verify`; no network, subprocess, path option or environment override
 - scope: strict HTTP observation; independent archive copy; fd-relative tree and GSM8K validation; canonical SHA256SUMS; fsync plus no-replace completion publication; full offline verification
 - verification: 62 acquisition tests, 26 archive-safety tests and 115/115 full repository tests passed with all test temp/cache paths directed to `/data0/hk_data/kairos-zx`
-- status: implementation plan was first `BLOCKED`, D-004-A was hardened, and the revised plan received `APPROVED TO IMPLEMENT`. The first staged audit was `BLOCKED` on path reopen, copied-archive identity, quadratic validation and publication order. The second audit remained `BLOCKED` on pair lifetime, complete canonical chain, formal-root protocol entries and guard publication order. The third audit then blocked on the outer pair lifetime, complete terminal fingerprint and held-pair close semantics. The fourth audit found the same cleanup defect in canonical temporary FDs. A shared fixed-snapshot best-effort closer now covers held and canonical pairs; final/guard/both close, active validation and partial-open regressions pass without masking primary errors. The fifth complete staged audit independently replayed all prior attack and cleanup paths and returned `APPROVED TO COMMIT`. This approval does not authorize real data download, and no real data has been downloaded.
+- status: implementation plan was first `BLOCKED`, D-004-A was hardened, and the revised plan received `APPROVED TO IMPLEMENT`. The first staged audit was `BLOCKED` on path reopen, copied-archive identity, quadratic validation and publication order. The second audit remained `BLOCKED` on pair lifetime, complete canonical chain, formal-root protocol entries and guard publication order. The third audit then blocked on the outer pair lifetime, complete terminal fingerprint and held-pair close semantics. The fourth audit found the same cleanup defect in canonical temporary FDs. A shared fixed-snapshot best-effort closer now covers held and canonical pairs; final/guard/both close, active validation and partial-open regressions pass without masking primary errors. The fifth complete staged audit independently replayed all prior attack and cleanup paths and returned `APPROVED TO COMMIT`. Commit `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` was pushed by ordinary non-force update with matching local/remote SHA. This does not authorize real data download, and no real data has been downloaded.

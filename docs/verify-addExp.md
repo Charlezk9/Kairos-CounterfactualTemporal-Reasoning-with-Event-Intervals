@@ -50,6 +50,8 @@ canonical 临时 fd 已改用与 held pair 一致的固定快照 best-effort cle
 
 第五次完整 staged 审计独立重放上述故障矩阵和前四轮攻击路径后给出 `APPROVED TO COMMIT`。该批准仅证明获取 helper 快照可提交/普通推送，不是数据下载、论文实验或 `VERIFIED` 数值的批准。
 
+审计通过的 helper 已以 commit `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` 普通推送至工作分支。截至该提交仍无 raw 数据、实验 run 或论文指标。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

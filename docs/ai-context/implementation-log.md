@@ -60,3 +60,4 @@
 - 智能体 2预审批准 canonical cleanup 聚焦修复；共享 `_close_fds_best_effort` 在调用者清空所有权后按 final→guard 尝试全部 fd，正常路径上拋首个 cleanup 错误，异常展开路径保留原 validation/open 异常。
 - canonical final/guard/both close、active validation+双 close、partial final-open+guard cleanup 回归已增加；智能体 1和主智能体分别使用项目局部 CPU 环境通过 115/115 完整测试，等待第五次 staged 审计。
 - 智能体 2第五次完整 staged audit 独立通过 115/115、62/62 acquisition 和 26/26 archive safety，重放全部 terminal namespace/pair/chain 及 held/canonical cleanup 攻击并给出 `APPROVED TO COMMIT`。批准仅覆盖当前 12-file snapshot 的提交/普通推送，不批准真实下载。
+- 已创建并普通 non-force 推送 `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` (`feat(data): add audited GSM8K acquisition finalizer`)；本地/远程 SHA 一致，项目专用 GitHub Ed25519 host key 仍为单行且指纹正确。真实下载等待单独执行预审。
