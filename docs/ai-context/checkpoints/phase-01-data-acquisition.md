@@ -99,3 +99,13 @@ The approved download scope ended with this source. MuSiQue, StrategyQA, 2Wiki, 
 - freeze audit: Agent 2 returned `APPROVED TO FREEZE/PLAN IMPLEMENTATION` after checking the complete seven-document staged snapshot, fixed source metadata, project Git/SSH and absent processed target; no semantic conflict or raw/test payload remained
 - approval boundary: documentation checkpoint commit and ordinary push are approved; only an Agent 1 implementation plan may follow. Coding, test execution, processed creation, additional download and high-resource work remain unapproved
 - mandatory implementation-plan details: component-wise data-root dirfd plus `O_DIRECTORY|O_NOFOLLOW` parent creation; physical-line lockstep raw/source/example replay including duplicate statistics; D-005 exact target overrides the generic operations placeholder
+
+## GSM8K D-005-A amendment gate
+
+- status: `FROZEN BEFORE IMPLEMENTATION`; no implementation permission
+- blocked plan: Agent 2 returned `BLOCKED` because D-005 ASCII-trim acceptance conflicted with the unchanged `TemporalExample.answers` Unicode-whitespace non-empty invariant for NBSP-only/EM-SPACE-only suffixes
+- minimal amendment: preserve the ASCII-trimmed target byte-for-character, add only a `target.strip() != ""` acceptance check, and never publish the Unicode-stripped value
+- approved technical interpretation: a fresh directory target uses held-parent atomic `mkdirat` with any leaf `EEXIST` fatal, followed by `O_DIRECTORY|O_NOFOLLOW` reopen; regular private temps use `O_EXCL`
+- plan corrections still required after amendment freeze: fingerprint baselines must be retaken after each legitimate namespace mutation, and CLI must catch only enumerated expected contract errors rather than broad exceptions
+- boundary: no code/test/raw/processed/network/GPU action is approved before the amendment is reviewed and frozen
+- amendment audit: Agent 2 returned `APPROVED TO FREEZE/REPLAN IMPLEMENTATION` for the complete eight-document staged snapshot; the approval covers this documentation commit and ordinary push, followed only by Agent 1 plan revision

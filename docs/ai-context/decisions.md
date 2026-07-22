@@ -94,3 +94,11 @@
 - immutable publication：target root 为全新 0700 no-follow 目录，完成时不含子目录。每个输出用私有 0600 O_EXCL/no-follow temp 写入、flush/fsync/close，重开验证后在同一 dirfd 以 hardlink no-replace 发布 final，再 unlink temp 并 fsync root；final 必须 `nlink=1`。`processed-manifest.json` 最后以同样语义发布并 fsync root，是唯一完成标志。禁止直接使用 overwrite 型 `write_examples()`。
 - failure/verify：任一失败保留 partial target，不清理、覆盖或在原目录重跑。Verifier 要求 flat root 恰好五个固定 regular/nlink=1 文件，拒绝额外文件/目录、symlink、special、unknown hardlink、private temp、缺 manifest、非 COMPLETE、非 canonical manifest 或任一 acquisition/output/schema/ID/linkage 不一致。
 - 可识别性：本决定只标准化官方 GSM8K source，不会恢复论文未发布的 temporal subset IDs，也不得用 test 结果反向调整 parser 或 split。
+
+## D-005-A：GSM8K target 与 generic answer invariant 的最小兼容修订
+
+- 状态：FROZEN BEFORE IMPLEMENTATION
+- 触发原因：D-005 的 ASCII-only trim 会把仅由 NBSP、EM SPACE 等 Unicode whitespace 构成的 suffix 保留为非空 target，但现有不变的 13-key `TemporalExample` 要求每个 answer 的无参 `strip()` 后非空；两者在该极端输入上矛盾。
+- 修订：先令 `target = suffix.strip(" \\t\\n\\r\\v\\f")`；仍要求 `target != ""`，并新增兼容性判定 `target.strip() != ""`。第二个判定只决定接受/拒绝，输出值仍必须是第一步的 `target`；禁止用 Unicode `strip()` 的结果替换、删除或 normalization 任何 Unicode whitespace。
+- 边界样例：suffix 仅为 NBSP/EM SPACE 等 Unicode whitespace 时拒绝；`X` 与 Unicode whitespace 的任意组合在兼容性判定后按 ASCII-trim 结果逐字符保留。全部回归只使用人工合成 fixture。
+- 作用域：本修订只精确替代 D-005 `raw/parser contract` 中“ASCII-trim 后非空”的 target 接受判定；不改动 generic `TemporalExample`、source ledger 原值、ID、split、manifest、publication 或任何其他 D-005 语义。

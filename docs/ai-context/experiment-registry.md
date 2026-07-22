@@ -4,7 +4,7 @@
 
 当前无实验运行。
 
-D-005 已作为文档决策冻结，未创建 development/formal run 或 processed 工件；其唯一语义记录位于 `decisions.md` 和阶段检查点，因此不伪造 run ID。
+D-005-A 最小语义修订已经文档复审冻结；未创建 development/formal run 或 processed 工件。其唯一语义记录位于 `decisions.md` 和阶段检查点，因此不伪造 run ID。
 
 ## Development-only verification
 

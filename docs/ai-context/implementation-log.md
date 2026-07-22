@@ -67,3 +67,5 @@
 - 智能体 2批准只读 D-005 discovery；智能体 1以无 raw 回显的聚合方式确认 train/test exact schema、whole-file SHA、LF/UTF-8/JSON 结构和 train delimiter 可逆性。
 - 现有 `TemporalExample` 不足以同时表达完整 raw answer 和提取 target；智能体 2批准起草二阶段 D-005：source-specific ledger 保存 decoded raw，generic compact provenance 定位，`TemporalExample` 只保存任务语义。实现和 processed 写入仍未批准。
 - D-005 补齐 exact nested schema、fixed binding、literal ID payload、五文件 manifest、immutable publication 和 synthetic-only 测试矩阵后，智能体 2二轮只读审计给出 `APPROVED TO FREEZE/PLAN IMPLEMENTATION`。本门禁只批准文档冻结提交与智能体 1下一步实施计划，仍不批准编码、测试执行或 processed 写入。
+- 智能体 1的四文件实施计划主动发现 ASCII-trim 与 generic Unicode-whitespace invariant 的极端冲突。智能体 2因不得在代码中暗选行为而给出 `BLOCKED`；D-005-A 只增加不输出 Unicode-strip 结果的兼容性接受判定，待文档复审。
+- 智能体 2复审确认 D-005-A 仅替代 target acceptance 极端边界，不改 generic schema 或其他冻结语义，因而给出 `APPROVED TO FREEZE/REPLAN IMPLEMENTATION`。下一步仍只是修订实施计划。

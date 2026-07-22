@@ -227,3 +227,21 @@
 - approved: freeze/checkpoint commit, ordinary non-force push and Agent 1 implementation planning only
 - not approved: coding, test execution, processed creation, download or high-resource work
 - mandatory next-plan detail: dirfd/no-follow processed parent chain, physical-line lockstep raw/source/example verification, and D-005 exact path precedence over the operations overview placeholder
+
+## 2026-07-22 — GSM8K adapter implementation-plan audit
+
+- verdict: `BLOCKED`; no file is approved for code or test edits
+- semantic defect: an ASCII-trimmed suffix containing only NBSP/EM SPACE is non-empty under D-005 but rejected by the unchanged generic `TemporalExample.answers` invariant, contradicting the required one-ledger/one-example mapping
+- required document gate: append and review a narrow D-005-A acceptance rule; keep the ASCII-trimmed target unchanged, require its Unicode `strip()` only as a non-empty predicate, and add synthetic Unicode-only reject/preserve regressions
+- approved no-replace interpretation: use held-parent `mkdirat` plus fatal target-leaf `EEXIST` and no-follow reopen; intermediate missing parents may be created, while existing parents must be no-follow validated
+- plan remediation: compare full fingerprints only within stable windows after legitimate mkdir/link/unlink mutations; catch only enumerated CLI contract errors and never mask unexpected bugs or interrupts
+- boundary: coding, test execution, raw access, processed creation, network and GPU remain prohibited until amendment freeze and a new implementation-plan approval
+
+## 2026-07-22 — GSM8K D-005-A amendment audit
+
+- verdict: `APPROVED TO FREEZE/REPLAN IMPLEMENTATION`
+- snapshot: eight staged documentation paths and zero unstaged paths; branch/HEAD/remote, project SSH, cached/working diff checks and hook passed
+- semantics: the Unicode `strip()` result is only a non-empty acceptance predicate; the published target remains the ASCII-trimmed value with all retained Unicode whitespace unchanged
+- scope: D-005 target acceptance only; generic `TemporalExample`, source/ID/split/manifest/publication and all other frozen semantics remain unchanged
+- approved: documentation commit, ordinary non-force push and Agent 1 plan revision only
+- not approved: code/test edits, test execution, raw access, processed creation, network or GPU
