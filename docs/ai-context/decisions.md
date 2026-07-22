@@ -130,3 +130,11 @@
 - 证据边界：README、repository LICENSE 与主论文只提供 revision-bound/paper-reported metadata；archive availability、内容、split/schema、SHA256 与许可证适用性仍为 `UNVERIFIED`。唯一详细来源为 `checkpoints/phase-01-2wiki-discovery.md`。
 - 下一门禁：只允许 Agent 1起草 corrected literal Dropbox URL 的 exact no-body HEAD 计划；Agent 2批准前不得联网、创建 approval/record、实现 helper、访问数据或创建工件。
 - 独立 HEAD disposition：该 exact 计划已单独评估为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，原因是当前调用接口不能在最外层 `/usr/bin/curl` 首次进程创建时原生传入空 `envp` 与 `inherit_env=false`。这不修改或泛化 D-007；计划未执行，未创建 approval/record，全部 source properties 仍为 `UNVERIFIED`。
+
+## D-009：TORQUE official metadata boundary
+
+- 状态：`METADATA_ONLY / DOCUMENTS_READ`；不是 snapshot、data observation、schema/evaluator freeze 或实验结果。
+- 来源：固定 `qiangning/TORQUE-dataset` commit `ab27019cc6a317fde3c879900499f02acce8b16d` 的 README/LICENSE，以及 ACL primary page/PDF。README 与论文事实分别标记 `README_REPORTED`/`PAPER_REPORTED`；唯一详细来源为 `checkpoints/phase-01-torque-discovery.md`。
+- 评测边界：未来只考虑经独立获取与审计的 public dev gold；作者移除的 test annotations 视为 `UNAVAILABLE`，禁止从 fork、缓存或镜像恢复。Apache-2.0 当前只绑定 repository LICENSE，data-license applicability 仍为 `UNVERIFIED`。
+- 冲突：paper prose 将 EM consistency 定义为所有 question 的 prediction 均 exact match 的 contrast-set 百分比；Table 4 caption 将 `C` 定义为组内每个 question 的 F1 均至少 80% 的 contrast-group 百分比。该 consistency formulation `SPEC_CONFLICT` 不是普通 per-question EM 冲突，本门禁不选择、不实现。
+- 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划，明确区分 code metadata/data blobs 并冻结 native environment/process 边界；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。

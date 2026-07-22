@@ -74,6 +74,8 @@ StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`�
 
 2Wiki exact HEAD 计划随后被独立判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，未执行且没有新的 HEAD 响应、approval、record、数据或实验工件。该非结果状态不验证 availability、redirect、MIME、size 或任何 archive property，也不支持论文 claim。
 
+TORQUE 当前仅完成固定 README/LICENSE 与 primary paper 的 metadata discovery，状态为 `METADATA_ONLY / DOCUMENTS_READ`。README/paper 描述没有被当作本地 tree、数据、schema、evaluator 或实验观察；指标定义冲突仍未选择，test gold 不会从第三方恢复。该非结果状态不产生任何可写入论文的实验数值，详细边界见 `docs/ai-context/checkpoints/phase-01-torque-discovery.md`。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

@@ -148,6 +148,16 @@ replace the first process environment. The plan was not executed, produced no
 new HEAD response, approval, record, data or artifact, and does not change any
 `UNVERIFIED` source property. Details remain unique to the linked checkpoint.
 
+## TORQUE metadata-only discovery
+
+The fixed repository README/LICENSE and ACL primary paper were read at the
+documentation layer only. README- and paper-reported source, split, scale and
+metric facts are not local tree/data observations; actual files, schema,
+hashes, evaluator behavior, data-license applicability and test gold remain
+unverified or unavailable. The unique detailed evidence and unresolved metric
+specification conflict are in `phase-01-torque-discovery.md`. No snapshot,
+data, approval, record, artifact or formal run was created.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

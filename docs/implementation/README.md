@@ -57,6 +57,12 @@ exact HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. No acquisition or
 implementation is authorized. The unique status and disposition are in
 `../ai-context/checkpoints/phase-01-2wiki-discovery.md`.
 
+## TORQUE source status
+
+TORQUE is `METADATA_ONLY / DOCUMENTS_READ`; no snapshot, data/evaluator access
+or implementation is authorized. The unique metadata, conflict and next-gate
+status is in `../ai-context/checkpoints/phase-01-torque-discovery.md`.
+
 ## GSM8K source adapter test matrix
 
 D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。
