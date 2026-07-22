@@ -22,3 +22,5 @@
 - 智能体 1在 `src/kairos/` 和 `tests/` 实现确定性数据核心；主智能体使用局部 Conda Python 独立复跑，包含严格嵌套 schema 拒绝的 24 项单元测试全部通过。
 - 真实数据源、构造漏斗和 200 条人工审计尚未开始；不将本次开发测试记为正式实验。
 - 智能体 2首次 staged-diff 事后审计阻止提交：发现无关 relation 查询可被误标 `known`，以及 canonical JSON 对非字符串 key 存在覆盖风险。修复、回归测试与复审完成前不提交。
+- 两项缺陷修复后 27/27 测试通过；第二次审计又纠正了 checkpoint 的 `CONDARC` 路径和过期 `next_safe_action`。最终审计为 `APPROVED TO COMMIT`。
+- 提交并普通推送 `111bb992f4371385dd9513f3a9d7ec161d16c313` (`feat(data): add deterministic temporal data core`)；本地与远端分支 SHA 一致，专用 GitHub Ed25519 `known_hosts` 仍为单行。

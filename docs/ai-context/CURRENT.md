@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-22 12:57:31 CST
+- updated_at: 2026-07-22 13:11:30 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 82f5cb1cb01f870cab72e5abb651cfe9965e5a46
-- last_verified_commit: 82f5cb1cb01f870cab72e5abb651cfe9965e5a46
-- last_completed_checkpoint: checkpoints/phase-00-bootstrap.md
+- git_head: 111bb992f4371385dd9513f3a9d7ec161d16c313
+- last_verified_commit: 111bb992f4371385dd9513f3a9d7ec161d16c313
+- last_completed_checkpoint: checkpoints/phase-01-data-core.md
 - active_run_ids: none
 - running_processes: none
 - blockers: none
-- next_safe_action: 由智能体 2完成修正后最终只读复核；获批后提交并推送 data-core checkpoint。
+- next_safe_action: 只读确认六个数据集的官方来源、许可、可获取 split 和可固定 revision，登记 D-004 后由智能体 2审核下载与 adapter 边界。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `decisions.md`

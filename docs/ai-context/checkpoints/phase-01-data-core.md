@@ -1,8 +1,9 @@
 # Phase 01 Data Core Checkpoint
 
-- status: RUNNING
+- status: COMPLETE (data-core sub-checkpoint; Phase 01 remains RUNNING)
 - branch: `experiment/reproduction-additional-evaluation`
 - base_commit: `82f5cb1cb01f870cab72e5abb651cfe9965e5a46`
+- checkpoint_commit: `111bb992f4371385dd9513f3a9d7ec161d16c313`
 - implementation_agent: agent 1
 - boundary_agent: agent 2
 
@@ -46,9 +47,12 @@ PYTHONPATH=/home/yangbin/zx-tmp/kairos/src \
 
 智能体 2的首次 staged-diff 审计为 `BLOCKED`：需拒绝与被改变 relation 无关的 yes/no 更新、拒绝 canonical JSON 的非字符串 mapping key，并记录完整可复跑环境命令。两项实现均已修复并新增回归测试；27 项测试已用上述完整命令通过。第二次审计又发现命令中 `CONDARC` 路径误写，现已指向实际存在的项目局部 `/data0/hk_data/kairos-zx/.condarc`，等待最终复核。
 
-## Pending gates
+## Completion
 
-1. staged-diff re-audit by agent 2;
-2. clean commit and push;
-3. official dataset source/revision decision and adapter implementation;
-4. real construction funnel and required human audit.
+确定性数据核心已在 commit `111bb992f4371385dd9513f3a9d7ec161d16c313` 提交并以普通 non-force push 同步到工作分支；推送后本地/remote SHA 一致，专用 `known_hosts` 仍为单行。
+
+## Phase 01 remaining gates
+
+1. official dataset source/revision/license decision and adapter implementation;
+2. raw/processed file SHA256 and real construction funnel;
+3. required two-person 200-example human audit.
