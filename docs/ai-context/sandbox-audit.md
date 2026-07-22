@@ -209,3 +209,21 @@
 - filesystem: raw top level only `gsm8k`; fixed stage plus revision only; no symlink/special file or unexpected hardlink; completion guard/final device 2048, inode 176825412, `nlink=2`
 - storage: 23,287,235 GSM8K bytes and 23,295,427 project-root delta; post-run available bytes 193,444,249,600
 - boundary: no second run, mirror, next dataset, cleanup, code execution from the archive, training or inference was authorized
+
+## 2026-07-22 — GSM8K D-005 discovery/design gate
+
+- discovery verdict: APPROVED TO DISCOVER with raw read-only, aggregate-only output, test no-value/no-rule-selection, 0 network/GPU and no processed creation
+- observed boundary: worktree stayed clean; offline acquisition verify passed; only schema/type/count/length/delimiter/reconstruction aggregates and whole-file hashes were reported
+- design verdict: APPROVED TO DRAFT D-005 only; no adapter implementation or processed output authorized
+- required architecture: source-specific ledger stores decoded raw once, compact generic provenance stores locator/file hash, raw-line SHA includes actual LF bytes, and `TemporalExample` references source ID without duplicated raw payload
+- publication gate: current overwrite-style `write_examples` is forbidden for formal output; clean implementation commit plus a second execution preflight are mandatory
+
+## 2026-07-22 — GSM8K D-005 second design audit
+
+- verdict: `APPROVED TO FREEZE/PLAN IMPLEMENTATION`
+- snapshot: seven staged documentation paths, zero unstaged paths; cached diff checks and project hook passed, with no source code, raw/test payload, per-record hash, secret or processed artifact
+- semantics: exact ledger/provenance/split schemas, raw/file binding, literal IDs, unchanged 13-key example mapping, flat outputs, nested manifest, commit roles, duplicate statistics, fixed CLI, double acquisition verification and immutable manifest-last publication are mutually consistent
+- boundary: branch/HEAD/remote and project-only SSH passed; fixed metadata matched existing acquisition evidence and the processed target remained absent
+- approved: freeze/checkpoint commit, ordinary non-force push and Agent 1 implementation planning only
+- not approved: coding, test execution, processed creation, download or high-resource work
+- mandatory next-plan detail: dirfd/no-follow processed parent chain, physical-line lockstep raw/source/example verification, and D-005 exact path precedence over the operations overview placeholder

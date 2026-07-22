@@ -64,3 +64,6 @@
 - 提交后状态以 `482af857249b03d89c986dce96c9d38fc11cfd70` 普通推送；智能体 2另行批准仅固定 GSM8K codeload 对象的一次前台获取。
 - curl exit 0，HTTP 200，effective URL 精确一致，MIME 为 `application/x-gzip`；4,447,003-byte archive SHA256 为 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`。
 - `validate-stage`、`finalize`、主智能体 `verify` 和智能体 2独立 offline verify 全部 exit 0；SHA256SUMS 15/15，train/test 为 7,473/1,319。无残留进程、后台任务或 GPU 使用。
+- 智能体 2批准只读 D-005 discovery；智能体 1以无 raw 回显的聚合方式确认 train/test exact schema、whole-file SHA、LF/UTF-8/JSON 结构和 train delimiter 可逆性。
+- 现有 `TemporalExample` 不足以同时表达完整 raw answer 和提取 target；智能体 2批准起草二阶段 D-005：source-specific ledger 保存 decoded raw，generic compact provenance 定位，`TemporalExample` 只保存任务语义。实现和 processed 写入仍未批准。
+- D-005 补齐 exact nested schema、fixed binding、literal ID payload、五文件 manifest、immutable publication 和 synthetic-only 测试矩阵后，智能体 2二轮只读审计给出 `APPROVED TO FREEZE/PLAN IMPLEMENTATION`。本门禁只批准文档冻结提交与智能体 1下一步实施计划，仍不批准编码、测试执行或 processed 写入。

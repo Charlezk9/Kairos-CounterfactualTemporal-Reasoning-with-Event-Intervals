@@ -34,6 +34,22 @@
 
 `kairos.acquisition` 是 D-004-A 的离线 finalization/verification helper 候选实现，不实现网络传输。生产布局、revision、URL、路径、上限和文件名固定在源码中；CLI 仅接受 expected archive SHA256 与 clean Git commit，提供 `validate-stage`、`finalize`、`verify`。它使用 held-fd archive API 对 stage HTTP 观测、独立 archive copy、GSM8K 固定树/JSONL、全文件 SHA256SUMS 和 completion manifest 执行严格校验，并以 fsync 后 formal-tree fingerprint 与固定 guard/final 同 inode pair 绑定 completion。第三和第四次 staged 审计发现的外层生命周期、terminal fingerprint、held/canonical pair cleanup 问题已修复；115/115 开发测试与第五次完整 staged 审计已通过。当前批准仅覆盖实现快照的提交/普通推送；真实获取需单独执行门禁。无锁 verifier 的保证以末次成功复核为线性化点，不声称返回后文件系统持续不变。安全与失败语义的唯一详细来源是 `../ai-context/decisions.md` D-004-A。
 
+## GSM8K source adapter test matrix
+
+D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。
+
+- Generic provenance/schema：exact keys/types，NFC POSIX relative path，1-based line number，bool-as-int、absolute/traversal/backslash/NUL/control 拒绝，64-hex file/line SHA，canonical byte stability，ID 对每个输入字段敏感。
+- Exact schema：`SourceProvenance`、`Gsm8kSourceRecord`、nested `split` 的 missing/extra/null/enum/type 矩阵；现有 13-key `TemporalExample` 不变，provenance 只出现在 source ledger。
+- Raw reader：合成 LF/no-final-LF 行的 byte hash 区分，但 production GSM8K 任一无 LF 行必须拒绝；1 MiB limit+1，strict UTF-8/JSON object/duplicate key/non-finite/exact two strings，blank/empty/extra/missing 拒绝，whole-file hash/byte size/count/revision/path mismatch fail closed。
+- GSM8K parser：合成 single delimiter golden reconstruction；zero/multiple delimiter、empty trimmed prefix/suffix 拒绝；只 ASCII whitespace trim；逗号、正负号、小数、单位和 Unicode whitespace 不做 normalization。禁止把 raw test 样本复制进 fixture。
+- Mapping/linkage：source/record ID 稳定且字段敏感，official train 与 internal train/dev 确定，official test 无 internal split，source ledger 值可重建 decoded raw fields，example `source_id` 一对一引用 source ledger，重复 question 不静默去重。
+- Determinism/statistics：四个 JSONL 保持 raw physical line 顺序，source/example 同行 ID 链接，两次合成 fixture conversion 字节一致；train/test 的 question/raw-record duplicate group/record 八个统计按 D-005 口径验证且不触发去重。
+- Manifest/CLI：exact top-level/nested schema、fixed values/path/count/byte size/SHA，acquisition commit 与 `--adapter-commit` clean HEAD 角色不混淆，非 40-hex、dirty/mismatched execution preflight 拒绝，禁止 path argument。
+- Immutable publication：target/final/temp 已存在、symlink/hardlink/special/extra file 或目录/private-temp 拒绝，O_EXCL/no-replace，四文件及 manifest 每个 create/write/fsync/reopen/link/unlink/root-fsync 阶段故障保留 partial，manifest 未成为唯一完成标志前 verifier 拒绝。
+- Verifier/integration：从合成 raw fixture 生成 flat source/example train/test 两类 ledger和 manifest，重算 schema/count/byte size/SHA/ID/source linkage，任一输出篡改、缺失或额外文件/目录拒绝；acquisition completion 在 prepare 前后的替换/篡改、fingerprint/provenance/source binding mismatch 拒绝。
+- Formal gate：全套测试只用局部 CPU 与 `/data0` temp/cache；正式 raw 转换只能在 clean implementation commit 与第二次执行预审后运行一次。
+- Fixture/privacy gate：所有 golden/reject/integration 只用人工合成内容，禁止回显、复制或提交真实 raw/test question、answer、raw line 或 per-record hash。
+
 ## 首批测试
 
 - schema 缺字段和非法 relation 拒绝。

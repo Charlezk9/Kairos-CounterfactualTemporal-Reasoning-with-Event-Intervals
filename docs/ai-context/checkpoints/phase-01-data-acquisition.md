@@ -86,3 +86,16 @@ MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 1
 - audit: main and boundary-agent offline verify passed; no symlink/special files, non-protocol hardlinks, residual curl/acquisition process, background job, or task GPU use
 
 The approved download scope ended with this source. MuSiQue, StrategyQA, 2Wiki, TORQUE and TimeQA remain not acquired; no mirror or second run is authorized by this checkpoint.
+
+## GSM8K D-005 discovery and freeze
+
+- status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`
+- raw verification: offline acquisition verify passed before aggregation; train/test whole-file hashes matched SHA256SUMS
+- train contract evidence: 7,473/7,473 exact `{answer, question}` string records, LF terminated, strict UTF-8/JSON, no blank/duplicate/non-finite record; exactly one `####` and reversible split for every train answer
+- test conformance evidence: 1,319/1,319 exact `{answer, question}` string records, LF terminated, strict UTF-8/JSON, no blank/duplicate/non-finite record; no test value was emitted or used to select parser semantics
+- source-file SHA256: train `17f347dc51477c50d4efb83959dbb7c56297aba886e5544ee2aaed3024813465`; test `3730d312f6e3440559ace48831e51066acaca737f6eabec99bccb9e4b3c39d14`
+- privacy boundary: discovery reported only aggregate key/type/count/length/delimiter/reconstruction facts; no raw line, question, answer or per-record hash was written to logs/Git
+- processed candidate: fixed `source-record-v1` target under the project data root was absent and not created
+- freeze audit: Agent 2 returned `APPROVED TO FREEZE/PLAN IMPLEMENTATION` after checking the complete seven-document staged snapshot, fixed source metadata, project Git/SSH and absent processed target; no semantic conflict or raw/test payload remained
+- approval boundary: documentation checkpoint commit and ordinary push are approved; only an Agent 1 implementation plan may follow. Coding, test execution, processed creation, additional download and high-resource work remain unapproved
+- mandatory implementation-plan details: component-wise data-root dirfd plus `O_DIRECTORY|O_NOFOLLOW` parent creation; physical-line lockstep raw/source/example replay including duplicate statistics; D-005 exact target overrides the generic operations placeholder
