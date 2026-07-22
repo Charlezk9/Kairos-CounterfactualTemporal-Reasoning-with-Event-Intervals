@@ -42,6 +42,7 @@ as a source availability result, HTTP observation or paper experiment.
 |---|---|---|---|---|
 | `PLAN-STRATEGYQA-20260722` | `SOURCE_PLAN_APPROVED` | `official-20210107` | documentation plus exact transfer/stage-validator implementation plan; no code/network/data | none |
 | `GATE-STRATEGYQA-REDIRECT-20260723` | `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV` | `official-20210107` | documentation-only gate; retained preparations are invalid/not executed and a native replacement-env process API plus fresh audited identity are required | none |
+| `DISCOVERY-2WIKI-20260723` | `METADATA_ONLY / HEAD_NOT_ATTEMPTED` | `13800e5be57df1b4040b9b1588c6c811779e69e9` | fixed metadata only; no new 2026-07-23 request and corrected exact HEAD not run; historical 2026-07-22 HEAD timeout remains non-availability evidence; no body, data, acquisition or formal run | none |
 
 Planning-gate entries are not acquisition records or model runs. In particular,
 the StrategyQA gate has no active run ID and registers no formal run.

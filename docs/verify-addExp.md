@@ -70,6 +70,8 @@ StrategyQA 固定 transfer/stage helper 已以 commit `978ba4dea0792061340d0ec97
 
 StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`：现有调用工具不能为最外层动态进程原生提供完全替换式环境，因此所有准备记录均未执行且不可复用。未创建新的运行身份、approval 或 V3，也没有网络、数据或实验工件；该状态不是实验结果，不改变任何论文结论。恢复条件与审计证据见 `docs/ai-context/checkpoints/phase-01-strategyqa-runtime-redirect.md`。
 
+2Wiki 当前仅完成官方 corrected source 与主论文 metadata 的文档冻结，状态为 `METADATA_ONLY / HEAD_NOT_ATTEMPTED`。本次 2026-07-23 discovery 未发起新的 Dropbox 请求，corrected literal exact HEAD 尚未执行；2026-07-22 历史限时 HEAD 超时且没有可用于证明 availability、size、MIME、redirect 或 archive content 的响应。未读取 archive 或观察本地 split/schema，论文描述也未被当作本地数据或实验结果；详细边界见 `docs/ai-context/checkpoints/phase-01-2wiki-discovery.md`。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

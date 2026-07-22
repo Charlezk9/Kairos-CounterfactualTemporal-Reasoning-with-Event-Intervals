@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-23 06:13:40 CST
+- updated_at: 2026-07-23 06:23:06 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: aa8a78da98368b86343536da4fb72e289e7c1ce1
-- last_verified_commit: aa8a78da98368b86343536da4fb72e289e7c1ce1
-- last_completed_checkpoint: checkpoints/phase-01-strategyqa-runtime-redirect.md
+- git_head: 22faa3005fd7f3145a210512e585a210624ec5ff
+- last_verified_commit: 22faa3005fd7f3145a210512e585a210624ec5ff
+- last_completed_checkpoint: checkpoints/phase-01-2wiki-discovery.md
 - active_run_ids: none
 - running_processes: none
 - blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`.
-- next_safe_action: 仅由智能体 1起草 2Wiki 官方 source metadata/discovery 的只读计划；智能体 2批准前不得联网、编写代码、访问数据或创建工件。
+- next_safe_action: 仅由智能体 1起草 2Wiki Dropbox HEAD 的 exact metadata-only 计划；智能体 2批准前不得执行网络请求，不得创建 approval、record、代码、数据或工件。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
@@ -21,6 +21,7 @@
   - `checkpoints/phase-01-strategyqa-source-plan.md`
   - `checkpoints/phase-01-strategyqa-acquisition-helper.md`
   - `checkpoints/phase-01-strategyqa-runtime-redirect.md`
+  - `checkpoints/phase-01-2wiki-discovery.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

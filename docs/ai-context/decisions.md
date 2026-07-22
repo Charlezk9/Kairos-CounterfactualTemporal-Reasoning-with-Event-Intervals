@@ -122,3 +122,10 @@
 - 决定：StrategyQA runtime redirect 验证的最外层进程必须由调用 API 原生传入实际 executable、完整 argv、cwd 和完全替换式的空或已批准 allowlist `envp`；禁止以 shell、`env`、Python、Conda 或其他已在继承环境中动态加载的 wrapper 清理环境。
 - 证据边界：V1、V2 与现有 approval 均保留为 `INVALID_NOT_EXECUTED` 且不得复用；未创建 V3、新 run ID、新 nonce 或新 approval，也未登记正式 run。详细证据唯一来源为 `checkpoints/phase-01-strategyqa-runtime-redirect.md`。
 - 恢复：只有提供上述原生 API 后，才可用全新身份与 no-replace approval/V3 record 重新接受 Agent 2审核。FD/launcher contract 与 `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` 保持不变；未来成功验证也不得在同一门禁中修改该 flag。
+
+## D-008：2WikiMultihopQA corrected source metadata boundary
+
+- 状态：`METADATA_ONLY / HEAD_NOT_ATTEMPTED`；后者仅指当前 corrected-literal exact gate 尚未执行 HEAD。2026-07-22 历史限时 HEAD 预检曾超时且未产生可验证 source property 的响应；不是 acquisition、archive observation、schema freeze 或实验结果。
+- 官方来源：固定 `Alab-NII/2wikimultihop` commit `13800e5be57df1b4040b9b1588c6c811779e69e9` 及其 README 指向的 corrected `data_ids_april7.zip`。旧 `data_ids.zip?dl=0` 永久禁用，不得回退、镜像替换或解释为同一对象。
+- 证据边界：README、repository LICENSE 与主论文只提供 revision-bound/paper-reported metadata；archive availability、内容、split/schema、SHA256 与许可证适用性仍为 `UNVERIFIED`。唯一详细来源为 `checkpoints/phase-01-2wiki-discovery.md`。
+- 下一门禁：只允许 Agent 1起草 corrected literal Dropbox URL 的 exact no-body HEAD 计划；Agent 2批准前不得联网、创建 approval/record、实现 helper、访问数据或创建工件。

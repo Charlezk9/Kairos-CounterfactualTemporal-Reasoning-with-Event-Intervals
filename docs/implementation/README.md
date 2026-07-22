@@ -50,6 +50,12 @@ Runtime verification is currently `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`, and
 status and recovery requirements are in
 `../ai-context/checkpoints/phase-01-strategyqa-runtime-redirect.md`.
 
+## 2Wiki source status
+
+2Wiki is currently `METADATA_ONLY / HEAD_NOT_ATTEMPTED`; no acquisition or
+implementation is authorized. The unique status and next gate are in
+`../ai-context/checkpoints/phase-01-2wiki-discovery.md`.
+
 ## GSM8K source adapter test matrix
 
 D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。

@@ -132,6 +132,16 @@ request require separate plans and audits. The runtime gate is now
 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; its unique detailed evidence and
 recovery requirements are in `phase-01-strategyqa-runtime-redirect.md`.
 
+## 2Wiki metadata-only discovery
+
+The corrected official source is frozen at documentation level with status
+`METADATA_ONLY / HEAD_NOT_ATTEMPTED`: no new request was made in the 2026-07-23
+discovery and the corrected-literal exact HEAD gate has not run. A bounded
+2026-07-22 HEAD preflight timed out without a usable metadata response, so it
+does not verify availability or source properties. No body, clone, archive,
+schema observation or artifact exists. The unique detailed evidence is in
+`phase-01-2wiki-discovery.md`.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`
