@@ -783,6 +783,73 @@ def _inspect_open_file(
     )
 
 
+def _duplicate_regular_file(archive_fd: int) -> tuple[BinaryIO, int]:
+    duplicate = os.dup(archive_fd)
+    try:
+        status = os.fstat(duplicate)
+        if not stat.S_ISREG(status.st_mode):
+            raise ArchiveSafetyError("archive descriptor must name a regular file")
+        original_offset = os.lseek(duplicate, 0, os.SEEK_CUR)
+        return os.fdopen(duplicate, "rb", closefd=True), original_offset
+    except BaseException:
+        os.close(duplicate)
+        raise
+
+
+def _restore_shared_offset(handle: BinaryIO, original_offset: int) -> None:
+    os.lseek(handle.fileno(), original_offset, os.SEEK_SET)
+
+
+def _duplicate_directory(directory_fd: int, name: str) -> int:
+    duplicate = os.dup(directory_fd)
+    try:
+        if not stat.S_ISDIR(os.fstat(duplicate).st_mode):
+            raise ArchiveSafetyError(f"{name} descriptor must name a directory")
+        return duplicate
+    except BaseException:
+        os.close(duplicate)
+        raise
+
+
+def _validate_destination_leaf(destination_leaf: str) -> None:
+    if not isinstance(destination_leaf, str):
+        raise TypeError("destination leaf must be a string")
+    normalized = normalize_member_path(destination_leaf, is_directory=False)
+    if normalized != destination_leaf or "/" in destination_leaf:
+        raise ArchiveSafetyError("destination leaf must be one canonical component")
+
+
+def inspect_archive_fd(
+    archive_fd: int,
+    *,
+    max_total_bytes: int,
+    max_members: int = 200_000,
+    max_metadata_bytes: int = _DEFAULT_METADATA_BYTES,
+    expected_sha256: Optional[str] = None,
+) -> ArchiveInspection:
+    """Inspect an already-open regular archive without closing its descriptor."""
+
+    _validate_limits(max_members, max_total_bytes, max_metadata_bytes)
+    _validate_expected_sha256(expected_sha256)
+    handle, original_offset = _duplicate_regular_file(archive_fd)
+    try:
+        inspection, _ = _inspect_open_file(
+            handle,
+            expected_sha256=expected_sha256,
+            max_members=max_members,
+            max_total_bytes=max_total_bytes,
+            max_metadata_bytes=max_metadata_bytes,
+        )
+        return inspection
+    finally:
+        if not handle.closed:
+            try:
+                _restore_shared_offset(handle, original_offset)
+            except OSError:
+                pass
+            handle.close()
+
+
 def inspect_archive(
     archive_path: str | Path,
     *,
@@ -796,14 +863,13 @@ def inspect_archive(
     _validate_limits(max_members, max_total_bytes, max_metadata_bytes)
     _validate_expected_sha256(expected_sha256)
     with _open_source_file(archive_path) as handle:
-        inspection, _ = _inspect_open_file(
-            handle,
+        return inspect_archive_fd(
+            handle.fileno(),
             expected_sha256=expected_sha256,
             max_members=max_members,
             max_total_bytes=max_total_bytes,
             max_metadata_bytes=max_metadata_bytes,
         )
-        return inspection
 
 
 def _open_or_create_directory(parent_descriptor: int, component: str) -> int:
@@ -970,6 +1036,79 @@ def _extract_tar(
         raise ArchiveSafetyError("TAR total bytes changed during extraction")
 
 
+def safe_extract_fd(
+    archive_fd: int,
+    destination_parent_fd: int,
+    destination_leaf: str,
+    *,
+    expected_sha256: str,
+    max_total_bytes: int,
+    max_members: int = 200_000,
+    max_metadata_bytes: int = _DEFAULT_METADATA_BYTES,
+) -> ArchiveInspection:
+    """Inspect and extract using duplicated, already-open descriptors."""
+
+    _validate_limits(max_members, max_total_bytes, max_metadata_bytes)
+    _validate_expected_sha256(expected_sha256)
+    _validate_destination_leaf(destination_leaf)
+    parent_descriptor = _duplicate_directory(
+        destination_parent_fd, "destination parent"
+    )
+    handle: Optional[BinaryIO] = None
+    original_offset = 0
+    destination_descriptor = -1
+    try:
+        try:
+            os.stat(destination_leaf, dir_fd=parent_descriptor, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        else:
+            raise FileExistsError(f"destination already exists: {destination_leaf}")
+
+        handle, original_offset = _duplicate_regular_file(archive_fd)
+        inspection, baseline = _inspect_open_file(
+            handle,
+            expected_sha256=expected_sha256,
+            max_members=max_members,
+            max_total_bytes=max_total_bytes,
+            max_metadata_bytes=max_metadata_bytes,
+        )
+        os.mkdir(destination_leaf, mode=0o755, dir_fd=parent_descriptor)
+        destination_descriptor = os.open(
+            destination_leaf, _directory_flags(), dir_fd=parent_descriptor
+        )
+        os.fchmod(destination_descriptor, 0o755)
+        if inspection.format is ArchiveFormat.ZIP:
+            _extract_zip(
+                handle,
+                destination_descriptor,
+                inspection,
+                max_members,
+                max_total_bytes,
+            )
+        else:
+            _extract_tar(
+                handle,
+                destination_descriptor,
+                inspection,
+                max_members,
+                max_total_bytes,
+            )
+        if _stable_sha256(handle, baseline) != inspection.sha256:
+            raise ArchiveSafetyError("archive content changed during extraction")
+    finally:
+        if destination_descriptor >= 0:
+            os.close(destination_descriptor)
+        if handle is not None and not handle.closed:
+            try:
+                _restore_shared_offset(handle, original_offset)
+            except OSError:
+                pass
+            handle.close()
+        os.close(parent_descriptor)
+    return inspection
+
+
 def safe_extract(
     archive_path: str | Path,
     destination: str | Path,
@@ -979,56 +1118,24 @@ def safe_extract(
     max_members: int = 200_000,
     max_metadata_bytes: int = _DEFAULT_METADATA_BYTES,
 ) -> ArchiveInspection:
-    """Inspect then safely extract using held source and destination dirfds."""
+    """Path-compatible wrapper around :func:`safe_extract_fd`."""
 
     _validate_limits(max_members, max_total_bytes, max_metadata_bytes)
     _validate_expected_sha256(expected_sha256)
     parent_descriptor, destination_leaf = _open_destination_parent(destination)
-    destination_descriptor = -1
     try:
-        try:
-            os.stat(destination_leaf, dir_fd=parent_descriptor, follow_symlinks=False)
-        except FileNotFoundError:
-            pass
-        else:
-            raise FileExistsError(f"destination already exists: {destination}")
-
         with _open_source_file(archive_path) as handle:
-            inspection, baseline = _inspect_open_file(
-                handle,
+            return safe_extract_fd(
+                handle.fileno(),
+                parent_descriptor,
+                destination_leaf,
                 expected_sha256=expected_sha256,
                 max_members=max_members,
                 max_total_bytes=max_total_bytes,
                 max_metadata_bytes=max_metadata_bytes,
             )
-            os.mkdir(destination_leaf, mode=0o755, dir_fd=parent_descriptor)
-            destination_descriptor = os.open(
-                destination_leaf, _directory_flags(), dir_fd=parent_descriptor
-            )
-            os.fchmod(destination_descriptor, 0o755)
-            if inspection.format is ArchiveFormat.ZIP:
-                _extract_zip(
-                    handle,
-                    destination_descriptor,
-                    inspection,
-                    max_members,
-                    max_total_bytes,
-                )
-            else:
-                _extract_tar(
-                    handle,
-                    destination_descriptor,
-                    inspection,
-                    max_members,
-                    max_total_bytes,
-                )
-            if _stable_sha256(handle, baseline) != inspection.sha256:
-                raise ArchiveSafetyError("archive content changed during extraction")
     finally:
-        if destination_descriptor >= 0:
-            os.close(destination_descriptor)
         os.close(parent_descriptor)
-    return inspection
 
 
 __all__ = [
@@ -1038,6 +1145,8 @@ __all__ = [
     "MemberKind",
     "MemberSummary",
     "inspect_archive",
+    "inspect_archive_fd",
     "normalize_member_path",
     "safe_extract",
+    "safe_extract_fd",
 ]

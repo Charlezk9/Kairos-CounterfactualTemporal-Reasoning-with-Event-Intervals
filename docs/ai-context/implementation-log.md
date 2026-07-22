@@ -44,3 +44,19 @@
 - 智能体 2仍以 `BLOCKED` 阻止实际下载：`--max-filesize` 不是未知 HTTP 长度的传输硬上限，curl 默认可读 `.curlrc`，无跳转策略与检查点冲突，hardlink stage alias 可破坏正式归档，completion 存在不能证明完整，JSONL 缺单行上限。已在 D-004-A 冻结修复语义，仍未创建 raw 数据。
 - D-004-A 以 `efb0cfd3add3b3b1bec6209ad5ab6066ec88aba0` 提交并普通推送，本地/远程 SHA 一致。智能体 1随后提交无网络 acquisition helper API/CLI 与 45–60 项故障测试计划。
 - 智能体 2对 helper 实施预审为 `BLOCKED`：任意生产路径、path-based reopen、未完整的 copy/tree fingerprint、未拒绝 hardlink、completion 前未 fsync 全树、helper 未独立执行全部硬上限，以及清单路径文法未充分冻结。补充规格已追加到 D-004-A，代码尚未实施。
+- D-004-A 增补以 `f3003a290d01f1ce72e77cb973c3aa9aefc3776a` 提交并普通推送。智能体 2复审后给出 `APPROVED TO IMPLEMENT`，范围仅两个 src/test 文件、标准库、无网络/GPU/raw 写入。
+- 智能体 1实现固定生产布局的 acquisition helper 与 33 项测试；主智能体使用项目局部 Python 独立复跑 82/82 通过，CLI 只暴露 `validate-stage`/`finalize`/`verify`，raw root 仍不存在。等待 staged 事后安全审计。
+- 智能体 2对 9-file staged snapshot 的事后审计为 `BLOCKED`：`safe_extract`/`inspect_archive` 仍通过绝对路径重开 revision，formal archive 关闭后重开未核对原目标 inode，空目录检查最坏 O(D×F)，completion 发布后才比较 snapshot 可留下未绑定 fsync 状态的 final。现有测试未覆盖这些反例，不提交、不下载。
+- 智能体 2对四文件扩展修复计划首次阻止了 root fingerprint 自污染和删除 guard 后无法保证失效的顺序；D-004-A 改为排除 revision root 的 formal-tree fingerprint 与永久 fixed guard/final 同 inode、`nlink=2` 成功格式后，获得 `APPROVED TO IMPLEMENT`。
+- 智能体 1新增 fd-native archive inspect/extract，修复 held revision/copy inode/O(D×F)/fsync publication 问题，并增加 canonical revision replacement、same-content inode swap、file/dir/root fsync、sparse limit+1、guard/fingerprint 回归。主智能体独立复跑 97/97 通过，raw root 仍不存在，等待完整 staged 复审。
+- 智能体 2第二次 staged audit 仍为 `BLOCKED`：读取 completion pair 后替换两个 canonical names 仍可返回旧 manifest，整个 revision parent 重命名后 leaf-only 核对仍可成功，formal root 的协议外 regular file 可进入清单并通过，且实现使用 `.completion-manifest.guard` 和 temp 直接同时 link guard/final，未形成 D-004-A 规定的已 fsync guard-only 准备态。当前不提交、不下载。
+- 智能体 2批准仅修改 acquisition 源/测试的第二轮修复；智能体 1新增显式 completion-pair context 与五态 protocol scan，对 pair 做首次/末次/返回前重绑，从 absolute project root 重建并比较全 revision chain，严核 formal root 三项集合，并实现 `completion-manifest.guard` guard-only fsync 后再 link final 的顺序。
+- 新增 pair swap、intermediate parent/project-root replacement、protocol-extra file/directory 和 publication-event 回归；主智能体独立复跑 103/103 通过，raw root 仍不存在，等待第三次 staged 复审。
+- 智能体 2第三次 staged audit 仍为 `BLOCKED`：`_verify_complete_fd` 结束后 pair fd 已关闭，外层做 revision binding 时替换 canonical pair 仍可返回旧 `COMPLETE`；最终 revision identity 比较漏掉 nlink，返回前新增目录可通过；`_CompletionPair.close()` 在首个 close 失败时不尝试另一 fd 且可掩盖活动异常。现有 103 项测试不足以放行。
+- 智能体 2预审批准仅修改 `src/kairos/acquisition.py` 和 `tests/test_acquisition.py`；finalize 现在 completion 发布完成后捕获稳定阶段 binding，统一 bound verifier 长持 pair 到末次树扫描、canonical pair 重绑、完整 root/parent/revision fingerprint 链校验和返回线性化点。
+- pair close 会预先清空对象状态并 best-effort 尝试两个 fd；独立 close 错误阻止成功返回，活动主异常不被 cleanup 错误覆盖。late pair/root/parent/leaf、late extra directory/regular file 和 close-failure 回归均通过。
+- 智能体 1与主智能体分别使用项目局部 CPU 环境通过 110/110 完整测试；等待第四次 staged 审计，真实下载仍未批准。
+- 智能体 2第四次 staged audit 仍为 `BLOCKED`：held `_CompletionPair.close()` 矩阵已通过，但 `_assert_completion_pair_binding` 中重开的 canonical final/guard 临时 fd 仍用串行 finally 关闭；final close 失败会跳过 guard close，且可覆盖既有 validation/open 异常。需补 canonical close 矩阵后再审。
+- 智能体 2预审批准 canonical cleanup 聚焦修复；共享 `_close_fds_best_effort` 在调用者清空所有权后按 final→guard 尝试全部 fd，正常路径上拋首个 cleanup 错误，异常展开路径保留原 validation/open 异常。
+- canonical final/guard/both close、active validation+双 close、partial final-open+guard cleanup 回归已增加；智能体 1和主智能体分别使用项目局部 CPU 环境通过 115/115 完整测试，等待第五次 staged 审计。
+- 智能体 2第五次完整 staged audit 独立通过 115/115、62/62 acquisition 和 26/26 archive safety，重放全部 terminal namespace/pair/chain 及 held/canonical cleanup 攻击并给出 `APPROVED TO COMMIT`。批准仅覆盖当前 12-file snapshot 的提交/普通推送，不批准真实下载。

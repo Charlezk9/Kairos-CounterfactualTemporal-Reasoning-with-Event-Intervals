@@ -30,6 +30,10 @@
 
 `kairos.archive_safety` 为 ZIP/TAR/TAR.GZ 提供标准库全量检查与新目录流式提取。它在标准库物化 archive 前逐条有界解析 ZIP 中心目录，要求中心目录紧邻 EOCD，且 EOCD 数量和字节范围与实际条目精确一致；central/local 的 version-needed、flags、compression、CRC 和大小逐字段交叉核验，data descriptor、ZIP64 与 multi-disk 均保守拒绝。TAR header/PAX/GNU metadata 也在物化前受成员与字节上限约束。模块拒绝 traversal、Windows/反斜杠路径、异常/超长/重复/前缀冲突成员、链接、设备、FIFO、sparse、加密 ZIP 和超预算 archive。源与目标必须为绝对无 symlink 路径；同一源 FD 在检查/提取前后重算 SHA/fstat，目标树使用 root-anchored dirfd 和 `O_NOFOLLOW|O_EXCL`。该模块不使用 `extractall`/`getmembers`，不保留上游 owner/permission，不覆盖已有路径。它只处理已经过 host/下载字节门禁的本地 archive，不负责网络获取或递归扫描嵌套 archive。
 
+## GSM8K acquisition finalization
+
+`kairos.acquisition` 是 D-004-A 的离线 finalization/verification helper 候选实现，不实现网络传输。生产布局、revision、URL、路径、上限和文件名固定在源码中；CLI 仅接受 expected archive SHA256 与 clean Git commit，提供 `validate-stage`、`finalize`、`verify`。它使用 held-fd archive API 对 stage HTTP 观测、独立 archive copy、GSM8K 固定树/JSONL、全文件 SHA256SUMS 和 completion manifest 执行严格校验，并以 fsync 后 formal-tree fingerprint 与固定 guard/final 同 inode pair 绑定 completion。第三和第四次 staged 审计发现的外层生命周期、terminal fingerprint、held/canonical pair cleanup 问题已修复；115/115 开发测试与第五次完整 staged 审计已通过。当前批准仅覆盖实现快照的提交/普通推送；真实获取需单独执行门禁。无锁 verifier 的保证以末次成功复核为线性化点，不声称返回后文件系统持续不变。安全与失败语义的唯一详细来源是 `../ai-context/decisions.md` D-004-A。
+
 ## 首批测试
 
 - schema 缺字段和非法 relation 拒绝。

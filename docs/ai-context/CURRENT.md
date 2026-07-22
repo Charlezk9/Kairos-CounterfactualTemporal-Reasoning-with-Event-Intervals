@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-22 14:45:29 CST
+- updated_at: 2026-07-22 17:00:27 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: efb0cfd3add3b3b1bec6209ad5ab6066ec88aba0
-- last_verified_commit: efb0cfd3add3b3b1bec6209ad5ab6066ec88aba0
+- git_head: f3003a290d01f1ce72e77cb973c3aa9aefc3776a
+- last_verified_commit: f3003a290d01f1ce72e77cb973c3aa9aefc3776a
 - last_completed_checkpoint: checkpoints/phase-01-data-core.md
 - active_run_ids: none
 - running_processes: none
-- blockers: acquisition helper 首次实施预审为 BLOCKED：需固定生产路径与长持有 dirfd，对 copy/tree/hash 做前后 fingerprint 并拒绝 hardlink，completion 前 fsync 全树，在 helper 内独立实施资源/路径上限与无歧义清单文法。
-- next_safe_action: 提交 D-004-A 的 dirfd/TOCTOU/fsync/硬上限增补，再由智能体 1重新提交 helper 实施计划供智能体 2预审；获批前不实现代码、不创建 raw 数据。
+- blockers: acquisition helper 第五次完整 staged 安全审计为 APPROVED TO COMMIT；批准范围仅限当前 12-file snapshot 的提交/普通推送，真实下载仍未批准。
+- next_safe_action: 运行文档状态增量复核与最终 hook/diff check，然后以 `feat(data): add audited GSM8K acquisition finalizer` 提交并普通 non-force push；提交前不下载。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`

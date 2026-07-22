@@ -18,8 +18,10 @@ from kairos.archive_safety import (
     ArchiveSafetyError,
     MemberKind,
     inspect_archive,
+    inspect_archive_fd,
     normalize_member_path,
     safe_extract,
+    safe_extract_fd,
 )
 
 
@@ -156,6 +158,110 @@ class ArchiveRoundTripTests(unittest.TestCase):
             self.assertTrue(destination.is_dir())
             self.assertEqual((destination / "first.txt").read_bytes(), b"first")
             self.assertFalse((destination / "second.txt").exists())
+
+
+class ArchiveFdApiTests(unittest.TestCase):
+    def test_inspect_fd_preserves_caller_descriptor_and_offset(self):
+        with tempfile.TemporaryDirectory(dir="/data0/hk_data/kairos-zx/.tmp") as directory:
+            source = Path(directory) / "sample.tar.gz"
+            write_tar(source, [("a.txt", b"alpha")], gzip=True)
+            descriptor = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+            try:
+                os.lseek(descriptor, 3, os.SEEK_SET)
+                inspection = inspect_archive_fd(
+                    descriptor,
+                    expected_sha256=file_sha256(source),
+                    max_total_bytes=100,
+                )
+                self.assertEqual(inspection.member_count, 1)
+                self.assertEqual(os.lseek(descriptor, 0, os.SEEK_CUR), 3)
+                self.assertTrue(stat.S_ISREG(os.fstat(descriptor).st_mode))
+            finally:
+                os.close(descriptor)
+
+    def test_fd_extract_uses_held_archive_and_parent_after_path_replacement(self):
+        with tempfile.TemporaryDirectory(dir="/data0/hk_data/kairos-zx/.tmp") as directory:
+            root = Path(directory)
+            source = root / "sample.tar.gz"
+            write_tar(source, [("a.txt", b"alpha")], gzip=True)
+            digest = file_sha256(source)
+            parent = root / "parent"
+            parent.mkdir()
+            archive_fd = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+            parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            source.rename(root / "held-source.tar.gz")
+            source.write_bytes(b"replacement")
+            parent.rename(root / "held-parent")
+            parent.mkdir()
+            try:
+                safe_extract_fd(
+                    archive_fd,
+                    parent_fd,
+                    "out",
+                    expected_sha256=digest,
+                    max_total_bytes=100,
+                )
+                self.assertEqual(
+                    (root / "held-parent" / "out" / "a.txt").read_bytes(),
+                    b"alpha",
+                )
+                self.assertFalse((parent / "out").exists())
+                self.assertTrue(stat.S_ISREG(os.fstat(archive_fd).st_mode))
+                self.assertTrue(stat.S_ISDIR(os.fstat(parent_fd).st_mode))
+            finally:
+                os.close(parent_fd)
+                os.close(archive_fd)
+
+    def test_fd_api_rejects_nonregular_nondirectory_and_multicomponent_leaf(self):
+        with tempfile.TemporaryDirectory(dir="/data0/hk_data/kairos-zx/.tmp") as directory:
+            root = Path(directory)
+            source = root / "sample.tar.gz"
+            write_tar(source, [("a.txt", b"alpha")], gzip=True)
+            file_fd = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+            directory_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            try:
+                with self.assertRaisesRegex(ArchiveSafetyError, "regular file"):
+                    inspect_archive_fd(directory_fd, max_total_bytes=100)
+                with self.assertRaisesRegex(ArchiveSafetyError, "directory"):
+                    safe_extract_fd(
+                        file_fd,
+                        file_fd,
+                        "out",
+                        expected_sha256=file_sha256(source),
+                        max_total_bytes=100,
+                    )
+                with self.assertRaisesRegex(ArchiveSafetyError, "one canonical"):
+                    safe_extract_fd(
+                        file_fd,
+                        directory_fd,
+                        "nested/out",
+                        expected_sha256=file_sha256(source),
+                        max_total_bytes=100,
+                    )
+            finally:
+                os.close(directory_fd)
+                os.close(file_fd)
+
+    def test_path_wrapper_opens_source_and_destination_parent_once(self):
+        with tempfile.TemporaryDirectory(dir="/data0/hk_data/kairos-zx/.tmp") as directory:
+            root = Path(directory)
+            source = root / "sample.tar.gz"
+            write_tar(source, [("a.txt", b"alpha")], gzip=True)
+            open_source = archive_safety._open_source_file
+            open_parent = archive_safety._open_destination_parent
+            with mock.patch(
+                "kairos.archive_safety._open_source_file", wraps=open_source
+            ) as source_mock, mock.patch(
+                "kairos.archive_safety._open_destination_parent", wraps=open_parent
+            ) as parent_mock:
+                safe_extract(
+                    source,
+                    root / "out",
+                    expected_sha256=file_sha256(source),
+                    max_total_bytes=100,
+                )
+            self.assertEqual(source_mock.call_count, 1)
+            self.assertEqual(parent_mock.call_count, 1)
 
 
 class ArchivePathTests(unittest.TestCase):

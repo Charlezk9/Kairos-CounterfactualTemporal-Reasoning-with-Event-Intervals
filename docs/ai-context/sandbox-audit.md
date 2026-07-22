@@ -123,3 +123,79 @@
 - passed: pure-standard-library no-network API/CLI split, independent archive copy direction, line cap, checksum-cycle exclusions, completion private-temp/no-replace direction and broad failure-test matrix
 - blocked defects: production accepted arbitrary paths and did not require held root dirfds; copy/tree/hash lacked complete source/destination fingerprints and hardlink rejection; completion did not fsync all extracted data/directories; helper-local resource/path bounds and unambiguous checksum path grammar were incomplete; atomic publication needed inode/temp-specific checks; HTTP observation omitted strict curl-exit schema
 - remediation design: D-004-A now fixes production paths, fd-relative traversal, stable fstat/SHA snapshots, `st_nlink=1`, full-tree fsync, independent helper limits, NFC/control-safe checksum grammar, exact temp inode/name semantics and strict HTTP observation. A revised plan and staged implementation require separate audits; download remains unapproved.
+
+## 2026-07-22 — Phase 01 acquisition-helper second implementation preflight
+
+- verdict: APPROVED TO IMPLEMENT only `src/kairos/acquisition.py` and `tests/test_acquisition.py`; real download and raw writes remain unapproved
+- verified plan: fixed production layout and CLI, long-held root/stage/revision/extracted dirfds, stable copy/tree fingerprints, hardlink rejection, helper-local limits, unambiguous checksum grammar, full-tree fsync, temp inode-aware no-replace publication, strict HTTP schema and final independent verification
+- restrictions: `expected-sha256` and `kairos-commit` are strict lowercase hex provenance/comparison values and cannot influence paths; test layout injection is internal only; all test temp paths must explicitly use `/data0/hk_data/kairos-zx/.tmp`
+- implementation evidence: two unstaged source/test files, 33 new tests and 82/82 full suite pass; exact staged diff and adversarial replay remain pending
+
+## 2026-07-22 — Phase 01 acquisition-helper first staged audit
+
+- verdict: BLOCKED; current nine-file snapshot must not be committed/pushed and real download remains unapproved
+- passed: 82/82 tests, hook/diff, fixed production CLI, no network/subprocess/environment path override, strict HTTP schema, fd-relative tree basics, hardlink/symlink/special rejection, checksum grammar, staged path/secret/large-file checks and project Git/SSH
+- blocked defects:
+  - `safe_extract` and `inspect_archive` reopened `layout.revision` by absolute path instead of consuming the held archive/revision dirfds;
+  - formal archive close/reopen compared digest/size but not the original destination `(dev, ino)`;
+  - extra-empty-directory validation was worst-case O(D×F) at the 200,000-member limit;
+  - completion was linked before the final snapshot comparison, directory fsync did not bind directory fingerprints, and a same-content inode replacement could leave a later-consumable but not fully persisted state.
+- required remediation: add reviewed open-fd/parent-dirfd archive APIs, preserve and compare destination identity, precompute file ancestors for near-linear validation, bind the completion manifest to a post-fsync formal-tree fingerprint and add path-replacement/inode/fsync/limit+1/publication-failure tests. Expanded implementation scope requires a new preflight.
+
+## 2026-07-22 — Phase 01 acquisition-helper expanded remediation preflight
+
+- first verdict: BLOCKED on protocol definition; revision-root timestamps would self-invalidate during publication and unlinking a transient guard before the final root fsync created an unavoidable failure window
+- final verdict: APPROVED TO IMPLEMENT only the four archive/acquisition source-test files after D-004-A excluded revision root from the formal-tree digest and adopted a permanent fixed guard/final same-inode `nlink=2` success state
+- implementation: fd-native inspect/extract, held canonical revision identity, destination reopen identity, near-linear file-ancestor set, complete nested-directory fingerprints, post-fsync formal-tree digest and permanent guard protocol are implemented
+- verification: 44 acquisition tests, 26 archive tests and 97/97 full suite pass; path replacement, same-content inode, file/directory/root fsync, sparse limit+1 and guarded publication regressions are included; final staged audit pending and download remains unapproved
+
+## 2026-07-22 — Phase 01 acquisition-helper second staged audit
+
+- verdict: BLOCKED; current twelve-file snapshot must not be committed/pushed and real download remains unapproved
+- passed: 97/97 tests, hook/diff, fd-native archive ownership/type/path-wrapper compatibility, copy identity fixes, near-linear ancestor validation, basic nested fingerprints/fsync, fixed production CLI, staged path/secret/large-file checks and project Git/SSH
+- blocked defects:
+  - completion guard/final were closed after parsing and their canonical names were not rebound to held pair identities before/after scans and return;
+  - canonical revision verification checked only the leaf in the previously held deepest parent, not the full chain reopened from the held project root;
+  - formal-tree canonicalization allowed root entries outside the fixed `{source.tar.gz, SHA256SUMS, extracted}` protocol set;
+  - implementation used `.completion-manifest.guard` and linked temp directly to guard and final before the first fsync, instead of persisting `completion-manifest.guard` alone, rechecking formal state, then linking guard to final.
+- required remediation: hold pair fds through verification and rebind both names at each boundary; re-open and compare the entire canonical parent chain/root identity; enforce the exact formal root set; implement the frozen guard-only preparation order and update tests/docs before another staged audit.
+- remediation implemented: `_CompletionPair` holds and rebinds guard/final identities through return; an explicit five-state scanner prevents guard-only from entering public verify; the project root and every revision parent are reopened no-follow and compared; formal top-level is exactly `{source.tar.gz, SHA256SUMS, extracted}`; fixed `completion-manifest.guard` is fsynced alone before it is linked to final. Pair-swap, nested/root replacement, extra-root file/directory and publication-order regressions raise. The full suite now passes 103 tests; third staged audit pending.
+
+## 2026-07-22 — Phase 01 acquisition-helper third staged audit
+
+- verdict: BLOCKED; current twelve-file snapshot must not be committed/pushed and real download remains unapproved
+- passed: 103/103 tests, hook/diff, all prior archive/copy/protocol/root-chain/guard-order fixes, staged path/secret/large-file checks and project Git/SSH
+- blocked defects:
+  - `_CompletionPair` was closed when inner verification returned, leaving an outer revision-binding window in which canonical pair replacement was accepted;
+  - final revision identity comparison omitted `nlink`, so a new root child could appear after inner verification and before return;
+  - a close error on one pair FD prevented attempting the other close, left fields uncleared and could replace an already active exception.
+- required remediation: hold the pair context through final chain binding and a last `PUBLISHED_PAIR` scan/canonical check; freeze and compare complete revision dev/ino/mode/nlink after extraction; close both FDs best-effort, clear state regardless, and preserve active exceptions. Add focused late-pair, late-extra and close-failure regressions before another audit.
+
+## 2026-07-22 — Phase 01 acquisition-helper third-audit remediation preflight
+
+- verdict: APPROVED TO IMPLEMENT only `src/kairos/acquisition.py` and `tests/test_acquisition.py`; real download and raw writes remain unapproved
+- binding gate: finalize captures the stable-stage binding only after completion publication; verify captures it immediately after opening the canonical revision. The terminal gate compares full root/parent/revision fingerprints, not only dev/ino/mode/nlink.
+- pair gate: one held pair context covers strict parse, core verification, terminal `PUBLISHED_PAIR` scan, canonical pair binding, complete chain binding, a final pair binding and the return linearization point.
+- close gate: both descriptors are attempted after object state is cleared; standalone close errors prevent success, while cleanup errors cannot replace an active body/open error.
+- verification evidence: 57 acquisition tests, 26 archive-safety tests and 110/110 full repository tests passed independently with cache/temp paths under `/data0/hk_data/kairos-zx`; fourth staged diff audit remains pending.
+
+## 2026-07-22 — Phase 01 acquisition-helper fourth staged audit
+
+- verdict: BLOCKED; the twelve-file snapshot must not be committed/pushed and real download remains unapproved
+- passed: 110/110 total, 57/57 acquisition, 26/26 archive safety, hook/diff, twelve staged and zero unstaged paths, all late namespace/pair attacks, held-pair close matrix, fixed CLI/archive FD APIs, resource/path/secret/large-file/Git/SSH checks, and raw-root absence
+- blocked defect: `_assert_completion_pair_binding` closes reopened canonical final/guard descriptors with a serial reversed loop. A final close failure skips guard cleanup and leaves it open; if canonical validation/open already failed, the cleanup error replaces that primary exception. Partial canonical open has the same cleanup shape.
+- required remediation: canonical final/guard descriptors need the same best-effort and active-exception-preserving cleanup semantics, with final/guard/both close, active validation and partial-open cleanup regressions before another staged audit.
+
+## 2026-07-22 — Phase 01 canonical temporary-FD remediation preflight
+
+- verdict: APPROVED TO IMPLEMENT only `src/kairos/acquisition.py` and `tests/test_acquisition.py`; download/raw writes remain unapproved
+- implementation: a fixed-snapshot internal closer is shared by held and canonical pairs after all ownership slots are cleared; every nonnegative FD is attempted, standalone cleanup raises the first failure only after all attempts, and exception-unwind cleanup preserves the primary validation/open error.
+- regressions: canonical final-only, guard-only, both-close, active-validation plus both-close, and partial-final-open plus guard-cleanup failures explicitly record attempted FDs and recover injected-open descriptors after mocks exit.
+- verification evidence: 62 acquisition tests, 26 archive-safety tests and 115/115 full repository tests passed independently with all cache/temp paths under `/data0/hk_data/kairos-zx`; fifth staged audit remains pending.
+
+## 2026-07-22 — Phase 01 acquisition-helper fifth staged audit
+
+- verdict: APPROVED TO COMMIT the current twelve-file snapshot; approval covers ordinary commit/push only and does not authorize a real download
+- verification: 115/115 total, 62/62 acquisition, 26/26 archive safety, pre-commit and cached/unstaged diff checks; twelve staged paths and zero unstaged paths
+- independent replay: canonical final-only, guard-only and both-close attempted final then guard; standalone cleanup raised the first error, active validation preserved `AcquisitionError`, and partial final-open preserved `FileNotFoundError`. Held/canonical ownership slots were cleared before cleanup.
+- prior gates: late pair/root/parent/leaf and extra directory/regular-file attacks were rejected; terminal ordering, post-publication finalize binding, archive FD API, fixed no-network CLI, secrets/large/dangerous scans, project Git/SSH and raw-root absence all passed.
