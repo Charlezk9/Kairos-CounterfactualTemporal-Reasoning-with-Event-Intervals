@@ -158,6 +158,13 @@ unverified or unavailable. The unique detailed evidence and unresolved metric
 specification conflict are in `phase-01-torque-discovery.md`. No snapshot,
 data, approval, record, artifact or formal run was created.
 
+The subsequent TORQUE A/B/C snapshot/acquisition plan is
+`BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. It distinguishes whole-archive transfer
+and opaque materialization, public-dev-only data validation and static
+evaluator audit; none was executed. There is no snapshot/acquisition request,
+stage, archive, approval, record, data or artifact, and all acquisition
+properties remain unverified. The full plan is only in the linked checkpoint.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

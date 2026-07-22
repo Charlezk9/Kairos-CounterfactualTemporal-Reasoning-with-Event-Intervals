@@ -138,3 +138,4 @@
 - 评测边界：未来只考虑经独立获取与审计的 public dev gold；作者移除的 test annotations 视为 `UNAVAILABLE`，禁止从 fork、缓存或镜像恢复。Apache-2.0 当前只绑定 repository LICENSE，data-license applicability 仍为 `UNVERIFIED`。
 - 冲突：paper prose 将 EM consistency 定义为所有 question 的 prediction 均 exact match 的 contrast-set 百分比；Table 4 caption 将 `C` 定义为组内每个 question 的 F1 均至少 80% 的 contrast-group 百分比。该 consistency formulation `SPEC_CONFLICT` 不是普通 per-question EM 冲突，本门禁不选择、不实现。
 - 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划，明确区分 code metadata/data blobs 并冻结 native environment/process 边界；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。
+- Snapshot/acquisition disposition：A/B/C 计划独立判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，因为当前调用接口不能为最外层 curl 原生替换 `envp` 或设置 pre-exec OS rlimit。A 若未来获批会传输并可能安全物化 whole archive，但 data/evaluator bytes 在 B/C 独立批准前保持 opaque/unconsumed；本次没有 snapshot/acquisition request、approval、record、stage、数据或工件。

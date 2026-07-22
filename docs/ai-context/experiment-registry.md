@@ -45,6 +45,7 @@ as a source availability result, HTTP observation or paper experiment.
 | `DISCOVERY-2WIKI-20260723` | `METADATA_ONLY / HEAD_NOT_ATTEMPTED` | `13800e5be57df1b4040b9b1588c6c811779e69e9` | fixed metadata only; no new 2026-07-23 request and corrected exact HEAD not run; historical 2026-07-22 HEAD timeout remains non-availability evidence; no body, data, acquisition or formal run | none |
 | `PLAN-2WIKI-HEAD-20260723` | `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV` | `13800e5be57df1b4040b9b1588c6c811779e69e9` | planning-only exact corrected-URL HEAD disposition; unavailable native replacement-env launch; no execution, response, approval, record, data or formal run | none |
 | `DISCOVERY-TORQUE-20260723` | `METADATA_ONLY / DOCUMENTS_READ` | `ab27019cc6a317fde3c879900499f02acce8b16d` | fixed README/LICENSE and primary-paper metadata only; no tree, data, evaluator, snapshot, acquisition or formal run | none |
+| `PLAN-TORQUE-SNAPSHOT-20260723` | `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV` | `ab27019cc6a317fde3c879900499f02acce8b16d` | planning-only A/B/C snapshot disposition; no snapshot/acquisition request, approval, record, stage, archive, data, artifact or formal run | none |
 
 Planning-gate entries are not acquisition records or model runs. In particular,
 the StrategyQA gate has no active run ID and registers no formal run.

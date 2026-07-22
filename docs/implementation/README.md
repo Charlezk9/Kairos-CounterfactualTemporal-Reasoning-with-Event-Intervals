@@ -59,9 +59,11 @@ implementation is authorized. The unique status and disposition are in
 
 ## TORQUE source status
 
-TORQUE is `METADATA_ONLY / DOCUMENTS_READ`; no snapshot, data/evaluator access
-or implementation is authorized. The unique metadata, conflict and next-gate
-status is in `../ai-context/checkpoints/phase-01-torque-discovery.md`.
+TORQUE metadata discovery remains `METADATA_ONLY / DOCUMENTS_READ`; its A/B/C
+snapshot/acquisition plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. No snapshot,
+data/evaluator access or implementation is authorized. The unique plan,
+conflict and disposition are in
+`../ai-context/checkpoints/phase-01-torque-discovery.md`.
 
 ## GSM8K source adapter test matrix
 

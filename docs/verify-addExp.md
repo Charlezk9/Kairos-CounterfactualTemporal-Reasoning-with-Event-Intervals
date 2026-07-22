@@ -76,6 +76,8 @@ StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`�
 
 TORQUE 当前仅完成固定 README/LICENSE 与 primary paper 的 metadata discovery，状态为 `METADATA_ONLY / DOCUMENTS_READ`。README/paper 描述没有被当作本地 tree、数据、schema、evaluator 或实验观察；指标定义冲突仍未选择，test gold 不会从第三方恢复。该非结果状态不产生任何可写入论文的实验数值，详细边界见 `docs/ai-context/checkpoints/phase-01-torque-discovery.md`。
 
+TORQUE A/B/C snapshot/acquisition 计划随后被判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。该计划未执行，未产生 snapshot/acquisition request、approval、record、stage、archive、数据或实验工件；public dev、clustering/schema、evaluator 与 test-annotation absence 均未作本地验证。该状态不是实验结果，不改变或解决既有指标 `SPEC_CONFLICT`。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
