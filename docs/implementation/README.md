@@ -115,3 +115,7 @@ Agent 1与主智能体分别通过 targeted 63/63 和全仓 166/166；Agent 2在
 - 候选去重、解析、SC tie 和 eval 禁止 gold。
 - LLM-Graph malformed JSON。
 - checkpoint 保存恢复和逐样本指标重聚合一致。
+
+## 显式 marker 构造 v0
+
+D-011 的下一局部实现候选只组合已冻结的抽取、改写和 UpdateAnswer 原语，且仅使用内存中的合成 fixture。精确语义、实施步骤、测试矩阵与未授权边界的唯一详细来源是 `../ai-context/checkpoints/phase-01-temporal-construction-v0.md`。

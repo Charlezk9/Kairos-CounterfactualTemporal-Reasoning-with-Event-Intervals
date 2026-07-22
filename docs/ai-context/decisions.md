@@ -148,3 +148,10 @@
 - 路由失败：先前 “View PDF” 导向 ar5iv HTML，定性为 `ROUTING_POLICY_FAILURE / OUT_OF_SCOPE_REDIRECT`；ar5iv HTML body/content 仅作为 routing failure 记录，不采纳任何内容。禁止采用 ar5iv Table 1、easy/hard 定义、schema、PDF-body 指标/表格、PDF bytes/pages 或样例内容。
 - 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。
 - Snapshot disposition：唯一 codeload literal 仅为未验证、未执行 candidate；A/B/C 计划独立为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。A 未来可语义读取 README/LICENSE/tree metadata，其余成员的 opaque/unconsumed 只表示不语义解析、样例输出、import 或 execute，不表示 hash/extract/materialize 未读字节。B/C 各需独立批准；当前无 request、approval、record、stage、snapshot、数据、代码或实验工件。
+
+## D-011：显式 marker 反事实构造 v0
+
+- 状态：`FROZEN BEFORE IMPLEMENTATION`。
+- 决定：下一个 dependency-independent 实现只组合 D-003 已有的保守抽取、marker 改写与确定性 UpdateAnswer；只有答案更新为 `KNOWN` 时才保留完整 original/counterfactual pair。它不定义 GSM8K temporal subset，不扩展 marker、模板或 task-specific updater。
+- 输出边界：构造 envelope 仅存内存；不写 JSONL/manifest，不产生 relation-only 记录、数据或实验工件。本决定的精确输入先决条件、门禁顺序、terminal enum、funnel、ID、envelope、字段继承和测试合同的唯一详细来源是 `checkpoints/phase-01-temporal-construction-v0.md`。
+- 实施门禁：当前只冻结语义与计划。智能体 1需另行提交仅限标准库和合成 fixture 的精确实施计划，智能体 2批准前不得修改源码或测试。
