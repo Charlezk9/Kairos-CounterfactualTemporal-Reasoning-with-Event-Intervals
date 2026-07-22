@@ -74,6 +74,11 @@ evaluation-file bytes, PDF-body evidence or implementation is authorized. The
 unique status is in
 `../ai-context/checkpoints/phase-01-timeqa-discovery.md`.
 
+The TimeQA A/B/C snapshot/acquisition plan is independently
+`BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; its candidate and all transfer/helper
+fields remain proposed and unexecuted. Detailed stage boundaries and audit
+semantics are only in the same checkpoint.
+
 ## GSM8K source adapter test matrix
 
 D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。

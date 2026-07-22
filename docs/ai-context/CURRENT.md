@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-23 07:05:40 CST
+- updated_at: 2026-07-23 07:17:56 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 903684181f6a936650e6c1ff2488f1d12ad5a957
-- last_verified_commit: 903684181f6a936650e6c1ff2488f1d12ad5a957
+- git_head: e301d576843cf13768b317d34f34c5192c348c72
+- last_verified_commit: e301d576843cf13768b317d34f34c5192c348c72
 - last_completed_checkpoint: checkpoints/phase-01-timeqa-discovery.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`. TimeQA direct primary-PDF reading is `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`; see `checkpoints/phase-01-timeqa-discovery.md`.
-- next_safe_action: 仅由智能体 1起草 TimeQA fixed-revision snapshot/acquisition 计划；智能体 2批准前不得联网、编写代码、访问数据、创建 approval、record 或工件。
+- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`. TimeQA direct primary-PDF reading is `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`; see `checkpoints/phase-01-timeqa-discovery.md`. The independent TimeQA fixed-revision snapshot/acquisition plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see the same checkpoint.
+- next_safe_action: 仅由智能体 1起草 Phase 01阻塞处置与 dependency-independent local implementation 候选清单；智能体 2批准前不得编写代码、联网、访问数据或创建工件。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`

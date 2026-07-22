@@ -48,6 +48,7 @@ as a source availability result, HTTP observation or paper experiment.
 | `PLAN-TORQUE-SNAPSHOT-20260723` | `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV` | `ab27019cc6a317fde3c879900499f02acce8b16d` | planning-only A/B/C snapshot disposition; no snapshot/acquisition request, approval, record, stage, archive, data, artifact or formal run | none |
 | `DISCOVERY-TIMEQA-20260723` | `METADATA_ONLY / ROUTE_REJECTED` | `38b05989070c1168b2bef3d5a2656afeeba763dc` | fixed README/LICENSE plus arXiv landing metadata; ar5iv route rejected; no data, snapshot, acquisition or formal run | none |
 | `PLAN-TIMEQA-PDF-20260723` | `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES` | `arXiv:2108.06314` | planning-only direct official-PDF disposition; not executed and no accepted PDF-body evidence, approval, record, data or formal run | none |
+| `PLAN-TIMEQA-SNAPSHOT-20260723` | `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV` | `38b05989070c1168b2bef3d5a2656afeeba763dc` | planning-only A/B/C snapshot disposition; sole candidate unverified/unexecuted; no request, approval, record, stage, snapshot, data, code, artifact or formal run | none |
 
 Planning-gate entries are not acquisition records or model runs. In particular,
 the StrategyQA gate has no active run ID and registers no formal run.

@@ -177,6 +177,13 @@ accepted PDF-body evidence, approval, record or artifact. The unique detailed
 status and prohibited-evidence boundary are in
 `phase-01-timeqa-discovery.md`.
 
+The subsequent TimeQA A/B/C snapshot/acquisition plan is
+`BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. Its sole candidate URL, native process
+contract, archive/publication semantics and A/B/C consumption boundaries are
+proposed and unexecuted. There is no snapshot/acquisition request, approval,
+record, stage, snapshot, data, code or experiment artifact; the unique detailed
+plan remains in the linked checkpoint.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

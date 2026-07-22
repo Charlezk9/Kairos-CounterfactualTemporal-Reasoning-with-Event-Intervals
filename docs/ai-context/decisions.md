@@ -147,3 +147,4 @@
 - 证据边界：README names/statements 为 `README_REPORTED`；固定 LICENSE 的 BSD-3-Clause/copyright 为 `LICENSE_EVIDENCE`，但具体 data/file applicability 未验；arXiv landing 数值只为 `ARXIV_LANDING_REPORTED`，不得解释为 split、本地数据或复现实验。
 - 路由失败：先前 “View PDF” 导向 ar5iv HTML，定性为 `ROUTING_POLICY_FAILURE / OUT_OF_SCOPE_REDIRECT`；ar5iv HTML body/content 仅作为 routing failure 记录，不采纳任何内容。禁止采用 ar5iv Table 1、easy/hard 定义、schema、PDF-body 指标/表格、PDF bytes/pages 或样例内容。
 - 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。
+- Snapshot disposition：唯一 codeload literal 仅为未验证、未执行 candidate；A/B/C 计划独立为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。A 未来可语义读取 README/LICENSE/tree metadata，其余成员的 opaque/unconsumed 只表示不语义解析、样例输出、import 或 execute，不表示 hash/extract/materialize 未读字节。B/C 各需独立批准；当前无 request、approval、record、stage、snapshot、数据、代码或实验工件。
