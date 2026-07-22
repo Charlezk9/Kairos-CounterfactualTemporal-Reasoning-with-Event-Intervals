@@ -129,3 +129,4 @@
 - 官方来源：固定 `Alab-NII/2wikimultihop` commit `13800e5be57df1b4040b9b1588c6c811779e69e9` 及其 README 指向的 corrected `data_ids_april7.zip`。旧 `data_ids.zip?dl=0` 永久禁用，不得回退、镜像替换或解释为同一对象。
 - 证据边界：README、repository LICENSE 与主论文只提供 revision-bound/paper-reported metadata；archive availability、内容、split/schema、SHA256 与许可证适用性仍为 `UNVERIFIED`。唯一详细来源为 `checkpoints/phase-01-2wiki-discovery.md`。
 - 下一门禁：只允许 Agent 1起草 corrected literal Dropbox URL 的 exact no-body HEAD 计划；Agent 2批准前不得联网、创建 approval/record、实现 helper、访问数据或创建工件。
+- 独立 HEAD disposition：该 exact 计划已单独评估为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，原因是当前调用接口不能在最外层 `/usr/bin/curl` 首次进程创建时原生传入空 `envp` 与 `inherit_env=false`。这不修改或泛化 D-007；计划未执行，未创建 approval/record，全部 source properties 仍为 `UNVERIFIED`。

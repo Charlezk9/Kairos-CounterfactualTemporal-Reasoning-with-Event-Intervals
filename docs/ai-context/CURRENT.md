@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-23 06:23:06 CST
+- updated_at: 2026-07-23 06:34:13 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 22faa3005fd7f3145a210512e585a210624ec5ff
-- last_verified_commit: 22faa3005fd7f3145a210512e585a210624ec5ff
+- git_head: 62d43a60c95eec294f2f0492a1e0242b747ea428
+- last_verified_commit: 62d43a60c95eec294f2f0492a1e0242b747ea428
 - last_completed_checkpoint: checkpoints/phase-01-2wiki-discovery.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`.
-- next_safe_action: 仅由智能体 1起草 2Wiki Dropbox HEAD 的 exact metadata-only 计划；智能体 2批准前不得执行网络请求，不得创建 approval、record、代码、数据或工件。
+- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`.
+- next_safe_action: 仅由智能体 1起草 TORQUE 官方 source metadata/discovery 的只读计划；智能体 2批准前不得联网、编写代码、访问数据或创建工件。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`

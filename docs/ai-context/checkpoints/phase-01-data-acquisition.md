@@ -142,6 +142,12 @@ does not verify availability or source properties. No body, clone, archive,
 schema observation or artifact exists. The unique detailed evidence is in
 `phase-01-2wiki-discovery.md`.
 
+The subsequent exact corrected-URL HEAD plan is now
+`BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`: the available launcher cannot natively
+replace the first process environment. The plan was not executed, produced no
+new HEAD response, approval, record, data or artifact, and does not change any
+`UNVERIFIED` source property. Details remain unique to the linked checkpoint.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

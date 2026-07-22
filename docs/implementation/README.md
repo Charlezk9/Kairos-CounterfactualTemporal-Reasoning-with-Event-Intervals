@@ -52,8 +52,9 @@ status and recovery requirements are in
 
 ## 2Wiki source status
 
-2Wiki is currently `METADATA_ONLY / HEAD_NOT_ATTEMPTED`; no acquisition or
-implementation is authorized. The unique status and next gate are in
+2Wiki metadata discovery remains `METADATA_ONLY / HEAD_NOT_ATTEMPTED`; its
+exact HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. No acquisition or
+implementation is authorized. The unique status and disposition are in
 `../ai-context/checkpoints/phase-01-2wiki-discovery.md`.
 
 ## GSM8K source adapter test matrix

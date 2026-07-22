@@ -72,6 +72,8 @@ StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`�
 
 2Wiki 当前仅完成官方 corrected source 与主论文 metadata 的文档冻结，状态为 `METADATA_ONLY / HEAD_NOT_ATTEMPTED`。本次 2026-07-23 discovery 未发起新的 Dropbox 请求，corrected literal exact HEAD 尚未执行；2026-07-22 历史限时 HEAD 超时且没有可用于证明 availability、size、MIME、redirect 或 archive content 的响应。未读取 archive 或观察本地 split/schema，论文描述也未被当作本地数据或实验结果；详细边界见 `docs/ai-context/checkpoints/phase-01-2wiki-discovery.md`。
 
+2Wiki exact HEAD 计划随后被独立判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，未执行且没有新的 HEAD 响应、approval、record、数据或实验工件。该非结果状态不验证 availability、redirect、MIME、size 或任何 archive property，也不支持论文 claim。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
