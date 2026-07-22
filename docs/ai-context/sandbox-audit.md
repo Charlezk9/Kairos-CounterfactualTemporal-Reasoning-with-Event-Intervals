@@ -53,3 +53,23 @@
 - verification: 27/27 tests, pre-commit hook and cached diff check passed; the documented local Python, `.condarc`, cache and temporary paths exist within the two authorized roots
 - Git/SSH: branch tracking, remote URL, repository-local isolated SSH command and the one-line verified GitHub Ed25519 host key passed
 - restriction: this approval covers the deterministic data-core checkpoint only; real dataset acquisition, adapters, construction statistics and human audit require a new preflight
+
+## 2026-07-22 — Phase 01 data-acquisition first preflight
+
+- verdict: BLOCKED before any data download
+- source facts passed: six official GitHub commits exist; StrategyQA 90/10 dev is unofficial; TORQUE test has no released gold; TimeQA `human_test.hard.json` exists; licenses and the paper's missing subset-ID limitation are accurately recorded
+- availability caveat: official MuSiQue Drive and 2Wiki Dropbox URLs are present in pinned READMEs but timed out during bounded HEAD checks, so availability and size remain unverified
+- blocked risks: original archive gate omitted special entries, Windows/backslash paths and expanded-size/member limits; bare `curl` resolved to an Anaconda binary outside the authorized roots
+- remediation: require a tested standard-library validator, `/usr/bin/curl`, HTTPS/host/size/time bounds, `.part` files, archive-bomb checks and extraction only into a new empty directory; re-audit pending
+
+## 2026-07-22 — Phase 01 data-acquisition second preflight
+
+- verdict: BLOCKED on one documentation command option; all archive/source/path gates passed
+- defect: `/usr/bin/curl` is 7.68.0 and does not implement the documented `--retry-all-errors`
+- remediation: use supported `--retry 3 --retry-connrefused --retry-delay 2 --retry-max-time 120`; all HTTPS, redirect, host, timeout, byte-limit and `.part` gates remain unchanged; final source-plan audit pending
+
+## 2026-07-22 — Phase 01 data source-plan final audit
+
+- verdict: APPROVED TO COMMIT SOURCE PLAN and ordinary non-force push
+- verified: five staged documentation files, hook/diff checks, fixed source revisions and licenses, curl 7.68-compatible bounded options, archive/path/type/member/expanded-size gates, 8 GiB budget, official-host allowlists and failure-without-mirror policy
+- scope restriction: this is not download approval; next action is limited to agent 1 implementing and testing the standard-library archive validator inside the repository

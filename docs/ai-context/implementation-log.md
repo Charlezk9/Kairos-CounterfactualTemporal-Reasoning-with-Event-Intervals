@@ -24,3 +24,7 @@
 - 智能体 2首次 staged-diff 事后审计阻止提交：发现无关 relation 查询可被误标 `known`，以及 canonical JSON 对非字符串 key 存在覆盖风险。修复、回归测试与复审完成前不提交。
 - 两项缺陷修复后 27/27 测试通过；第二次审计又纠正了 checkpoint 的 `CONDARC` 路径和过期 `next_safe_action`。最终审计为 `APPROVED TO COMMIT`。
 - 提交并普通推送 `111bb992f4371385dd9513f3a9d7ec161d16c313` (`feat(data): add deterministic temporal data core`)；本地与远端分支 SHA 一致，专用 GitHub Ed25519 `known_hosts` 仍为单行。
+- 提交并推送提交后恢复状态 `bcc18139ebbe901a797c59d5120637cb3d644d8e`。
+- 只读核对六个官方数据源、HEAD revision、许可与公开 split；发现论文未发布原始四数据集的 temporal subset IDs，已在 D-004 冻结 independent reconstruction 的可识别性边界。
+- 未下载数据；已起草 0-GPU、8-GiB 硬限、顺序下载和 archive traversal 检查的获取门禁，等待智能体 2审核。
+- 智能体 2核对数据源事实后首次阻止下载：原门禁未覆盖 archive 特殊 entry、展开字节、Windows 路径和裸 `curl` 解析到根目录外 Anaconda 的风险。已将标准库 validator、`/usr/bin/curl`、`.part`、host allowlist、archive bomb 限制与新空目录门禁写入检查点，等待复审。
