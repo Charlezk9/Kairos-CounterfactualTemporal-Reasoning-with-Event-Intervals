@@ -5,14 +5,14 @@
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 00，restart-safe bootstrap
+- 当前阶段：Phase 01，data pipeline planning
 - 复现性质：independent reimplementation
 - 已完成实验：无
 - 当前结论：尚不能验证论文数值或新增 claim
 
 ## 2. 复现范围、版本与 Git commit
 
-待首次 Git 提交后补充 commit。以 `kairos.pdf` 为主要待验证规格，`main.tex` 为较早且数值冲突的版本。
+restart-safe bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`。以 `kairos.pdf` 为主要待验证规格，`main.tex` 为较早且数值冲突的版本。
 
 ## 3. PDF、TeX 与重实现差异
 
@@ -66,4 +66,4 @@
 
 ## 14. Run、Commit 与工件追踪
 
-当前无 run。首次提交后记录 bootstrap commit；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+当前无 run。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。

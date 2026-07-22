@@ -16,3 +16,13 @@
   - `core.sshCommand` 必须隔离默认 SSH 配置并限定 Ed25519 host key。
   - staged diff 必须拒绝密钥、token、模型、数据、checkpoint 和大型结果。
   - 首次 push 前再次确认远端为空。
+
+## 2026-07-22 — Phase 00 postflight
+
+- verdict: APPROVED
+- bootstrap commit: `989634284e58b733e0bca2520fd0e7caad930e4c`
+- push: `origin/main` created without force
+- work branch: `experiment/reproduction-additional-evaluation`
+- sensitive/large files: none detected
+- known_hosts after remote access: still one verified Ed25519 entry
+- background/GPU work: none
