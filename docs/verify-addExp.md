@@ -68,6 +68,8 @@ StrategyQA 已完成获取前 source-plan 冻结：`official-20210107` 仅是项
 
 StrategyQA 固定 transfer/stage helper 已以 commit `978ba4dea0792061340d0ec97241caa1efd6d6f2` 实现；两轮安全审计后 targeted 79/79、full 337/337 合成测试通过。该结果只是 development verification，`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` 仍在任何网络、文件或子进程操作前阻断 production fetch。因此本项未产生 StrategyQA archive、样本统计、run ID 或论文指标，不得作为效果 claim。
 
+StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`：现有调用工具不能为最外层动态进程原生提供完全替换式环境，因此所有准备记录均未执行且不可复用。未创建新的运行身份、approval 或 V3，也没有网络、数据或实验工件；该状态不是实验结果，不改变任何论文结论。恢复条件与审计证据见 `docs/ai-context/checkpoints/phase-01-strategyqa-runtime-redirect.md`。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

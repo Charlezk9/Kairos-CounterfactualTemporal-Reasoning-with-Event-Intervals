@@ -128,7 +128,9 @@ only in `phase-01-strategyqa-acquisition-helper.md`.
 Production remains blocked by `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`.
 There has been no StrategyQA HEAD/GET, archive, raw/formal stage, schema
 discovery or experiment. Runtime redirect verification and any later source
-request require separate plans and audits.
+request require separate plans and audits. The runtime gate is now
+`BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; its unique detailed evidence and
+recovery requirements are in `phase-01-strategyqa-runtime-redirect.md`.
 
 ## GSM8K D-005 discovery and freeze
 

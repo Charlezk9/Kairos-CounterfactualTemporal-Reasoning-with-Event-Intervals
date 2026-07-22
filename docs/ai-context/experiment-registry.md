@@ -41,9 +41,10 @@ as a source availability result, HTTP observation or paper experiment.
 | ID | Status | Source label | Approved scope | Artifacts |
 |---|---|---|---|---|
 | `PLAN-STRATEGYQA-20260722` | `SOURCE_PLAN_APPROVED` | `official-20210107` | documentation plus exact transfer/stage-validator implementation plan; no code/network/data | none |
-| `GATE-STRATEGYQA-REDIRECT-20260723` | `BLOCKED_RUNTIME_VERIFICATION` | `official-20210107` | helper committed; runtime redirect semantics still require a separate plan and audit before any execution | none |
+| `GATE-STRATEGYQA-REDIRECT-20260723` | `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV` | `official-20210107` | documentation-only gate; retained preparations are invalid/not executed and a native replacement-env process API plus fresh audited identity are required | none |
 
-Planning-gate entries are not acquisition records or model runs.
+Planning-gate entries are not acquisition records or model runs. In particular,
+the StrategyQA gate has no active run ID and registers no formal run.
 
 ## Processed data artifacts
 

@@ -115,3 +115,10 @@
 - Drive 观测：2026-07-22 对固定 view URL 的一次 no-follow/no-body HEAD 在 10 秒连接阶段以 curl error 28 超时，未收到 HTTP response。过滤管道的 shell 外层状态 0 仅来自 `sed`，不代表 curl 成功。Redirect authority、MIME、Content-Length、availability、archive byte size/SHA256/tree/schema 均为 `UNVERIFIED`。
 - 安全实现：`archive_safety.py` 的 ZIP/TAR/TAR.GZ held-fd inspect/extract、成员/metadata/展开预算、路径规范化和 symlink/hardlink/special/sparse/duplicate/prefix-conflict 拒绝可复用；`acquisition.py` 将 GSM8K URL、revision、layout、schema 与 counts 写死，不得参数化挪用或放宽。
 - 下一门禁：先由 Agent 1提交固定 URL/authority、OS 与应用层字节上限、超时、stage/revision absent、HTTP observation、failure preservation 的单次 acquisition/probe 方案。Agent 2批准前不重试网络、不下载、不读取 body、不创建 raw/processed、不实现代码。
+
+## D-007：StrategyQA runtime redirect 原生环境门禁
+
+- 状态：`BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`。
+- 决定：StrategyQA runtime redirect 验证的最外层进程必须由调用 API 原生传入实际 executable、完整 argv、cwd 和完全替换式的空或已批准 allowlist `envp`；禁止以 shell、`env`、Python、Conda 或其他已在继承环境中动态加载的 wrapper 清理环境。
+- 证据边界：V1、V2 与现有 approval 均保留为 `INVALID_NOT_EXECUTED` 且不得复用；未创建 V3、新 run ID、新 nonce 或新 approval，也未登记正式 run。详细证据唯一来源为 `checkpoints/phase-01-strategyqa-runtime-redirect.md`。
+- 恢复：只有提供上述原生 API 后，才可用全新身份与 no-replace approval/V3 record 重新接受 Agent 2审核。FD/launcher contract 与 `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` 保持不变；未来成功验证也不得在同一门禁中修改该 flag。

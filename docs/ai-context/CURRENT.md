@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-23 01:43:40 CST
+- updated_at: 2026-07-23 06:13:40 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 978ba4dea0792061340d0ec97241caa1efd6d6f2
-- last_verified_commit: 978ba4dea0792061340d0ec97241caa1efd6d6f2
-- last_completed_checkpoint: checkpoints/phase-01-strategyqa-acquisition-helper.md
+- git_head: aa8a78da98368b86343536da4fb72e289e7c1ce1
+- last_verified_commit: aa8a78da98368b86343536da4fb72e289e7c1ce1
+- last_completed_checkpoint: checkpoints/phase-01-strategyqa-runtime-redirect.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA production fetch is independently blocked because `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`; no HEAD/GET has run, so archive SHA256, bytes, MIME, members, schema, split and license remain `UNVERIFIED`.
-- next_safe_action: 只由智能体 1起草 StrategyQA runtime redirect-semantics 的独立验证计划，明确固定 `/usr/bin/curl` 版本、合成重定向用例、无 production 路径/真实 URL/数据写入与安全恢复边界；智能体 2批准前不运行该验证，不改变 flag，不执行 fetch。
+- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`.
+- next_safe_action: 仅由智能体 1起草 2Wiki 官方 source metadata/discovery 的只读计划；智能体 2批准前不得联网、编写代码、访问数据或创建工件。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
@@ -20,6 +20,7 @@
   - `checkpoints/phase-01-musique-probe-helper.md`
   - `checkpoints/phase-01-strategyqa-source-plan.md`
   - `checkpoints/phase-01-strategyqa-acquisition-helper.md`
+  - `checkpoints/phase-01-strategyqa-runtime-redirect.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

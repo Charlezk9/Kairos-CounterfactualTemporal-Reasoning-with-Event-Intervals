@@ -45,10 +45,10 @@ commit is `978ba4dea0792061340d0ec97241caa1efd6d6f2`; detailed transaction and a
 evidence is in
 `../ai-context/checkpoints/phase-01-strategyqa-acquisition-helper.md`.
 
-Production is deliberately unavailable while
-`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`. This implementation checkpoint is
-not evidence that the source is reachable or that its archive, schema, split or
-license has been observed.
+Runtime verification is currently `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`, and
+`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` remains unchanged. The unique gate
+status and recovery requirements are in
+`../ai-context/checkpoints/phase-01-strategyqa-runtime-redirect.md`.
 
 ## GSM8K source adapter test matrix
 
