@@ -39,3 +39,6 @@
 - 智能体 1已要求 central directory 紧邻 EOCD，逐字段比较 central/local version-needed、flags、compression、CRC 和大小，并保守拒绝 data descriptor；EOCD gap 和各字段不一致均有 pre-ZipFile 回归。主智能体将独立复跑 49 项测试后请求完整 staged 复审。
 - 智能体 2独立重放 central-to-EOCD gap、central-only/local-only encryption/bit3 和其他 header 字段篡改，全部在 `ZipFile` 构造前被拒绝；49/49、hook/diff、secret/大文件/危险命令与 Git/SSH 检查通过，给出 `APPROVED TO COMMIT`。
 - 已创建并普通 non-force 推送 `c57a133cf7c05f049ca16f8e43d29302480ec411` (`feat(data): add bounded archive validation`)；本地/远程 SHA 一致，GitHub Ed25519 `known_hosts` 仍为单行且指纹为 `SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU`。该批准不包含真实数据下载。
+- 提交后恢复状态以 `8b5c64e653de0aaa87cf0dd43122d446ae395169` 普通推送；工作树 clean。GSM8K 固定快照 HEAD 预检为 200/`application/x-gzip`，effective host 为 `codeload.github.com`，/data0 当时可用 227100254208 bytes，raw root 与目标不存在。
+- 智能体 1提交 GSM8K 单源执行单；主智能体在提交审计前删除 curl 7.68 不支持的 `--retry-all-errors`/`--no-clobber` 并修正为 revision-root + `extracted/` 布局。
+- 智能体 2仍以 `BLOCKED` 阻止实际下载：`--max-filesize` 不是未知 HTTP 长度的传输硬上限，curl 默认可读 `.curlrc`，无跳转策略与检查点冲突，hardlink stage alias 可破坏正式归档，completion 存在不能证明完整，JSONL 缺单行上限。已在 D-004-A 冻结修复语义，仍未创建 raw 数据。

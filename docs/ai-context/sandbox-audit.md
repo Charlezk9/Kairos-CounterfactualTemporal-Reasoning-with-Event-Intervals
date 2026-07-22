@@ -109,3 +109,10 @@
 - independent replay: central-to-EOCD gap, central-only/local-only encryption and bit 3, other flags, compression, CRC32 and both size mismatches all raised before the mocked `ZipFile` constructor
 - verification: 49/49 tests, cached diff, `.githooks/pre-commit`, secret/large-file/dangerous-command scans, no-unstaged-drift check and project-local Git/SSH checks passed
 - completion: commit `c57a133cf7c05f049ca16f8e43d29302480ec411` was pushed without force; local/remote SHA matched and the one-line verified GitHub Ed25519 host key remained unchanged
+
+## 2026-07-22 — Phase 01 GSM8K acquisition first execution preflight
+
+- verdict: BLOCKED; no raw directory, download or other write was performed
+- passed: fixed revision/URL, HEAD/effective host/content type, revision-root + `extracted/` layout, local/upstream clean commit, resource facts and all other listed curl 7.68 options
+- blocked defects: curl lacked OS `RLIMIT_FSIZE` and `--disable`; no-redirect conflicted with the checkpoint; a retained stage hardlink could mutate the formal archive; completion publication was not crash-safe and downstream semantics only tested existence; JSONL validation lacked exact paths and a pre-parse line-byte limit
+- remediation design: D-004-A freezes `prlimit` plus curl `--disable`, direct no-redirect codeload matching, independent O_EXCL archive copy and rehash, 1 MiB JSONL line cap, exact checksum coverage, fsync plus atomic no-replace completion publication, and mandatory downstream full validation. These rules require staged documentation/code re-audit before any download.

@@ -26,6 +26,8 @@ restart-safe bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`。�
 
 archive validator 已在智能体 2独立重放篡改反例后通过最终安全审计，并以 commit `c57a133cf7c05f049ca16f8e43d29302480ec411` 推送。该证据仅验证数据获取前置组件，不是论文实验运行；真实数据下载仍需单独资源与路径审批。
 
+GSM8K 首次实际获取预审为 `BLOCKED`，未创建 raw 目录。阻塞项涉及传输硬上限、curl 局部配置隔离、archive 别名完整性、completion 崩溃一致性和 JSONL 内存上限；修复规格已冻结到 D-004-A，在代码与执行复审前仍不获取数据。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
