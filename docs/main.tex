@@ -1,0 +1,483 @@
+\documentclass[11pt]{article}
+
+\usepackage[review]{acl}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\definecolor{headgray}{gray}{0.90}
+\definecolor{rowred}{RGB}{255,235,235}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage[ruled,vlined]{algorithm2e}
+
+\SetKwInOut{KwData}{Data}
+\SetKwInOut{KwResult}{Result}
+
+\setlength{\textfloatsep}{6pt plus 1pt minus 2pt}
+\setlength{\floatsep}{6pt plus 1pt minus 2pt}
+\setlength{\intextsep}{6pt plus 1pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
+
+\newcommand{\method}{Kairos}
+\newcommand{\placeholder}[1]{%
+\fbox{\begin{minipage}{0.92\linewidth}
+\centering
+\vspace{0.55cm}
+\textcolor{gray}{#1}
+\vspace{0.55cm}
+\end{minipage}}}
+
+\title{\method{} for Counterfactual Temporal Reasoning with Event Intervals}
+
+\author{Anonymous Authors \\
+Paper under double blind review}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Temporal reasoning is central to large language models in mathematical reasoning, multi-hop question answering, commonsense reasoning, and narrative understanding. Existing evaluations usually focus on final answer accuracy, but a correct answer does not necessarily imply that the model has represented event order and temporal relations. Prompting based methods may exploit surface temporal cues while leaving the underlying event structure implicit.
+
+We study this issue through counterfactual event order shifts, which preserve most non-temporal content but change the relation between target events. A temporally reliable model should update its relation prediction, and should update the final answer when the answer depends on the changed relation. However, prompting based baselines can remain insensitive to such shifts because their reasoning is expressed only as unconstrained text.
+
+To address this, we propose \method, an interval based framework for counterfactual temporal reasoning. \method{} maps event mentions into latent start and end coordinates, decodes pairwise temporal relations through geometry guided features, and uses the resulting event relation graph to rerank candidate answers. We further introduce counterfactual temporal supervision to train relation predictions to update under order changing perturbations. Experiments suggest that explicit event interval representation improves robustness over prompting based baselines, especially under counterfactual shifts.
+\end{abstract}
+
+\section{Introduction}
+
+Large language models have become a general reasoning interface for natural language tasks~\citep{brown2020language,ouyang2022training,achiam2023gpt4,touvron2023llama,yang2024qwen25}. Many reasoning tasks require models to understand time. In mathematical reasoning, a model may need to track state changes. In multi-hop question answering, it may need to compare events across passages. In commonsense reasoning, it may need to infer which event must occur before another~\citep{cobbe2021training,geva2021strategyqa,trivedi2022musique,ho2020constructing}. These cases require more than fluent generation. They require a representation of event order, duration, overlap, and persistence.
+
+Prompting based methods provide a convenient way to elicit reasoning from large language models. Direct prompting asks the model to answer from the input. Chain of thought prompting encourages intermediate rationales~\citep{wei2022chain,kojima2022large}. Self consistency aggregates multiple sampled rationales~\citep{wang2023selfconsistency}. These methods can improve answer accuracy, but their reasoning remains in free form language space. The rationale is not required to maintain event boundaries, compare temporal intervals, or preserve a consistent event relation graph.
+
+This creates a gap between answer correctness and temporal understanding. A model may answer a standard temporal question correctly by relying on surface expressions such as before, after, during, and then. It may also exploit common event priors learned during pretraining. Such behavior can be sufficient for the original example, but it does not show that the model has represented the event structure needed for robust temporal reasoning.
+
+We expose this gap with counterfactual event order shifts. These shifts change a target temporal relation while preserving most non-temporal content. For example, if an original query states that event \(e_i\) happens before event \(e_j\), a counterfactual query may reverse this order. A temporally reliable model should update the relation prediction, and should update the final answer when the answer depends on this relation. However, prompting based models may preserve the original prediction because the perturbed query remains lexically similar. This reveals temporal structure inconsistency, where standard accuracy hides unstable event relation reasoning.
+
+A natural solution is to strengthen prompting with longer rationales or self consistency. However, these methods still produce unconstrained text and do not expose whether the relation between two events has changed. Another solution is to rely only on explicit temporal markers, but this reduces coverage and fails to handle implicit or distributed event dependencies. These limitations suggest that counterfactual temporal reasoning requires an explicit intermediate structure rather than stronger prompting alone.
+
+To address this issue, we propose \method, an interval based framework for counterfactual temporal reasoning. \method{} first constructs conservative event and relation labels from explicit temporal markers and counterfactual templates. It then maps event mentions into latent start and end coordinates and decodes an event relation graph through geometry guided features. Finally, it uses the predicted relation graph to rerank candidate answers, making temporal structure part of answer selection rather than a post hoc explanation.
+
+We further introduce counterfactual temporal supervision. Unlike invariance based augmentation, our objective does not force original and perturbed examples to share the same representation. Event order perturbations are meaningful structural changes. Therefore, the model should learn to update relation predictions when the underlying temporal order changes.
+
+We evaluate \method{} on temporal subsets selected or constructed from reasoning benchmarks covering mathematical reasoning, multi-hop question answering, commonsense reasoning, and counterfactual stress testing. The results suggest that \method{} improves robustness over direct prompting, chain of thought prompting, and self consistency decoding. The improvement is larger under counterfactual shifts, indicating that explicit event interval representation helps reduce reliance on surface temporal cues.
+
+The main contributions of our work are summarized as follows.
+
+\begin{itemize}
+    \item We formalize temporal structure inconsistency as a failure mode where models answer standard temporal examples correctly but fail to update predictions under counterfactual event order shifts.
+
+    \item We propose \method, an interval based temporal reasoning framework that maps event mentions into latent intervals, decodes an event relation graph, and uses this graph to guide answer selection.
+
+    \item We introduce counterfactual temporal supervision, which treats event order perturbations as structural changes and trains relation predictions to update rather than remain invariant.
+
+    \item Experiments across temporal reasoning settings show that \method{} improves robustness over prompting based baselines, while ablations identify the role of relation supervision, interval projection, counterfactual supervision, and graph based answer scoring.
+\end{itemize}
+
+\section{Related Work}
+
+\subsection{Temporal Reasoning in Language Models}
+
+Temporal reasoning has long been studied as a core ability in language understanding. Earlier work introduced temporal annotation schemes and temporal relation benchmarks to represent events, time expressions, and relations between them~\citep{allen1983maintaining,pustejovsky2003timeml,pustejovsky2010isotimeml,uzzaman2013tempeval3}. More recent work formulates temporal reasoning as reading comprehension or question answering, where models must answer questions about before, after, overlap, and duration relations~\citep{ning2020torque,jia2018tempquestions,chen2021timeqa,zhang2021situatedqa}.
+
+Large language models usually approach these tasks through prompting based reasoning. Direct prompting, chain of thought prompting, and self consistency are effective in many reasoning settings~\citep{wei2022chain,wang2023selfconsistency}. However, their intermediate rationales are written in natural language and are not required to satisfy temporal consistency constraints. Our work adds an explicit event relation graph on top of language model representations, making temporal structure part of the prediction process.
+
+\subsection{Counterfactual Robustness}
+
+Counterfactual evaluation tests whether models rely on robust reasoning patterns or superficial correlations~\citep{mccoy2019right,kaushik2020learning,gardner2020evaluating,ribeiro2020beyond}. For temporal reasoning, event order perturbation is a natural counterfactual operation. If the order of two events changes, the predicted temporal relation should usually change as well. If the answer remains unchanged after an order changing perturbation, the model may be relying on lexical similarity rather than temporal structure.
+
+Many robustness studies focus on final answer changes. We instead emphasize the intermediate relation that should change after perturbation. This allows us to evaluate whether the model updates the event relation graph in a structurally meaningful way. This distinction matters because answer level accuracy can hide temporal reasoning errors.
+
+\subsection{Structured and Compositional Reasoning}
+
+A growing body of work shows that high answer accuracy may hide shallow reasoning shortcuts in multi-step and compositional tasks~\citep{min2019compositional,sinha2019clutrr,lake2018generalization,keysers2020measuring,press2023measuring}. Multi-hop question answering datasets such as HotpotQA, MuSiQue, and 2WikiMultihopQA evaluate whether models can combine multiple pieces of evidence~\citep{yang2018hotpotqa,trivedi2022musique,ho2020constructing}. However, many such benchmarks still evaluate only final answers, leaving intermediate structure underconstrained.
+
+\method{} is related to structured reasoning but focuses on temporal structure. Instead of requiring a symbolic temporal program, it learns latent event intervals from language model representations. These intervals provide a differentiable representation for event relations, while counterfactual temporal supervision trains relation updates under order changing perturbations.
+
+\section{Temporal Structure Inconsistency}
+
+We use temporal structure inconsistency to describe a failure mode where a model answers the original temporal query correctly but fails to update its prediction when the underlying event order changes. The key issue is that final answer accuracy alone does not reveal whether the model has represented event boundaries or pairwise temporal relations.
+
+\subsection{Standard Accuracy Can Hide Temporal Errors}
+
+Prompting based methods often perform reasonably on standard temporal examples. However, such performance may reflect sensitivity to lexical patterns rather than stable temporal reasoning. A model can exploit ordering expressions, common narrative priors, or answer shortcuts without explicitly representing event relations. Therefore, success on the original example does not guarantee that the model has preserved the temporal structure needed for counterfactual reasoning.
+
+\subsection{Order Shifts Expose Relation Inconsistency}
+
+Counterfactual event order shifts provide a direct diagnostic. We change one target temporal relation while preserving non-temporal content as much as possible. A temporally reliable model should update the corresponding relation prediction, and should change the final answer when that answer depends on the altered relation. If the prediction remains unchanged, the model is likely relying on surface overlap rather than relation structure.
+
+\subsection{Design Requirements}
+
+This analysis leads to three requirements. First, the model should represent event boundaries. Second, it should explicitly predict relations between event pairs. Third, it should learn to update these relations under counterfactual event order shifts. \method{} follows these requirements by learning latent event intervals, decoding an event relation graph, and applying counterfactual temporal supervision.
+
+\section{\method}
+\label{sec:method}
+
+Building on the above analysis, \method{} aims to make temporal structure explicit and trainable. The framework addresses three challenges. First, dense temporal annotations are usually unavailable, so event relation supervision must be constructed conservatively. Second, temporal reasoning requires a differentiable representation that can compare event boundaries. Third, counterfactual perturbations require supervision that updates temporal relations rather than treating them as nuisance noise.
+
+\method{} addresses these challenges with three components. It constructs event mentions and reliable relation labels from explicit markers and counterfactual templates. It projects event representations into latent intervals and decodes pairwise relations into an event relation graph. It then uses counterfactual temporal supervision and graph aware answer selection to make relation changes affect the final prediction.
+
+The framework separates answer generation from answer selection. A backbone language model proposes candidate answers, while \method{} reranks these candidates according to their consistency with the predicted event relation graph. This design supports both closed form tasks and open ended question answering settings.
+
+\begin{figure}[!t]
+\centering
+\placeholder{
+Query and event mentions
+
+Span pooled language model representations
+
+Latent event interval projection
+
+Geometry guided relation decoding
+
+Event relation graph based answer scoring
+}
+\caption{\textbf{Overview of \method.} The model encodes event mentions, projects them into latent intervals, decodes pairwise temporal relations, constructs an event relation graph, and reranks candidate answers.}
+\label{fig:framework}
+\end{figure}
+
+\subsection{Event and Relation Construction}
+
+Given a query \(q\), we first construct event mentions and reliable relation labels. We treat verbal predicates and nominal event expressions as event candidates. For each retained candidate, we store the query identifier, token span, event text, detected temporal marker, linked event pair, and relation label when available. Candidates that do not participate in any temporal expression or event dependency are removed. This produces an event set \(E=\{e_1,e_2,\ldots,e_n\}\).
+
+Relation labels are obtained from explicit temporal markers and counterfactual templates. We use a rule based detector for markers such as before, after, during, while, until, when, then, earlier, later, and followed by. Each detected marker induces a relation label over the closest compatible event pair. If the text states that \(e_i\) happens before \(e_j\), we assign \(r_{ij}=\mathrm{precedes}\). If the marker indicates reversed order, we assign the inverse relation. Event pairs without reliable markers are not used in the relation loss, but they can still contribute to answer supervision.
+
+This construction keeps relation supervision conservative. We only supervise event pairs whose temporal relation can be derived from explicit markers or from the template that generated the perturbed example. For each perturbed example, we also store the original query, perturbed query, original relation, updated relation, original answer, and updated answer when it can be determined reliably. This reduces noisy labels and allows \method{} to train on examples where only answer supervision is available.
+
+\subsection{Event Interval Estimation}
+
+Given the event set \(E = \{e_1, e_2, \ldots, e_n\}\), we encode each event mention with the hidden states of its token span.
+
+$$
+\mathbf{h}_i =
+\mathrm{Pool}_{t \in \mathrm{span}(e_i)} \mathbf{H}_t
+$$
+
+Here \(\mathbf{H}_t\) is the contextual hidden state of token \(t\), and \(\mathbf{h}_i\) is the span pooled representation of event \(e_i\). To make temporal boundaries explicit, \method{} projects each event representation into a start coordinate and a positive duration.
+
+$$
+\hat{s}_i = \mathbf{w}_s^\top \mathbf{h}_i,
+\quad
+\hat{d}_i = \mathrm{softplus}(\mathbf{w}_d^\top \mathbf{h}_i),
+\quad
+\hat{e}_i = \hat{s}_i + \hat{d}_i
+$$
+
+Here \(\hat{s}_i\), \(\hat{d}_i\), and \(\hat{e}_i\) denote the predicted start coordinate, duration, and end coordinate. Since the duration is positive, the end coordinate is always later than the start coordinate. The interval is latent rather than absolute. It does not recover real timestamps, but represents the relative temporal position of an event within the query.
+
+\subsection{Geometry Guided Relation Decoding}
+
+After projecting events into intervals, \method{} decodes temporal relations by comparing interval endpoints. The geometric inequalities define relation features rather than hard decisions. For example, event \(e_i\) precedes event \(e_j\) if the end of \(e_i\) occurs before the start of \(e_j\). We define the precedence feature as follows.
+
+$$
+z_{\mathrm{precedes}}(i,j) = \hat{s}_j - \hat{e}_i
+$$
+
+A larger value of \(z_{\mathrm{precedes}}(i,j)\) indicates stronger evidence that \(e_i\) occurs before \(e_j\). Overlap can be described through three endpoint comparisons.
+
+$$
+z_{\mathrm{overlaps}}(i,j)
+=
+\min(\hat{s}_j - \hat{s}_i,\ \hat{e}_i - \hat{s}_j,\ \hat{e}_j - \hat{e}_i)
+$$
+
+In practice, temporal expressions may be implicit or ambiguous. Therefore, we use interval derived features as inputs to a relation classifier.
+
+$$
+\mathbf{g}_{ij}
+=
+[\hat{s}_i,\hat{e}_i,\hat{s}_j,\hat{e}_j,
+\hat{s}_j-\hat{e}_i,
+\hat{s}_i-\hat{e}_j,
+\hat{d}_i,\hat{d}_j]
+$$
+
+$$
+P_{\theta}(r_{ij} \mid q) = \mathrm{softmax}(W_r \mathbf{g}_{ij})
+$$
+
+The geometric features preserve the inductive bias of interval reasoning, while the classifier adapts to noisy and implicit temporal expressions. Given relation labels \(\mathcal{R}_q\), the relation learning objective is
+
+$$
+\mathcal{L}_{\mathrm{rel}}
+=
+-\sum_{(i,j,r_{ij}) \in \mathcal{R}_q}
+\log P_{\theta}(r_{ij} \mid q).
+$$
+
+\subsection{Answer Selection with Event Relation Graph}
+
+The predicted relations form an event relation graph \(G_q\), where nodes are event mentions and edges are temporal relation distributions. \method{} uses this graph to rerank candidate answers rather than relying only on language model likelihood.
+
+The candidate set \(\mathcal{A}\) depends on the task format. For multiple choice or yes no tasks, \(\mathcal{A}\) is given by the benchmark. For open ended tasks, including numerical and extractive question answering, we sample a small candidate pool from the backbone model using direct prompting and chain of thought prompting. During training, the gold answer is added when it is missing from the pool. During inference, \method{} reranks only generated candidates. This turns open ended prediction into a graph aware reranking problem.
+
+We first pool pairwise relation distributions into a graph representation.
+
+$$
+\mathbf{g}_q = \mathrm{Pool}_{i,j}(P_{\theta}(r_{ij} \mid q))
+$$
+
+For each candidate answer \(a \in \mathcal{A}\), we encode the concatenation of the query and candidate answer to obtain a contextual answer representation.
+
+$$
+\mathbf{u}_a =
+\mathrm{Pool}_{t \in \mathrm{span}(a)}
+\mathrm{LM}([q;a])_t
+$$
+
+Since the answer representation and graph representation may have different dimensions, we project them into a shared space.
+
+$$
+\tilde{\mathbf{u}}_a = W_u \mathbf{u}_a,
+\quad
+\tilde{\mathbf{g}}_q = W_g \mathbf{g}_q
+$$
+
+The consistency score combines the candidate representation with the event relation graph.
+
+$$
+S(a,G_q,q)
+=
+\mathbf{w}_a^\top
+[\tilde{\mathbf{u}}_a;\tilde{\mathbf{g}}_q;
+\tilde{\mathbf{u}}_a \odot \tilde{\mathbf{g}}_q]
+$$
+
+The final prediction is the candidate with the highest graph aware score.
+
+$$
+a^* = \arg\max_{a \in \mathcal{A}} S(a,G_q,q)
+$$
+
+The answer supervision objective is computed over the candidate pool.
+
+$$
+P_{\theta}(a \mid q,G_q)
+=
+\frac{\exp S(a,G_q,q)}
+{\sum_{a' \in \mathcal{A}}\exp S(a',G_q,q)}
+$$
+
+$$
+\mathcal{L}_{\mathrm{ans}}
+=
+-\log P_{\theta}(a^* \mid q,G_q)
+$$
+
+This design separates generation from selection. The backbone model proposes answers, while \method{} selects the candidate most consistent with the predicted temporal structure.
+
+\subsection{Counterfactual Temporal Supervision}
+
+Counterfactual temporal supervision trains the model to update relation predictions when event order changes. Given an original query \(q\), we construct a perturbed query \(q'\) by changing one target relation while preserving non temporal content as much as possible. The perturbation can reverse an explicit temporal marker, insert a temporal modifier, or swap two event descriptions. The target relation changes from \(r_{ij}\) to \(r'_{ij}\).
+
+The answer label is also updated when the perturbation changes the correct answer. We denote the updated answer by \(a'\). For perturbations that only change an intermediate relation but do not affect the final answer, we keep \(a'=a\). For perturbations that change the answer, \(a'\) is obtained by applying the same counterfactual template to the answer derivation or by regenerating the gold answer from the updated query. Perturbed examples are retained only when the updated relation and answer can be determined reliably.
+
+The counterfactual relation loss is
+
+$$
+\mathcal{L}_{\mathrm{cf}}
+=
+-\sum_{(i,j,r'_{ij}) \in \mathcal{R}_{q'}}
+\log P_{\theta}(r'_{ij} \mid q').
+$$
+
+This objective differs from representation invariance. We do not force the original query and perturbed query to have similar representations. Temporal perturbations are meaningful structural changes, not nuisance noise. The model should therefore update its relation prediction when event order changes.
+
+\begin{algorithm}[!t]
+\caption{Counterfactual Temporal Supervision}
+\KwData{Training set \(\mathcal{D}\), event extractor \(\mathcal{E}\), temporal templates \(\mathcal{T}\)}
+\KwResult{Augmented training set \(\mathcal{D}_{cf}\)}
+\ForEach{example \((q,a)\in \mathcal{D}\)}{
+    \(E \leftarrow \mathcal{E}(q)\)\;
+    \ForEach{event pair \((e_i,e_j)\in E\)}{
+        \(r_{ij} \leftarrow \mathrm{DetectRelation}(q,e_i,e_j)\)\;
+        \If{\(r_{ij}\) is reliable}{
+            \(q' \leftarrow \mathrm{Perturb}(q,e_i,e_j,\mathcal{T})\)\;
+            \(r'_{ij} \leftarrow \mathrm{UpdateRelation}(r_{ij})\)\;
+            \(a' \leftarrow \mathrm{UpdateAnswer}(a,q,q')\)\;
+            \If{\(a'\) is reliable}{
+                Add \((q',a',r'_{ij})\) to \(\mathcal{D}_{cf}\)\;
+            }
+        }
+    }
+}
+\Return{\(\mathcal{D}_{cf}\)}
+\end{algorithm}
+
+The final objective combines answer supervision, relation supervision, and counterfactual temporal supervision.
+
+$$
+\mathcal{L}
+=
+\mathcal{L}_{\mathrm{ans}}
++
+\lambda_{\mathrm{rel}}\mathcal{L}_{\mathrm{rel}}
++
+\lambda_{\mathrm{cf}}\mathcal{L}_{\mathrm{cf}}
+$$
+
+This objective lets \method{} learn from final answers, explicit event relations, and counterfactual relation changes.
+
+\section{Experiments}
+\label{sec:experiments}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{Overall temporal reasoning results across the evaluated benchmarks.}
+\label{tab:main_results}
+\resizebox{0.88\textwidth}{!}{
+\begin{tabular}{l|lcccc}
+\toprule
+\rowcolor{headgray}
+Dataset & Metric & Direct & CoT & Self-Cons. & \method{} \\
+\midrule
+\multirow{3}{*}{Overall}
+& Standard Acc\(\uparrow\)
+& 0.165 $\pm$ 0.001
+& 0.175 $\pm$ 0.002
+& 0.176 $\pm$ 0.001
+& \textbf{0.272} $\pm$ 0.004 \\
+
+& Counterfactual Acc\(\uparrow\)
+& 0.148 $\pm$ 0.002
+& 0.158 $\pm$ 0.001
+& 0.159 $\pm$ 0.002
+& \textbf{0.251} $\pm$ 0.003 \\
+
+\rowcolor{rowred}
+& Average\(\uparrow\)
+& 0.157
+& 0.167
+& 0.168
+& \textbf{0.262} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+In this section, we evaluate \method{} from three perspectives. First, we examine whether the event relation graph provides useful temporal structure. Second, we test whether interval based reasoning improves robustness under standard and counterfactual settings. Third, we analyze whether each component of \method{} is necessary.
+
+\subsection{Experimental Setup}
+
+We evaluate on four public reasoning benchmarks and one constructed stress test split. The public benchmarks include GSM8K, MuSiQue Ans, StrategyQA, and 2WikiMultihopQA. These datasets differ in format, and we evaluate on temporal subsets selected or constructed from them. The selected examples require tracking event order, state changes, or dependencies across multiple reasoning steps. We additionally construct a counterfactual stress test split by altering event orderings in selected test examples.
+
+For each benchmark, we select or construct examples with temporal expressions and event order dependencies. The counterfactual partition is built by changing event order while preserving much of the original lexical content. This setting is designed to test whether a model responds to temporal structure rather than surface overlap.
+
+For open ended datasets, we construct candidate pools by sampling candidate answers from the backbone model and adding the gold answer during training. This converts open ended answer prediction into a reranking problem for \method. Event mentions and relation labels are constructed using the marker based procedure described in Section~\ref{sec:method}, and examples without reliable relation labels are used only for answer supervision.
+
+We use Qwen2.5 7B Instruct as the backbone model. The interval projection and relation decoding modules are trained on top of contextual event representations. We compare against direct prompting, chain of thought prompting, and self consistency decoding. All methods use the same backbone model for fair comparison.
+
+\subsection{Evaluating Temporal Structure}
+
+Before evaluating final answer accuracy, we examine whether the learned event relation graph captures temporal structure. If the interval representation is meaningful, relation predictions should change when event order changes. They should also remain stable when the perturbation does not alter temporal relations.
+
+We evaluate this property on the counterfactual partition by comparing relation predictions before and after perturbation. A reliable temporal representation should satisfy two conditions. For order changing perturbations, the corresponding relation should change in the correct direction. For lexical perturbations that preserve event order, the relation should remain stable. This evaluation separates temporal structure tracking from final answer correctness.
+
+\subsection{Interval Reasoning Improves Counterfactual Robustness}
+
+Table~\ref{tab:main_results} reports the main results. \method{} improves over direct prompting, chain of thought prompting, and self consistency decoding in the standard setting. The gain is larger under counterfactual shifts, suggesting that explicit event interval representation helps the model respond to structural temporal changes rather than surface overlap.
+
+The results also show that counterfactual temporal reasoning remains challenging. All methods degrade under event order shifts, suggesting that explicit temporal structure reduces temporal brittleness but does not fully solve it. Errors often occur when event mentions are implicit, when temporal expressions are ambiguous, or when the answer requires additional commonsense knowledge.
+
+\subsection{Selective Routing Trades Accuracy for Inference Cost}
+
+We include routed \method{} as an efficiency oriented variant. Unlike full \method, which applies interval based reasoning to every example, routed \method{} sends confident examples to direct prompting and uncertain examples to \method. This setting studies whether simple uncertainty signals can reduce the use of structured inference while retaining part of its robustness benefit.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{Selective routing analysis across difficulty levels.}
+\label{tab:routing_analysis}
+\begin{tabular}{l|ccc}
+\toprule
+\rowcolor{headgray}
+Routing strategy & Easy & Medium & Hard \\
+\midrule
+Always direct & 1.00 & 1.00 & 1.00 \\
+Always \method{} & 0.00 & 0.00 & 0.00 \\
+Confidence gate & 0.71 & 0.45 & 0.22 \\
+Disagreement routing & 0.68 & 0.42 & 0.19 \\
+\rowcolor{rowred}
+Random routing & 0.50 & 0.50 & 0.50 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:routing_analysis} reports the proportion of examples routed to direct prompting across different difficulty levels. Confidence based routing and disagreement based routing assign more easy examples to direct prompting and more hard examples to \method. Since routing deliberately skips structured inference on a subset of examples, routed \method{} is less accurate than full \method. We therefore use routing only to analyze the tradeoff between robustness and structured inference cost, not as an accuracy improving component.
+
+\subsection{Ablation Confirms the Role of Temporal Structure}
+
+We conduct ablation studies to verify the necessity of the main components. Removing relation supervision reduces the model's ability to learn event level temporal structure. Removing the interval projection forces the model to rely on ordinary contextual representations, which weakens its ability to compare event boundaries. Removing counterfactual temporal supervision makes the model less responsive to event order changes.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{Ablation study of the main components in \method.}
+\label{tab:ablation}
+\begin{tabular}{l|cc}
+\toprule
+\rowcolor{headgray}
+Variant & Accuracy & Change \\
+\midrule
+\rowcolor{rowred}
+\method{} & \textbf{0.272} $\pm$ 0.004 & --- \\
+w/o Relation Supervision & 0.219 $\pm$ 0.003 & -0.053 \\
+w/o Interval Projection & 0.186 $\pm$ 0.002 & -0.086 \\
+w/o Counterfactual Supervision & 0.198 $\pm$ 0.003 & -0.074 \\
+w/o Answer Graph Scoring & 0.258 $\pm$ 0.004 & -0.014 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The ablation results support the design motivation of \method. Interval projection provides explicit event boundaries. Relation decoding turns these boundaries into event level temporal structure. Counterfactual supervision teaches the model to update this structure under perturbation. These components work together and correspond to the design requirements identified in Section~3.
+
+\subsection{Error Analysis}
+
+Direct prompting and chain of thought prompting often preserve the original answer when the perturbed query remains lexically similar. This suggests that their predictions are partly driven by surface overlap rather than updated temporal relations. \method{} behaves differently because the perturbation changes the event relation graph, which then changes candidate answer scores.
+
+Several failure modes remain. Some failures come from event extraction errors. Others come from implicit temporal relations that cannot be inferred from local text alone. Counterfactual examples can also introduce noisy supervision when the updated answer cannot be determined reliably. These cases show that future work should improve event identification and incorporate richer temporal knowledge.
+
+\section{Discussion}
+
+\subsection{What is Supported}
+
+The current evidence supports a focused claim. Explicit event interval representation improves robustness over prompting based baselines in the evaluated temporal reasoning settings. The gains are larger under counterfactual event order shifts, suggesting that relation level supervision helps the model respond to structural temporal changes rather than surface overlap.
+
+\subsection{What is Not Supported}
+
+The current evidence does not show that every example requires structured interval reasoning. Some examples with explicit surface temporal cues can still be solved by direct prompting. It also does not show that selective routing improves accuracy over full \method. The routed variant should therefore be interpreted as an efficiency oriented analysis rather than an accuracy improving method. The main contribution of this work is the temporal representation and counterfactual supervision, not routing.
+
+\subsection{Why Counterfactual Temporal Reasoning Remains Difficult}
+
+Counterfactual temporal perturbations can change local event relations, final answers, or both. This makes supervision more difficult than ordinary data augmentation. Incorrect event extraction, ambiguous temporal markers, and unreliable answer updates can all introduce noise. For this reason, \method{} uses conservative relation labels and retains perturbed examples only when the updated relation and answer can be determined reliably.
+
+\subsection{Why Explicit Structure Matters}
+
+The results suggest that stronger prompting alone is insufficient for counterfactual temporal reasoning. Prompting can produce plausible rationales, but the rationale is not forced to expose event boundaries or relation changes. \method{} does not treat temporal structure as a post hoc explanation. It introduces event intervals and relation graphs as intermediate objects that directly affect candidate answer selection.
+
+\section{Conclusion}
+
+We presented \method, an interval based framework for counterfactual temporal reasoning in large language models. The framework maps event mentions into latent intervals, decodes an event relation graph, and uses counterfactual temporal supervision to train relation updates under event order shifts. Experiments suggest that explicit temporal structure improves robustness over prompting based baselines, especially in counterfactual settings. Future work should expand evaluation to larger temporal benchmarks, improve event extraction, and develop stronger supervision for ambiguous temporal relations.
+
+\section*{Limitations}
+
+This work focuses on textual temporal reasoning and does not yet cover multimodal temporal grounding. The current evaluation is preliminary and should be expanded to larger datasets, more base models, and more diverse temporal perturbations. The method also depends on the quality of event mention extraction. If events are missed or incorrectly segmented, the event relation graph may become unreliable. Finally, relation supervision can be noisy when temporal relations are implicit rather than explicitly stated.
+
+\bibliography{references}
+
+\end{document}

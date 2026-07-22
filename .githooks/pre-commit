@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+git diff --cached --check
+
+blocked_regex='(^|/)(\.env($|\.)|\.ssh($|/)|id_(rsa|dsa|ecdsa|ed25519)|known_hosts)|\.(safetensors|bin|pt|pth|ckpt|pem|key)$|^(data|models|artifacts|outputs|checkpoints)/'
+
+while IFS= read -r -d '' staged_path; do
+  if [[ "$staged_path" =~ $blocked_regex ]]; then
+    echo "blocked staged path: $staged_path" >&2
+    exit 1
+  fi
+
+  file_size=$(git cat-file -s ":$staged_path")
+  if (( file_size > 10485760 )); then
+    echo "blocked staged file larger than 10 MiB: $staged_path" >&2
+    exit 1
+  fi
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+if git diff --cached --no-ext-diff -U0 | grep -Eiq '(BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|hf_[A-Za-z0-9]{20,})'; then
+  echo "blocked possible credential in staged diff" >&2
+  exit 1
+fi
