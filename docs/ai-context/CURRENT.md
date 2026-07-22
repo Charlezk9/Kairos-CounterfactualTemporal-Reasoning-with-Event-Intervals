@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-22 21:53:26 CST
+- updated_at: 2026-07-22 22:06:26 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: d769d183083e8d126395b25f5299355bbae6d797
-- last_verified_commit: d769d183083e8d126395b25f5299355bbae6d797
-- last_completed_checkpoint: checkpoints/phase-01-musique-probe-helper.md
+- git_head: dbe9582a7d2be258d762c13f2ebf1fbb1ab1e644
+- last_verified_commit: dbe9582a7d2be258d762c13f2ebf1fbb1ab1e644
+- last_completed_checkpoint: checkpoints/phase-01-strategyqa-source-plan.md
 - active_run_ids: none
 - running_processes: none
 - blockers: MuSiQue acquisition is `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`: fixed production traversal reaches 0775 ancestors and fails before stage creation or network. This is not a ProbeStatus or remote-source failure; availability, size, MIME, SHA256, tree and schema remain unverified.
-- next_safe_action: 只由智能体 1提交 StrategyQA 官方 GCS source 获取策略计划，固定 URL/host、`official-20210107` revision 表述、预算、archive 验证、immutable publication 和 trusted-ancestor 冲突处理；智能体 2批准前不做 HEAD/GET、联网、下载、production、raw/processed 写入或代码修改。
+- next_safe_action: 只由智能体 1提交 StrategyQA 固定 transfer/stage-validator 的精确 implementation plan，补齐 0775 初始根真实性假设与 pre/post-open 替换测试、header/writeout/stderr 独立硬上限、whole-PGID 回收和 JSON 64 MiB limit+1；智能体 2批准前不编写代码、不运行测试或 Git preflight，也不做 HEAD/GET、联网、production 或数据写入。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
@@ -18,6 +18,7 @@
   - `checkpoints/phase-01-gsm8k-conversion.md`
   - `checkpoints/phase-01-musique-discovery.md`
   - `checkpoints/phase-01-musique-probe-helper.md`
+  - `checkpoints/phase-01-strategyqa-source-plan.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

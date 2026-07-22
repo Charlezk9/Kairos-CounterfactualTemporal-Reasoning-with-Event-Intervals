@@ -83,3 +83,5 @@
 - 精确两文件实现提交为 `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2`。本工作未执行 production、真实 curl/Git preflight、网络或 MuSiQue 数据访问；当前 0775 trusted-ancestor 门禁会在联网前 fail closed，等待独立执行策略审查。
 - 智能体 1与智能体 2只读复核 fixed root、调用链和 `namei` mode 后确认：不 chmod、不改代码/信任策略且不扩大允许根时不存在合规执行路径。MuSiQue acquisition 记为 `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`，不是 ProbeStatus 或远端不可达证据；未创建 stage、未发请求。
 - 智能体 2批准下一步仅编写 StrategyQA 官方 GCS source 获取策略计划；HEAD/GET、下载、production、raw/processed 写入和代码修改仍未批准。
+- StrategyQA 计划将 `official-20210107` 明确为 project label，以 fixed GCS URL、strong ETag token、UTC date 和首次 GET 后 SHA/bytes 联合绑定；ZIP、成员、schema、MIME 和 license 保持未验证。ZIP 缺 license 时只能 `STAGED_LICENSE_BLOCKED`。
+- 智能体 2给出 `APPROVED TO DOCUMENT / PLAN IMPLEMENTATION`，但 held-dirfd 模型仅是 StrategyQA 候选；下一份实施计划必须解决 0775 初始根假设、全 PGID 和三个小流独立上限。未批准代码、测试、Git preflight、网络或数据写入。

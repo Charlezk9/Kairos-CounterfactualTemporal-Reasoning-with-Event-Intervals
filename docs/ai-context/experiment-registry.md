@@ -35,6 +35,14 @@ Acquisition records track source provenance and file integrity only. They are no
 This table records local execution-policy state only. It must not be interpreted
 as a source availability result, HTTP observation or paper experiment.
 
+## Source planning gates
+
+| ID | Status | Source label | Approved scope | Artifacts |
+|---|---|---|---|---|
+| `PLAN-STRATEGYQA-20260722` | `SOURCE_PLAN_APPROVED` | `official-20210107` | documentation plus exact transfer/stage-validator implementation plan; no code/network/data | none |
+
+Planning-gate entries are not acquisition records or model runs.
+
 ## Processed data artifacts
 
 | ID | Status | Dataset revision | Execution commit | Counts | Artifact binding | Path |

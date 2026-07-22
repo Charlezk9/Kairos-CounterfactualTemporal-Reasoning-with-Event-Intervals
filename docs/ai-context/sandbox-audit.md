@@ -292,3 +292,11 @@
 - classification: `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`, not `ProbeStatus.BLOCKED`, HTTP failure or remote unavailability; no stage, Git preflight, curl or network was run
 - prohibited resolution: no silent chmod, root relocation, group/ACL allowlist, namespace change or weakening of the trusted-chain threat model
 - approved next scope: Agent 1 may draft only the StrategyQA official-source plan; all network, production, data writes and code changes require a new Agent 2 approval
+
+## 2026-07-22 — StrategyQA official-source plan audit
+
+- verdict: `APPROVED TO DOCUMENT / PLAN IMPLEMENTATION`
+- identity: fixed GCS URL plus strong ETag token and UTC date; `official-20210107` is a project label, while SHA/size/MIME/tree/schema/license remain unverified
+- fail-closed decisions: redirects forbidden by `--location --max-redirs 0`; missing license yields staged-only evidence; JSON 64 MiB and all stream/resource limits must be hard gates
+- threat model: GSM8K held-dirfd logic is only a StrategyQA implementation candidate and does not modify MuSiQue policy; the next plan must address pre-open authenticity under 0775 and root/parent/leaf replacements
+- boundary: documentation and one exact implementation plan only; no code, tests, Git preflight, HEAD/GET, network, data paths, dependency changes or GPU

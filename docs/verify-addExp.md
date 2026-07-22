@@ -64,6 +64,8 @@ MuSiQue 固定官方 Drive view URL 的 65,536-byte response-body probe helper �
 
 执行策略复核已将 MuSiQue 获取工作项标为 `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`：固定路径的 0775 祖先在 stage 创建和网络前即被拒绝。该状态不是 ProbeStatus、HTTP 失败或 Drive 不可达证据；production probe 从未运行，MuSiQue 的 archive 与实验状态仍未验证。
 
+StrategyQA 已完成获取前 source-plan 冻结：`official-20210107` 仅是项目标签，未来对象必须由固定 GCS URL、strong ETag、UTC date 与首次 GET 后 SHA/bytes 联合识别。实际 ZIP、schema、split、license 与指标均未获取或验证；当前批准只到精确 implementation plan，不产生实验或数据证据。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

@@ -107,6 +107,15 @@ network. This classification is local policy evidence only, not a probe result
 or a claim about Drive availability. Agent 2 approved moving to a StrategyQA
 source-plan review; no source request or write is included in that approval.
 
+## StrategyQA source-plan gate
+
+The fixed GCS source identity, staged-license behavior, resource envelope and
+two-step discovery/finalization sequence received `APPROVED TO DOCUMENT / PLAN
+IMPLEMENTATION`. The unique detailed plan is
+`phase-01-strategyqa-source-plan.md`. Approval stops before code, tests, Git
+preflight, network or data access; the next deliverable is only a precise
+transfer/stage-validator implementation plan.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`
