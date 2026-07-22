@@ -139,3 +139,11 @@
 - 冲突：paper prose 将 EM consistency 定义为所有 question 的 prediction 均 exact match 的 contrast-set 百分比；Table 4 caption 将 `C` 定义为组内每个 question 的 F1 均至少 80% 的 contrast-group 百分比。该 consistency formulation `SPEC_CONFLICT` 不是普通 per-question EM 冲突，本门禁不选择、不实现。
 - 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划，明确区分 code metadata/data blobs 并冻结 native environment/process 边界；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。
 - Snapshot/acquisition disposition：A/B/C 计划独立判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，因为当前调用接口不能为最外层 curl 原生替换 `envp` 或设置 pre-exec OS rlimit。A 若未来获批会传输并可能安全物化 whole archive，但 data/evaluator bytes 在 B/C 独立批准前保持 opaque/unconsumed；本次没有 snapshot/acquisition request、approval、record、stage、数据或工件。
+
+## D-010：TimeQA official metadata and primary-PDF boundary
+
+- 状态：repository README/LICENSE 与 official arXiv landing 为 metadata-only evidence；direct PDF 读取为 `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`。唯一详细来源为 `checkpoints/phase-01-timeqa-discovery.md`。
+- 来源：固定 `wenhuchen/Time-Sensitive-QA` commit `38b05989070c1168b2bef3d5a2656afeeba763dc`。`dataset/human_test.hard.json` 仅为 `PROJECT_PLANNED`，不是已观察文件。
+- 证据边界：README names/statements 为 `README_REPORTED`；固定 LICENSE 的 BSD-3-Clause/copyright 为 `LICENSE_EVIDENCE`，但具体 data/file applicability 未验；arXiv landing 数值只为 `ARXIV_LANDING_REPORTED`，不得解释为 split、本地数据或复现实验。
+- 路由失败：先前 “View PDF” 导向 ar5iv HTML，定性为 `ROUTING_POLICY_FAILURE / OUT_OF_SCOPE_REDIRECT`；ar5iv HTML body/content 仅作为 routing failure 记录，不采纳任何内容。禁止采用 ar5iv Table 1、easy/hard 定义、schema、PDF-body 指标/表格、PDF bytes/pages 或样例内容。
+- 下一门禁：只允许 Agent 1起草 fixed-revision snapshot/acquisition 计划；Agent 2批准前不得联网、实现代码、访问数据、创建 approval/record 或工件。

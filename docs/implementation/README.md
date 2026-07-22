@@ -65,6 +65,15 @@ data/evaluator access or implementation is authorized. The unique plan,
 conflict and disposition are in
 `../ai-context/checkpoints/phase-01-torque-discovery.md`.
 
+## TimeQA source status
+
+TimeQA has metadata-only README/LICENSE and arXiv landing evidence; an ar5iv
+route was rejected and direct PDF reading is
+`BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`. No snapshot, hard
+evaluation-file bytes, PDF-body evidence or implementation is authorized. The
+unique status is in
+`../ai-context/checkpoints/phase-01-timeqa-discovery.md`.
+
 ## GSM8K source adapter test matrix
 
 D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。

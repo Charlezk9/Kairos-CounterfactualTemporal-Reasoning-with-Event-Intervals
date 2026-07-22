@@ -78,6 +78,8 @@ TORQUE 当前仅完成固定 README/LICENSE 与 primary paper 的 metadata disco
 
 TORQUE A/B/C snapshot/acquisition 计划随后被判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。该计划未执行，未产生 snapshot/acquisition request、approval、record、stage、archive、数据或实验工件；public dev、clustering/schema、evaluator 与 test-annotation absence 均未作本地验证。该状态不是实验结果，不改变或解决既有指标 `SPEC_CONFLICT`。
 
+TimeQA 当前只有固定 README/LICENSE 和 official arXiv landing 的 metadata evidence。ar5iv HTML 路由仅作为越界失败记录且未采纳内容，direct official-PDF 计划为 `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES` 且未执行；不存在 accepted PDF-body evidence、来自 `PROJECT_PLANNED` hard evaluation file 的任何 bytes、schema、split、PDF-body 指标或实验结果。该状态不能支持任何新增论文 claim，详细边界见 `docs/ai-context/checkpoints/phase-01-timeqa-discovery.md`。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

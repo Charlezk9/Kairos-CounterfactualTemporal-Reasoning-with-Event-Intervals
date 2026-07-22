@@ -165,6 +165,18 @@ evaluator audit; none was executed. There is no snapshot/acquisition request,
 stage, archive, approval, record, data or artifact, and all acquisition
 properties remain unverified. The full plan is only in the linked checkpoint.
 
+## TimeQA metadata-only discovery
+
+The fixed README/LICENSE and official arXiv landing were read at the metadata
+layer only. A “View PDF” route escaped to ar5iv HTML and was rejected; the
+direct official-PDF plan is independently
+`BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES` and was not executed.
+No fixed-revision repository snapshot was acquired; no byte of the
+`PROJECT_PLANNED` hard evaluation file was read or created; and there is no
+accepted PDF-body evidence, approval, record or artifact. The unique detailed
+status and prohibited-evidence boundary are in
+`phase-01-timeqa-discovery.md`.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

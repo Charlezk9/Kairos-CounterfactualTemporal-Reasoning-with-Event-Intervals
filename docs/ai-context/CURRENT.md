@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-23 06:52:30 CST
+- updated_at: 2026-07-23 07:05:40 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 45ebd0f3b7ff81ef11173f9479db9c3f68241eb8
-- last_verified_commit: 45ebd0f3b7ff81ef11173f9479db9c3f68241eb8
-- last_completed_checkpoint: checkpoints/phase-01-torque-discovery.md
+- git_head: 903684181f6a936650e6c1ff2488f1d12ad5a957
+- last_verified_commit: 903684181f6a936650e6c1ff2488f1d12ad5a957
+- last_completed_checkpoint: checkpoints/phase-01-timeqa-discovery.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`.
-- next_safe_action: 仅由智能体 1起草 TimeQA primary-source metadata/discovery 的只读计划；智能体 2批准前不得联网、编写代码、访问数据或创建工件。
+- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`. TimeQA direct primary-PDF reading is `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`; see `checkpoints/phase-01-timeqa-discovery.md`.
+- next_safe_action: 仅由智能体 1起草 TimeQA fixed-revision snapshot/acquisition 计划；智能体 2批准前不得联网、编写代码、访问数据、创建 approval、record 或工件。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
@@ -23,6 +23,7 @@
   - `checkpoints/phase-01-strategyqa-runtime-redirect.md`
   - `checkpoints/phase-01-2wiki-discovery.md`
   - `checkpoints/phase-01-torque-discovery.md`
+  - `checkpoints/phase-01-timeqa-discovery.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`
