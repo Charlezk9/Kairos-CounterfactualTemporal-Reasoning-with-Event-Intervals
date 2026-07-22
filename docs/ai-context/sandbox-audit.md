@@ -245,3 +245,14 @@
 - scope: D-005 target acceptance only; generic `TemporalExample`, source/ID/split/manifest/publication and all other frozen semantics remain unchanged
 - approved: documentation commit, ordinary non-force push and Agent 1 plan revision only
 - not approved: code/test edits, test execution, raw access, processed creation, network or GPU
+
+## 2026-07-22 — GSM8K adapter implementation audits
+
+- pre-implementation verdict: `APPROVED TO IMPLEMENT` only `src/kairos/schema.py`, new `src/kairos/gsm8k.py`, `tests/test_schema_identity.py` and new `tests/test_gsm8k.py`; synthetic CPU tests only
+- first staged verdict: `BLOCKED` on reproducible FD leak/exception masking and late canonical target replacement; 145/145 passing tests were insufficient
+- first remediation: unified owned-resource best-effort cleanup, terminal held/parent/canonical/parent linearization, real path/inode attacks, nested manifest/raw boundary tests and five-artifact failure matrix; 163/163 passed
+- second staged verdict: `BLOCKED` because close/content hooks claimed phases without exercising the real close/content boundary, and canonical-FD-held target replacement was not yet a staged regression
+- second remediation: artifact-aware close at the actual resource cleanup boundary, real temp content mutation at lockstep/manifest reads, verified fingerprint binding through publication, post-validation tamper and two later target replacement regressions
+- final verdict: `APPROVED TO COMMIT`; Agent 2 independently replayed targeted 63/63, full 166/166, real content/close failures and canonical-FD-held replacements
+- Git/SSH: exact four-file commit `892b486b6bfb522de0aae4a675b651baf7ae1868` was ordinary-pushed with matching local/remote SHA and project-only strict SSH
+- boundary: no production raw read, processed creation, network, GPU, dependency install, training or inference; formal conversion remains separately gated

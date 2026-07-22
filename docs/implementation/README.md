@@ -47,8 +47,14 @@ D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保�
 - Manifest/CLI：exact top-level/nested schema、fixed values/path/count/byte size/SHA，acquisition commit 与 `--adapter-commit` clean HEAD 角色不混淆，非 40-hex、dirty/mismatched execution preflight 拒绝，禁止 path argument。
 - Immutable publication：target/final/temp 已存在、symlink/hardlink/special/extra file 或目录/private-temp 拒绝，O_EXCL/no-replace，四文件及 manifest 每个 create/write/fsync/reopen/link/unlink/root-fsync 阶段故障保留 partial，manifest 未成为唯一完成标志前 verifier 拒绝。
 - Verifier/integration：从合成 raw fixture 生成 flat source/example train/test 两类 ledger和 manifest，重算 schema/count/byte size/SHA/ID/source linkage，任一输出篡改、缺失或额外文件/目录拒绝；acquisition completion 在 prepare 前后的替换/篡改、fingerprint/provenance/source binding mismatch 拒绝。
-- Formal gate：全套测试只用局部 CPU 与 `/data0` temp/cache；正式 raw 转换只能在 clean implementation commit 与第二次执行预审后运行一次。
+- Formal gate：全套测试只用局部 CPU 与 `/data0` temp/cache；正式 raw 转换只能在包含已审实现的最新 clean checkpoint HEAD 与第二次执行预审后运行一次。
 - Fixture/privacy gate：所有 golden/reject/integration 只用人工合成内容，禁止回显、复制或提交真实 raw/test question、answer、raw line 或 per-record hash。
+
+## GSM8K source adapter implementation status
+
+冻结的 D-005/D-005-A 已在 commit `892b486b6bfb522de0aae4a675b651baf7ae1868` 实现。实现使用固定路径、held dirfd/no-follow parent chain、target `mkdirat` no-reuse、O_EXCL private temp、verified fingerprint-bound hardlink publication、manifest-last completion、fresh acquisition gates 与 raw/source/example physical-line lockstep replay。统一 cleanup 保证尝试关闭全部 owned FD/file object，且 cleanup 错误不覆盖活动主异常。
+
+Agent 1与主智能体分别通过 targeted 63/63 和全仓 166/166；Agent 2在两轮阻塞修复后给出 `APPROVED TO COMMIT`。详细审计证据见 `../ai-context/checkpoints/phase-01-gsm8k-adapter.md`。该状态不表示 production processed 已生成，也不授权运行固定 CLI。
 
 ## 首批测试
 

@@ -54,7 +54,9 @@ canonical 临时 fd 已改用与 held pair 一致的固定快照 best-effort cle
 
 GSM8K 官方 commit `3101c7d5072418e28b9008a6636bde82a006892c` 已在 provenance commit `482af857249b03d89c986dce96c9d38fc11cfd70` 上按固定 codeload URL 获取。Archive 为 4,447,003 bytes，SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`，18 个成员、声明展开 14,356,149 bytes；train/test 分别 7,473/1,319 条。主智能体与边界智能体的 offline verify 均通过，`SHA256SUMS` 15/15 严格验证，completion pair 同 inode 且 `nlink=2`。这只是 `ACQ-GSM8K-20260722` 数据获取/完整性证据，不是模型实验、论文指标或 `VERIFIED` 结果。
 
-D-005 只读 discovery 进一步确认 train/test 的 exact `{answer, question}` string schema 与 whole-file SHA256；parser 语义只由 train 冻结，test 未回显值也未用于选择规则。实施计划审计发现 ASCII-only trim 与 generic answer Unicode-whitespace invariant 在 NBSP-only/EM-SPACE-only suffix 上冲突，最小 D-005-A 已经边界审计冻结：Unicode `strip()` 只作非空接受判定，发布值仍是逐字符保留的 ASCII-trim target。本步未实现 adapter、未运行测试、未读取 raw、未创建 processed 工件，不产生实验结果。
+D-005 只读 discovery 进一步确认 train/test 的 exact `{answer, question}` string schema 与 whole-file SHA256；parser 语义只由 train 冻结，test 未回显值也未用于选择规则。实施计划审计发现 ASCII-only trim 与 generic answer Unicode-whitespace invariant 在 NBSP-only/EM-SPACE-only suffix 上冲突，最小 D-005-A 已经边界审计冻结：Unicode `strip()` 只作非空接受判定，发布值仍是逐字符保留的 ASCII-trim target。在该语义冻结检查点，尚未实现 adapter、运行测试、读取 raw 或创建 processed 工件，因此该检查点不产生实验结果。
+
+immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7ae1868` 实现：source ledger 保存 decoded raw 与 compact provenance，canonical example 以 `source_id` 引用并保存 ASCII-trim target；四 JSONL 与 manifest 使用 no-replace、fingerprint-bound、manifest-last 发布，verifier 从 raw physical line 锁步重构全部预期值。两轮安全阻塞先后修复了 FD/异常生命周期、terminal namespace 窗口和伪故障覆盖；最终 targeted 63/63、full 166/166 并经智能体 2独立复核。这仍只是 development verification，未运行 production conversion、未创建 processed 工件，不产生论文指标。
 
 ## 5. 实验设计与超参数
 

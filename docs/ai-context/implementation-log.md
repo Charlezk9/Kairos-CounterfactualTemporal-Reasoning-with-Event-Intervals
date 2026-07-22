@@ -69,3 +69,7 @@
 - D-005 补齐 exact nested schema、fixed binding、literal ID payload、五文件 manifest、immutable publication 和 synthetic-only 测试矩阵后，智能体 2二轮只读审计给出 `APPROVED TO FREEZE/PLAN IMPLEMENTATION`。本门禁只批准文档冻结提交与智能体 1下一步实施计划，仍不批准编码、测试执行或 processed 写入。
 - 智能体 1的四文件实施计划主动发现 ASCII-trim 与 generic Unicode-whitespace invariant 的极端冲突。智能体 2因不得在代码中暗选行为而给出 `BLOCKED`；D-005-A 只增加不输出 Unicode-strip 结果的兼容性接受判定，待文档复审。
 - 智能体 2复审确认 D-005-A 仅替代 target acceptance 极端边界，不改 generic schema 或其他冻结语义，因而给出 `APPROVED TO FREEZE/REPLAN IMPLEMENTATION`。下一步仍只是修订实施计划。
+- 四文件 adapter 实施在首次 staged audit 被阻止：direct close 会泄漏/掩盖异常，terminal canonical target 仍有可替换窗口，故障矩阵也不完整。智能体 1统一 owned-resource cleanup、收紧终态线性化并增加竞态回归。
+- 第二次 staged audit 确认实现缺陷已修复，但阻止了未落在真实边界的 close/content 伪覆盖。后续改为真实 temp 篡改、已验 fingerprint 绑定 publication 和 artifact-aware 真实 close cleanup，并固化 canonical FD 已打开后的 target replacement 攻击。
+- 智能体 1与主智能体独立通过 targeted 63/63 与 full 166/166；智能体 2第三次 staged audit 给出 `APPROVED TO COMMIT`。批准仅覆盖四文件实现快照和普通推送。
+- 已创建并普通推送 `892b486b6bfb522de0aae4a675b651baf7ae1868` (`feat(data): add immutable GSM8K source adapter`)；本地/远程一致，未运行 production conversion。
