@@ -1,20 +1,21 @@
 # Current State
 
-- updated_at: 2026-07-22 19:26:34 CST
+- updated_at: 2026-07-22 19:40:31 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 892b486b6bfb522de0aae4a675b651baf7ae1868
-- last_verified_commit: 892b486b6bfb522de0aae4a675b651baf7ae1868
-- last_completed_checkpoint: checkpoints/phase-01-gsm8k-adapter.md
+- git_head: 3e34c9c6da06a0364b84ef97492331e59a764a45
+- last_verified_commit: 3e34c9c6da06a0364b84ef97492331e59a764a45
+- last_completed_checkpoint: checkpoints/phase-01-gsm8k-conversion.md
 - active_run_ids: none
 - running_processes: none
-- blockers: the immutable GSM8K adapter implementation is committed and audited, but production raw conversion, processed output and all next-source downloads remain unapproved.
-- next_safe_action: 只由智能体 1提交一次性 GSM8K production conversion 执行单，执行基线必须是包含实现 commit `892b486b6bfb522de0aae4a675b651baf7ae1868` 的最新 clean checkpoint HEAD，并在执行单中记录实际 SHA；智能体 2单独给出 `APPROVED TO EXECUTE` 前不运行 `kairos.gsm8k prepare/verify`、不读取 production raw、不创建 processed、不下载下一源。
+- blockers: GSM8K production source/example ledgers are complete and post-audited; MuSiQue provenance, acquisition and adapter semantics remain unfrozen, and all next-source downloads remain unapproved.
+- next_safe_action: 只由智能体 1提交 MuSiQue 单源 provenance/acquisition discovery 计划，限定为论文与仓库文档只读、上游 revision/license/URL/预算候选核对；智能体 2另行批准前不联网、不下载、不创建 MuSiQue raw/processed、不修改代码。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
   - `checkpoints/phase-01-gsm8k-adapter.md`
+  - `checkpoints/phase-01-gsm8k-conversion.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

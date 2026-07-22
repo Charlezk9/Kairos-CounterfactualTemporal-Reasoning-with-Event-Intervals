@@ -73,3 +73,6 @@
 - 第二次 staged audit 确认实现缺陷已修复，但阻止了未落在真实边界的 close/content 伪覆盖。后续改为真实 temp 篡改、已验 fingerprint 绑定 publication 和 artifact-aware 真实 close cleanup，并固化 canonical FD 已打开后的 target replacement 攻击。
 - 智能体 1与主智能体独立通过 targeted 63/63 与 full 166/166；智能体 2第三次 staged audit 给出 `APPROVED TO COMMIT`。批准仅覆盖四文件实现快照和普通推送。
 - 已创建并普通推送 `892b486b6bfb522de0aae4a675b651baf7ae1868` (`feat(data): add immutable GSM8K source adapter`)；本地/远程一致，未运行 production conversion。
+- adapter checkpoint 文档以 `3e34c9c6da06a0364b84ef97492331e59a764a45` 普通推送；智能体 1随后提交一次性 production conversion 执行单，智能体 2给出仅覆盖一次 prepare、成功后一次 verify 与非内容验收的 `APPROVED TO EXECUTE`。
+- clean HEAD、upstream 0/0、target absent、181 GiB `/data0` 余量、0 GPU 与 2 CPU 线程门禁通过。固定 `prepare --adapter-commit 3e34c9c...` 与独立无参 `verify` 各执行一次且均 exit 0。
+- `PROC-P01-GSM8K-20260722` 生成四个 ledger 与 manifest；train/test 均保持 7,473/1,319 一一对应，八个 duplicate statistics 均为 0。智能体 2完成 namespace/权限/Git/进程事后审计并给出 `POST-AUDIT APPROVED`。

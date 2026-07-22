@@ -1,11 +1,11 @@
 # Kairos 补充实验技术与结果报告
 
 > 状态：PLANNED
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前所有论文数字均为 `REPORTED`，尚无本项目 `VERIFIED` 实验结果。
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有一个 `VERIFIED` 数据准备工件，但所有论文效果数字仍仅为 `REPORTED`，尚无本项目 `VERIFIED` 模型实验结果。
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01，deterministic data core implementation
+- 当前阶段：Phase 01，data pipeline；GSM8K source/example production conversion 已完成
 - 复现性质：independent reimplementation
 - 已完成实验：无
 - 当前结论：尚不能验证论文数值或新增 claim
@@ -56,7 +56,9 @@ GSM8K 官方 commit `3101c7d5072418e28b9008a6636bde82a006892c` 已在 provenance
 
 D-005 只读 discovery 进一步确认 train/test 的 exact `{answer, question}` string schema 与 whole-file SHA256；parser 语义只由 train 冻结，test 未回显值也未用于选择规则。实施计划审计发现 ASCII-only trim 与 generic answer Unicode-whitespace invariant 在 NBSP-only/EM-SPACE-only suffix 上冲突，最小 D-005-A 已经边界审计冻结：Unicode `strip()` 只作非空接受判定，发布值仍是逐字符保留的 ASCII-trim target。在该语义冻结检查点，尚未实现 adapter、运行测试、读取 raw 或创建 processed 工件，因此该检查点不产生实验结果。
 
-immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7ae1868` 实现：source ledger 保存 decoded raw 与 compact provenance，canonical example 以 `source_id` 引用并保存 ASCII-trim target；四 JSONL 与 manifest 使用 no-replace、fingerprint-bound、manifest-last 发布，verifier 从 raw physical line 锁步重构全部预期值。两轮安全阻塞先后修复了 FD/异常生命周期、terminal namespace 窗口和伪故障覆盖；最终 targeted 63/63、full 166/166 并经智能体 2独立复核。这仍只是 development verification，未运行 production conversion、未创建 processed 工件，不产生论文指标。
+immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7ae1868` 实现：source ledger 保存 decoded raw 与 compact provenance，canonical example 以 `source_id` 引用并保存 ASCII-trim target；四 JSONL 与 manifest 使用 no-replace、fingerprint-bound、manifest-last 发布，verifier 从 raw physical line 锁步重构全部预期值。两轮安全阻塞先后修复了 FD/异常生命周期、terminal namespace 窗口和伪故障覆盖；最终 targeted 63/63、full 166/166 并经智能体 2独立复核。在该 adapter implementation checkpoint 尚未运行 production conversion、创建 processed 工件或产生论文指标。
+
+随后从 clean checkpoint commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 完成唯一一次 production prepare 和唯一一次 offline verify，二者均 exit 0 且 canonical manifest 一致。工件 `PROC-P01-GSM8K-20260722` 已通过智能体 2事后边界审计；它验证数据转换可追溯性，不是论文模型实验。
 
 ## 5. 实验设计与超参数
 
@@ -64,7 +66,14 @@ immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7
 
 ## 6. 数据构造统计与人工审计
 
-待运行。至少报告 raw、filtered、event-success、reliable-relation、valid-counterfactual、retained，以及两人审计的有效率和 Cohen's kappa。
+GSM8K 固定 upstream revision `3101c7d5072418e28b9008a6636bde82a006892c` 的 source/example 转换已验证：
+
+| Status | Artifact ID | Split | Source records | Canonical examples | Duplicate question/raw-record groups | Execution commit |
+|---|---|---:|---:|---:|---:|---|
+| `VERIFIED DATA ARTIFACT` | `PROC-P01-GSM8K-20260722` | train | 7,473 | 7,473 | 0 / 0 | `3e34c9c6da06a0364b84ef97492331e59a764a45` |
+| `VERIFIED DATA ARTIFACT` | `PROC-P01-GSM8K-20260722` | test | 1,319 | 1,319 | 0 / 0 | `3e34c9c6da06a0364b84ef97492331e59a764a45` |
+
+processed manifest SHA256 为 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`；四个 ledger 的逐文件 SHA256 与 bytes 位于 `docs/ai-context/checkpoints/phase-01-gsm8k-conversion.md`。这里的 `VERIFIED DATA ARTIFACT` 不等于实验效果 `VERIFIED`。事件抽取、关系可靠性、反事实有效率、人工审计和 Cohen's kappa 尚未运行。
 
 ## 7. 已有实验复现结果
 
@@ -102,4 +111,4 @@ immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7
 
 ## 14. Run、Commit 与工件追踪
 
-当前无正式 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+当前无正式模型 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。

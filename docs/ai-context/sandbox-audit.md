@@ -256,3 +256,12 @@
 - final verdict: `APPROVED TO COMMIT`; Agent 2 independently replayed targeted 63/63, full 166/166, real content/close failures and canonical-FD-held replacements
 - Git/SSH: exact four-file commit `892b486b6bfb522de0aae4a675b651baf7ae1868` was ordinary-pushed with matching local/remote SHA and project-only strict SSH
 - boundary: no production raw read, processed creation, network, GPU, dependency install, training or inference; formal conversion remains separately gated
+
+## 2026-07-22 — GSM8K production conversion gate and post-audit
+
+- pre-execution verdict: `APPROVED TO EXECUTE` only one fixed production `prepare` from clean checkpoint HEAD `3e34c9c6da06a0364b84ef97492331e59a764a45`, followed by one no-argument offline `verify` only if prepare returned 0
+- preflight: branch/HEAD/remote/upstream 0/0 and implementation ancestry exact; target absent by both `! -e` and `! -L`; `/data0` available 181 GiB; 0 GPU and CPU thread variables capped at 2
+- execution: prepare exit 0 and verify exit 0; canonical manifests matched; no pipeline, retry, background process, download, training, inference or record-content output
+- artifact: exact five-file 0700/0600 namespace at the fixed revision path; 7,473 train and 1,319 test source/example records; manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`
+- post-execution verdict: `POST-AUDIT APPROVED`; Agent 2 independently checked only namespace metadata, Git/upstream, disk bytes and absence of a residual adapter process, without rerunning the converter/verifier or reading record content
+- boundary: approval is exhausted; immutable target may not be retried, cleaned, moved, overwritten or treated as a model experiment, and no next-source action is authorized
