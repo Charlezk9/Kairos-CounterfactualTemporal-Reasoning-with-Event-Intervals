@@ -265,3 +265,13 @@
 - artifact: exact five-file 0700/0600 namespace at the fixed revision path; 7,473 train and 1,319 test source/example records; manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`
 - post-execution verdict: `POST-AUDIT APPROVED`; Agent 2 independently checked only namespace metadata, Git/upstream, disk bytes and absence of a residual adapter process, without rerunning the converter/verifier or reading record content
 - boundary: approval is exhausted; immutable target may not be retried, cleaned, moved, overwritten or treated as a model experiment, and no next-source action is authorized
+
+## 2026-07-22 — MuSiQue metadata discovery audit
+
+- local verdict: `APPROVED TO DISCOVER LOCALLY`; read-only Kairos PDF/TeX/README/decisions and archive/acquisition source only, with no `/data0` MuSiQue access or file write
+- local finding: Kairos PDF p4–5 reports an unidentifiable 418-example MuSiQue Ans temporal subset with answer accuracy, not a specified official split or EM/F1 protocol; `references.bib` is absent
+- network verdict: `APPROVED FOR OFFICIAL METADATA DISCOVERY`; fixed GitHub commit README/LICENSE, ACL/TACL primary paper and one fixed Drive HEAD only, without clone, data preview/body, Range, third-party mirror or write
+- official metadata: commit `922ac98f...`, CC BY 4.0, Drive object ID, train/dev/test declarations, dev-as-validation, answer/support F1, MuSiQue-Ans 19,938/2,417/2,459 and seed single-hop leakage notice were confirmed from primary sources
+- Drive observation: one no-follow/no-body HEAD ended with curl error 28 and no HTTP response; a downstream `sed` masked the pipeline status, so redirect/MIME/size/availability remain `UNVERIFIED`
+- documentation verdict: `APPROVED TO DOCUMENT DISCOVERY`; no run ID, raw/processed artifact, SHA256, schema or download authorization may be inferred
+- boundary: next action is only an Agent 1 bounded acquisition/probe plan followed by a fresh Agent 2 review; no network retry, download, extraction, implementation or experiment is approved

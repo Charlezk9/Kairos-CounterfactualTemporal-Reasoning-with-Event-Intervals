@@ -102,3 +102,16 @@
 - 修订：先令 `target = suffix.strip(" \\t\\n\\r\\v\\f")`；仍要求 `target != ""`，并新增兼容性判定 `target.strip() != ""`。第二个判定只决定接受/拒绝，输出值仍必须是第一步的 `target`；禁止用 Unicode `strip()` 的结果替换、删除或 normalization 任何 Unicode whitespace。
 - 边界样例：suffix 仅为 NBSP/EM SPACE 等 Unicode whitespace 时拒绝；`X` 与 Unicode whitespace 的任意组合在兼容性判定后按 ASCII-trim 结果逐字符保留。全部回归只使用人工合成 fixture。
 - 作用域：本修订只精确替代 D-005 `raw/parser contract` 中“ASCII-trim 后非空”的 target 接受判定；不改动 generic `TemporalExample`、source ledger 原值、ID、split、manifest、publication 或任何其他 D-005 语义。
+
+## D-006：MuSiQue official metadata boundary
+
+- 状态：`METADATA-ONLY`；不是 acquisition、schema 或 adapter freeze。
+- Kairos 论文事实：PDF 第 4 页 §5.1说明从 MuSiQue Ans 选择需要 temporal dependency 或可靠 counterfactual relation update 的 temporal subset；第 5 页 Table 1以 per-benchmark answer accuracy 报告 standard/CF，第 5 页 Table 2只给 subset 418、marker-pair coverage 56.0% 和 relation-label coverage 39.5%。论文只写原始 dev/test format，未标识 MuSiQue 的具体 split，也未给 subset IDs、hash、完整筛选器或重建映射。
+- Kairos 指标边界：PDF/TeX 未把 MuSiQue 原结果定义为 EM/F1。`docs/experiments/README.md` 的 official validation、EM/F1 与 CF accuracy 是本项目的新增独立评测设计；不得用它解释原论文 Table 1 数字。
+- 官方 source：固定上游为 [StonyBrookNLP/musique](https://github.com/StonyBrookNLP/musique) commit `922ac98f19a201998dbdae6d7f2887a5258dbdeb`（提交主题 `Update LICENSE`）。该 revision README 声明数据采用 CC BY 4.0，官方 Drive object ID 为 `1tGdADlNjWFaHLeZZGShh2IRcpO6Lv24h`，内容包括 MuSiQue-Ans/Full 的 train/dev/test 与 `data/dev_test_singlehop_questions_v1.0.json`；这些仍是 README provenance，不是本地 archive inspection。
+- 许可：固定 revision 的 README 与 LICENSE 均为 Creative Commons Attribution 4.0。下载后仍须检查 archive 内许可/notice 与 seed-source attribution；派生 temporal subset 必须保留 attribution 和变更说明。
+- 官方 split/规模：[TACL primary paper](https://aclanthology.org/2022.tacl-1.31/) 报告 MuSiQue-Ans 共 24,814 条 2–4 hop 问题：train 19,938、dev 2,417、test 2,459。官方 README 用 `musique_ans_v1.0_dev.jsonl` 举例并把 dev称为 validation；标准指标为 answer F1 与 paragraph-level support F1。实例抽象为 `(Q,C;A,P_s)` 并额外包含 gold decomposition `G_Q`。
+- leakage：固定 README 明确 MuSiQue 由 SQuAD、T-REx、Natural Questions、MLQA 和 Zero Shot RE 的 single-hop questions 组合而成；若模型使用这些 seed datasets，必须排除 released dev/test single-hop IDs。该文件是后续训练 provenance 的强制门禁，不得忽略。
+- Drive 观测：2026-07-22 对固定 view URL 的一次 no-follow/no-body HEAD 在 10 秒连接阶段以 curl error 28 超时，未收到 HTTP response。过滤管道的 shell 外层状态 0 仅来自 `sed`，不代表 curl 成功。Redirect authority、MIME、Content-Length、availability、archive byte size/SHA256/tree/schema 均为 `UNVERIFIED`。
+- 安全实现：`archive_safety.py` 的 ZIP/TAR/TAR.GZ held-fd inspect/extract、成员/metadata/展开预算、路径规范化和 symlink/hardlink/special/sparse/duplicate/prefix-conflict 拒绝可复用；`acquisition.py` 将 GSM8K URL、revision、layout、schema 与 counts 写死，不得参数化挪用或放宽。
+- 下一门禁：先由 Agent 1提交固定 URL/authority、OS 与应用层字节上限、超时、stage/revision absent、HTTP observation、failure preservation 的单次 acquisition/probe 方案。Agent 2批准前不重试网络、不下载、不读取 body、不创建 raw/processed、不实现代码。

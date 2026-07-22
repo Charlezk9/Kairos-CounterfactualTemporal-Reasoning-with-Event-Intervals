@@ -1,21 +1,22 @@
 # Current State
 
-- updated_at: 2026-07-22 19:40:31 CST
+- updated_at: 2026-07-22 19:55:17 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 3e34c9c6da06a0364b84ef97492331e59a764a45
-- last_verified_commit: 3e34c9c6da06a0364b84ef97492331e59a764a45
-- last_completed_checkpoint: checkpoints/phase-01-gsm8k-conversion.md
+- git_head: 79b56bca305272525ffffb658bb8ffeaa9cc6137
+- last_verified_commit: 79b56bca305272525ffffb658bb8ffeaa9cc6137
+- last_completed_checkpoint: checkpoints/phase-01-musique-discovery.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K production source/example ledgers are complete and post-audited; MuSiQue provenance, acquisition and adapter semantics remain unfrozen, and all next-source downloads remain unapproved.
-- next_safe_action: 只由智能体 1提交 MuSiQue 单源 provenance/acquisition discovery 计划，限定为论文与仓库文档只读、上游 revision/license/URL/预算候选核对；智能体 2另行批准前不联网、不下载、不创建 MuSiQue raw/processed、不修改代码。
+- blockers: MuSiQue official metadata is documented, but the fixed Drive object returned no HTTP response before curl error 28; archive availability, size, MIME, SHA256, tree, schema and acquisition implementation remain unverified.
+- next_safe_action: 只由智能体 1提交 MuSiQue 单次有界 acquisition/probe 方案，明确官方 fixed URL、允许 authority、字节/时间/磁盘硬上限、stage absent、HTTP 观测与失败保留；智能体 2重新批准前不发起网络请求、不下载、不创建 MuSiQue raw/processed、不修改代码。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
   - `checkpoints/phase-01-gsm8k-adapter.md`
   - `checkpoints/phase-01-gsm8k-conversion.md`
+  - `checkpoints/phase-01-musique-discovery.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

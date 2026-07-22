@@ -76,3 +76,6 @@
 - adapter checkpoint 文档以 `3e34c9c6da06a0364b84ef97492331e59a764a45` 普通推送；智能体 1随后提交一次性 production conversion 执行单，智能体 2给出仅覆盖一次 prepare、成功后一次 verify 与非内容验收的 `APPROVED TO EXECUTE`。
 - clean HEAD、upstream 0/0、target absent、181 GiB `/data0` 余量、0 GPU 与 2 CPU 线程门禁通过。固定 `prepare --adapter-commit 3e34c9c...` 与独立无参 `verify` 各执行一次且均 exit 0。
 - `PROC-P01-GSM8K-20260722` 生成四个 ledger 与 manifest；train/test 均保持 7,473/1,319 一一对应，八个 duplicate statistics 均为 0。智能体 2完成 namespace/权限/Git/进程事后审计并给出 `POST-AUDIT APPROVED`。
+- 智能体 1提交 MuSiQue 单源 discovery 计划；智能体 2分别批准仓库内论文只读核对和仅官方 GitHub/ACL/Drive HEAD 的 metadata discovery，明确禁止数据 body、Range、clone、写文件和第三方镜像。
+- 官方 metadata 确认 fixed commit `922ac98f...`、CC BY 4.0、Drive object ID、MuSiQue-Ans/Full train/dev/test、dev-as-validation、官方 answer/support F1、24,814 条 split 规模和 seed single-hop leakage 门禁。Kairos 的 418 条 temporal subset 仍不可识别。
+- 固定 Drive view URL 的唯一 no-follow/no-body HEAD 在连接阶段 curl error 28；未收到 HTTP response。可达性、size/MIME/hash/tree/schema 均保持 `UNVERIFIED`，未下载或创建 MuSiQue 工件。
