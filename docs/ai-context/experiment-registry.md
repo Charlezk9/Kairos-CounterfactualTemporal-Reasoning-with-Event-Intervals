@@ -13,3 +13,11 @@
 | `DEV-P01-ACQUIRE-20260722` | 2026-07-22 | offline GSM8K acquisition finalization/verification helper | committed as `ca759ac` | 62 acquisition tests; 115/115 passed; fifth complete staged audit approved | none |
 
 该条目不是正式 run，不产生可进入论文的数值；正式实验仍为空。
+
+## Acquisition records
+
+| ID | Status | Source revision | Provenance commit | Archive SHA256 | Integrity evidence | Artifacts |
+|---|---|---|---|---|---|---|
+| `ACQ-GSM8K-20260722` | `COMPLETE` | `3101c7d5072418e28b9008a6636bde82a006892c` | `482af857` | `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a` | offline verify exit 0; SHA256SUMS 15/15; 7,473 train / 1,319 test | `/data0/hk_data/kairos-zx/data/raw/gsm8k/` |
+
+Acquisition records track source provenance and file integrity only. They are not model runs and do not contain paper metrics.

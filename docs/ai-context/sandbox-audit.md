@@ -199,3 +199,13 @@
 - verification: 115/115 total, 62/62 acquisition, 26/26 archive safety, pre-commit and cached/unstaged diff checks; twelve staged paths and zero unstaged paths
 - independent replay: canonical final-only, guard-only and both-close attempted final then guard; standalone cleanup raised the first error, active validation preserved `AcquisitionError`, and partial final-open preserved `FileNotFoundError`. Held/canonical ownership slots were cleared before cleanup.
 - prior gates: late pair/root/parent/leaf and extra directory/regular-file attacks were rejected; terminal ordering, post-publication finalize binding, archive FD API, fixed no-network CLI, secrets/large/dangerous scans, project Git/SSH and raw-root absence all passed.
+
+## 2026-07-22 — GSM8K fixed-source execution and post-audit
+
+- pre-execution verdict: APPROVED TO EXECUTE only the fixed codeload URL/revision, foreground curl, strict observation, fixed-layout finalize/verify and read-only post-checks
+- resources: 0 task GPUs, no background job, curl single process, helper thread variables capped at 2; `/data0` available bytes stayed above the 120 GiB stop threshold
+- transfer: exit 0, HTTP 200, exact no-redirect effective URL, `application/x-gzip`, 4,447,003 bytes, SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`
+- post-execution verdict: APPROVED TO RECORD after an independent offline verify and strict `SHA256SUMS` 15/15 replay
+- filesystem: raw top level only `gsm8k`; fixed stage plus revision only; no symlink/special file or unexpected hardlink; completion guard/final device 2048, inode 176825412, `nlink=2`
+- storage: 23,287,235 GSM8K bytes and 23,295,427 project-root delta; post-run available bytes 193,444,249,600
+- boundary: no second run, mirror, next dataset, cleanup, code execution from the archive, training or inference was authorized

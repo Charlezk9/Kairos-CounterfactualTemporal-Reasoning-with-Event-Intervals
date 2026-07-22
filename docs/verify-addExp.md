@@ -52,6 +52,8 @@ canonical 临时 fd 已改用与 held pair 一致的固定快照 best-effort cle
 
 审计通过的 helper 已以 commit `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` 普通推送至工作分支。截至该提交仍无 raw 数据、实验 run 或论文指标。
 
+GSM8K 官方 commit `3101c7d5072418e28b9008a6636bde82a006892c` 已在 provenance commit `482af857249b03d89c986dce96c9d38fc11cfd70` 上按固定 codeload URL 获取。Archive 为 4,447,003 bytes，SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`，18 个成员、声明展开 14,356,149 bytes；train/test 分别 7,473/1,319 条。主智能体与边界智能体的 offline verify 均通过，`SHA256SUMS` 15/15 严格验证，completion pair 同 inode 且 `nlink=2`。这只是 `ACQ-GSM8K-20260722` 数据获取/完整性证据，不是模型实验、论文指标或 `VERIFIED` 结果。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
@@ -96,4 +98,4 @@ canonical 临时 fd 已改用与 held pair 一致的固定快照 best-effort cle
 
 ## 14. Run、Commit 与工件追踪
 
-当前无 run。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+当前无正式 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。

@@ -1,6 +1,6 @@
 # Phase 01 Official Data Acquisition Checkpoint
 
-- status: IMPLEMENTATION COMPLETE; ACQUISITION NOT STARTED
+- status: IN PROGRESS; GSM8K COMPLETE, FIVE SOURCES NOT STARTED
 - branch: `experiment/reproduction-additional-evaluation`
 - planning_commit: `b6491ec501ad18115bf5d3588cb250e01891d1e2`
 - implementation_agent: agent 1
@@ -62,4 +62,27 @@ MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 1
 - production CLI: fixed-path `validate-stage`, `finalize`, `verify`; no network, subprocess, path option or environment override
 - scope: strict HTTP observation; independent archive copy; fd-relative tree and GSM8K validation; canonical SHA256SUMS; fsync plus no-replace completion publication; full offline verification
 - verification: 62 acquisition tests, 26 archive-safety tests and 115/115 full repository tests passed with all test temp/cache paths directed to `/data0/hk_data/kairos-zx`
-- status: implementation plan was first `BLOCKED`, D-004-A was hardened, and the revised plan received `APPROVED TO IMPLEMENT`. The first staged audit was `BLOCKED` on path reopen, copied-archive identity, quadratic validation and publication order. The second audit remained `BLOCKED` on pair lifetime, complete canonical chain, formal-root protocol entries and guard publication order. The third audit then blocked on the outer pair lifetime, complete terminal fingerprint and held-pair close semantics. The fourth audit found the same cleanup defect in canonical temporary FDs. A shared fixed-snapshot best-effort closer now covers held and canonical pairs; final/guard/both close, active validation and partial-open regressions pass without masking primary errors. The fifth complete staged audit independently replayed all prior attack and cleanup paths and returned `APPROVED TO COMMIT`. Commit `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` was pushed by ordinary non-force update with matching local/remote SHA. This does not authorize real data download, and no real data has been downloaded.
+- status: implementation plan was first `BLOCKED`, D-004-A was hardened, and the revised plan received `APPROVED TO IMPLEMENT`. The first staged audit was `BLOCKED` on path reopen, copied-archive identity, quadratic validation and publication order. The second audit remained `BLOCKED` on pair lifetime, complete canonical chain, formal-root protocol entries and guard publication order. The third audit then blocked on the outer pair lifetime, complete terminal fingerprint and held-pair close semantics. The fourth audit found the same cleanup defect in canonical temporary FDs. A shared fixed-snapshot best-effort closer now covers held and canonical pairs; final/guard/both close, active validation and partial-open regressions pass without masking primary errors. The fifth complete staged audit independently replayed all prior attack and cleanup paths and returned `APPROVED TO COMMIT`. Commit `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` was pushed by ordinary non-force update with matching local/remote SHA. That implementation approval did not authorize download; the later separately approved execution is recorded below.
+
+## GSM8K acquisition result
+
+- acquisition ID: `ACQ-GSM8K-20260722`
+- status: `COMPLETE` (source integrity only; not an experiment run)
+- completed at: `2026-07-22T09:20:01.531117+00:00`
+- provenance commit: `482af857249b03d89c986dce96c9d38fc11cfd70`
+- source revision: `3101c7d5072418e28b9008a6636bde82a006892c`
+- fixed/effective URL: `https://codeload.github.com/openai/grade-school-math/tar.gz/3101c7d5072418e28b9008a6636bde82a006892c`
+- HTTP: curl exit 0, status 200, MIME `application/x-gzip`, size `4,447,003` bytes
+- archive SHA256: `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`
+- archive: 18 members, `14,356,149` declared expanded bytes; stage/formal copies have different inodes and `nlink=1`
+- dataset: `train.jsonl` 7,473 rows; `test.jsonl` 1,319 rows
+- SHA256SUMS: 15 entries, strict 15/15 verification, file SHA256 `fb6bb5349ea5a620062f34cda78eb4faed2aa8a6ec9cf43ad54010904b813107`
+- formal tree fingerprint: `6b52e122a14c0f78baf3fc0b046b312b780518771828702acf074ab8ac95583f`
+- completion manifest SHA256: `d8861250e197bf04e1f24fee4dbb7bfe07194f485095f77cdcc8669412e35047`
+- completion pair: device 2048, inode 176825412, guard/final both `nlink=2`
+- paths: fixed stage and revision under `/data0/hk_data/kairos-zx/data/raw/gsm8k/`; raw top-level contains only `gsm8k`
+- storage: GSM8K `23,287,235` bytes; project-root pre/post `28,380,762,718` / `28,404,058,145` bytes; delta `23,295,427` bytes including 8,192 bytes of new parent directories
+- post-run available bytes: `193,444,249,600`
+- audit: main and boundary-agent offline verify passed; no symlink/special files, non-protocol hardlinks, residual curl/acquisition process, background job, or task GPU use
+
+The approved download scope ended with this source. MuSiQue, StrategyQA, 2Wiki, TORQUE and TimeQA remain not acquired; no mirror or second run is authorized by this checkpoint.

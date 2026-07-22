@@ -61,3 +61,6 @@
 - canonical final/guard/both close、active validation+双 close、partial final-open+guard cleanup 回归已增加；智能体 1和主智能体分别使用项目局部 CPU 环境通过 115/115 完整测试，等待第五次 staged 审计。
 - 智能体 2第五次完整 staged audit 独立通过 115/115、62/62 acquisition 和 26/26 archive safety，重放全部 terminal namespace/pair/chain 及 held/canonical cleanup 攻击并给出 `APPROVED TO COMMIT`。批准仅覆盖当前 12-file snapshot 的提交/普通推送，不批准真实下载。
 - 已创建并普通 non-force 推送 `ca759ac26bfc0bd64ee25a9732c20d8ea335a362` (`feat(data): add audited GSM8K acquisition finalizer`)；本地/远程 SHA 一致，项目专用 GitHub Ed25519 host key 仍为单行且指纹正确。真实下载等待单独执行预审。
+- 提交后状态以 `482af857249b03d89c986dce96c9d38fc11cfd70` 普通推送；智能体 2另行批准仅固定 GSM8K codeload 对象的一次前台获取。
+- curl exit 0，HTTP 200，effective URL 精确一致，MIME 为 `application/x-gzip`；4,447,003-byte archive SHA256 为 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`。
+- `validate-stage`、`finalize`、主智能体 `verify` 和智能体 2独立 offline verify 全部 exit 0；SHA256SUMS 15/15，train/test 为 7,473/1,319。无残留进程、后台任务或 GPU 使用。
