@@ -37,3 +37,5 @@
 - 智能体 2第三次 validator staged audit 确认 forged-count 与 local ZIP64 已修复，但仍以可复现反例阻止提交：central directory 与 EOCD 之间可插入未计量 gap，local flags/compression/CRC/sizes 可与 central 不一致而通过前置门禁。
 - 上述两个缺陷已交由智能体 1修复；修复及新的 pre-ZipFile 回归测试获得智能体 2批准前，不提交且不下载。
 - 智能体 1已要求 central directory 紧邻 EOCD，逐字段比较 central/local version-needed、flags、compression、CRC 和大小，并保守拒绝 data descriptor；EOCD gap 和各字段不一致均有 pre-ZipFile 回归。主智能体将独立复跑 49 项测试后请求完整 staged 复审。
+- 智能体 2独立重放 central-to-EOCD gap、central-only/local-only encryption/bit3 和其他 header 字段篡改，全部在 `ZipFile` 构造前被拒绝；49/49、hook/diff、secret/大文件/危险命令与 Git/SSH 检查通过，给出 `APPROVED TO COMMIT`。
+- 已创建并普通 non-force 推送 `c57a133cf7c05f049ca16f8e43d29302480ec411` (`feat(data): add bounded archive validation`)；本地/远程 SHA 一致，GitHub Ed25519 `known_hosts` 仍为单行且指纹为 `SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU`。该批准不包含真实数据下载。

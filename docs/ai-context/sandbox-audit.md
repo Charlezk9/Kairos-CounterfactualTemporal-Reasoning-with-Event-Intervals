@@ -102,3 +102,10 @@
   - local header comparison covered only filename/ZIP64, not version-needed, flags, compression, CRC32 and compressed/uncompressed sizes; mutated local values were accepted before materialization.
 - required remediation: require the central directory to end exactly at EOCD under the project's no-digital-signature/no-ZIP64 policy; compare all relevant central/local fields and conservatively reject data descriptors unless fully verified; add pre-`ZipFile` regressions for each mismatch and request another full staged audit.
 - remediation implemented: central end must equal EOCD offset; version-needed, flags, compression, CRC32 and both sizes are compared; encryption and bit-3 data descriptors are rejected in either header; gap and mismatch regressions fail before `ZipFile`. The full repository suite now has 49 tests; another staged audit is pending.
+
+## 2026-07-22 — Phase 01 archive-validator final staged audit
+
+- verdict: APPROVED TO COMMIT the exact nine-file staged snapshot and ordinary non-force push; real data download remains unapproved
+- independent replay: central-to-EOCD gap, central-only/local-only encryption and bit 3, other flags, compression, CRC32 and both size mismatches all raised before the mocked `ZipFile` constructor
+- verification: 49/49 tests, cached diff, `.githooks/pre-commit`, secret/large-file/dangerous-command scans, no-unstaged-drift check and project-local Git/SSH checks passed
+- completion: commit `c57a133cf7c05f049ca16f8e43d29302480ec411` was pushed without force; local/remote SHA matched and the one-line verified GitHub Ed25519 host key remained unchanged

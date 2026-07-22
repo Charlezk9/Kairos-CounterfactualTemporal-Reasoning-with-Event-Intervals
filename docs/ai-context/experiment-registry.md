@@ -9,6 +9,6 @@
 | ID | Date | Scope | Git state | Result | Artifacts |
 |---|---|---|---|---|---|
 | `DEV-P01-UNIT-20260722` | 2026-07-22 | deterministic data core unit tests | staged tree later committed as `111bb99` | 27/27 passed after audit fixes | none |
-| `DEV-P01-ARCHIVE-20260722` | 2026-07-22 | archive safety and full repository unit tests | dirty, based on `b6491ec` | 49/49 passed after three audit-remediation rounds; full re-audit pending | none |
+| `DEV-P01-ARCHIVE-20260722` | 2026-07-22 | archive safety and full repository unit tests | staged tree committed as `c57a133` | 49/49 passed after three audit-remediation rounds; final audit approved | none |
 
 该条目不是正式 run，不产生可进入论文的数值；正式实验仍为空。
