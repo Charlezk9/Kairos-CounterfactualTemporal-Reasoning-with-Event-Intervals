@@ -34,6 +34,22 @@
 
 `kairos.acquisition` 是 D-004-A 的离线 finalization/verification helper 候选实现，不实现网络传输。生产布局、revision、URL、路径、上限和文件名固定在源码中；CLI 仅接受 expected archive SHA256 与 clean Git commit，提供 `validate-stage`、`finalize`、`verify`。它使用 held-fd archive API 对 stage HTTP 观测、独立 archive copy、GSM8K 固定树/JSONL、全文件 SHA256SUMS 和 completion manifest 执行严格校验，并以 fsync 后 formal-tree fingerprint 与固定 guard/final 同 inode pair 绑定 completion。第三和第四次 staged 审计发现的外层生命周期、terminal fingerprint、held/canonical pair cleanup 问题已修复；115/115 开发测试与第五次完整 staged 审计已通过。当前批准仅覆盖实现快照的提交/普通推送；真实获取需单独执行门禁。无锁 verifier 的保证以末次成功复核为线性化点，不声称返回后文件系统持续不变。安全与失败语义的唯一详细来源是 `../ai-context/decisions.md` D-004-A。
 
+## StrategyQA staged acquisition
+
+`kairos.strategyqa_acquisition` fixes the approved GCS identity and exposes only
+fixed-path `fetch` and offline `verify-stage` behavior. It uses a durable
+project-root transaction marker, held no-follow dirfds, bounded transfer
+evidence, whole-process-group supervision, fixed resource/policy/Git gates and
+a held guard/final manifest pair with strict terminal replay. The implementation
+commit is `978ba4dea0792061340d0ec97241caa1efd6d6f2`; detailed transaction and audit
+evidence is in
+`../ai-context/checkpoints/phase-01-strategyqa-acquisition-helper.md`.
+
+Production is deliberately unavailable while
+`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`. This implementation checkpoint is
+not evidence that the source is reachable or that its archive, schema, split or
+license has been observed.
+
 ## GSM8K source adapter test matrix
 
 D-005 是 source-ledger/canonical-example 语义的唯一来源；本节只保存实现验收矩阵。

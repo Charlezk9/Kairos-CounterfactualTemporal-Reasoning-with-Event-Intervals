@@ -85,3 +85,6 @@
 - 智能体 2批准下一步仅编写 StrategyQA 官方 GCS source 获取策略计划；HEAD/GET、下载、production、raw/processed 写入和代码修改仍未批准。
 - StrategyQA 计划将 `official-20210107` 明确为 project label，以 fixed GCS URL、strong ETag token、UTC date 和首次 GET 后 SHA/bytes 联合绑定；ZIP、成员、schema、MIME 和 license 保持未验证。ZIP 缺 license 时只能 `STAGED_LICENSE_BLOCKED`。
 - 智能体 2给出 `APPROVED TO DOCUMENT / PLAN IMPLEMENTATION`，但 held-dirfd 模型仅是 StrategyQA 候选；下一份实施计划必须解决 0775 初始根假设、全 PGID 和三个小流独立上限。未批准代码、测试、Git preflight、网络或数据写入。
+- StrategyQA 固定 transfer/stage helper 经两轮 staged 事后审计。首轮在 75/75 targeted 和 333/333 full 通过后仍因 FD close retry、unknown marker 绑定前读取和 manifest pair 越过 commit point 而 `BLOCKED`。
+- 智能体 1修复所有权转移、marker inode 早拒绝和 pair pre-commit teardown；智能体 1与主智能体分别通过 targeted 79/79 和 full 337/337，无 production 路径、测试临时目录或残留进程。
+- 智能体 2对精确两文件 staged snapshot 给出 `APPROVED TO COMMIT`；已提交 `978ba4dea0792061340d0ec97241caa1efd6d6f2` (`feat(data): add bounded StrategyQA acquisition stage`)。`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` 保持，未执行 HEAD/GET、网络、production、数据写入或真实 Git/NSS/ACL。

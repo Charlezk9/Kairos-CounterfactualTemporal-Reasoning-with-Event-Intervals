@@ -116,6 +116,20 @@ IMPLEMENTATION`. The unique detailed plan is
 preflight, network or data access; the next deliverable is only a precise
 transfer/stage-validator implementation plan.
 
+## StrategyQA acquisition-helper checkpoint
+
+The fixed transfer/stage helper is implemented in commit
+`978ba4dea0792061340d0ec97241caa1efd6d6f2`. After one blocked audit and the
+required transaction-lifecycle remediation, Agent 1 and the main agent each
+passed targeted 79/79 and full 337/337 tests; Agent 2 approved the exact
+two-file snapshot. The detailed implementation and fault evidence are recorded
+only in `phase-01-strategyqa-acquisition-helper.md`.
+
+Production remains blocked by `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`.
+There has been no StrategyQA HEAD/GET, archive, raw/formal stage, schema
+discovery or experiment. Runtime redirect verification and any later source
+request require separate plans and audits.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

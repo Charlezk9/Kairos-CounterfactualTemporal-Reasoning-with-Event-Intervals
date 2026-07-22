@@ -1,6 +1,7 @@
 # Phase 01 StrategyQA Official Source Plan
 
-- status: `SOURCE_PLAN_APPROVED`; implementation and network not approved
+- status: `SOURCE_PLAN_APPROVED`; implementation later completed under a separate gate
+- implementation outcome: see `phase-01-strategyqa-acquisition-helper.md`; network remains unapproved
 - source label: `official-20210107` (project label, not a commit or hash)
 - fixed URL: `https://storage.googleapis.com/ai2i/strategyqa/data/strategyqa_dataset.zip`
 - fixed host: `storage.googleapis.com`

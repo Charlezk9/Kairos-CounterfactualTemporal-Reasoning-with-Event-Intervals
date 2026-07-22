@@ -300,3 +300,12 @@
 - fail-closed decisions: redirects forbidden by `--location --max-redirs 0`; missing license yields staged-only evidence; JSON 64 MiB and all stream/resource limits must be hard gates
 - threat model: GSM8K held-dirfd logic is only a StrategyQA implementation candidate and does not modify MuSiQue policy; the next plan must address pre-open authenticity under 0775 and root/parent/leaf replacements
 - boundary: documentation and one exact implementation plan only; no code, tests, Git preflight, HEAD/GET, network, data paths, dependency changes or GPU
+
+## 2026-07-23 — StrategyQA acquisition-helper audits
+
+- implementation scope: exactly `src/kairos/strategyqa_acquisition.py` and `tests/test_strategyqa_acquisition.py`; synthetic CPU tests only, with zero GPU and all temp/cache paths under `/data0/hk_data/kairos-zx`
+- first staged verdict: `BLOCKED` despite targeted 75/75 and full 333/333; marker recovery could retry an FD after a close error, an unknown different-inode marker was read before ownership rejection, and held manifest-pair FDs lived past the unique transaction commit point
+- remediation: ownership is transferred before close; unknown markers are rejected by lstat/held inode before open/read; rebuilt markers rebind before content reads; guard/final close while the root transaction marker remains and any error takes the outer recovery path
+- final evidence: main-agent targeted 79/79 and full 337/337; cached diff check passed; production marker/stage/formal and test temp paths were absent; no residual process; `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`
+- final verdict: `APPROVED TO COMMIT` the exact two-file snapshot, committed as `978ba4dea0792061340d0ec97241caa1efd6d6f2`
+- boundary: no real URL, redirect test, loopback server, Git/NSS/ACL, production acquisition, download or data write was approved or performed

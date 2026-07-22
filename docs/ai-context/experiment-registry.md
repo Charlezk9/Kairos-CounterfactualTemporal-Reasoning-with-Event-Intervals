@@ -15,6 +15,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-ACQUIRE-20260722` | 2026-07-22 | offline GSM8K acquisition finalization/verification helper | committed as `ca759ac` | 62 acquisition tests; 115/115 passed; fifth complete staged audit approved | none |
 | `DEV-P01-GSM8K-ADAPTER-20260722` | 2026-07-22 | immutable GSM8K source-ledger/canonical-example adapter | committed as `892b486` | targeted 63/63; full 166/166; third staged audit approved after two remediation rounds | none |
 | `DEV-P01-MUSIQUE-PROBE-20260722` | 2026-07-22 | fixed 65,536-byte MuSiQue response-body probe helper; offline synthetic verification only | committed as `cacbcbc` | targeted 92/92; full 258/258; fourth staged audit approved | none |
+| `DEV-P01-STRATEGYQA-ACQUIRE-20260723` | 2026-07-23 | fixed StrategyQA transfer/stage helper; offline synthetic verification only | committed as `978ba4d` | targeted 79/79; full 337/337; second staged audit approved | none |
 
 这些条目不是正式 run，不产生可进入论文的数值；正式模型实验仍为空。
 
@@ -40,6 +41,7 @@ as a source availability result, HTTP observation or paper experiment.
 | ID | Status | Source label | Approved scope | Artifacts |
 |---|---|---|---|---|
 | `PLAN-STRATEGYQA-20260722` | `SOURCE_PLAN_APPROVED` | `official-20210107` | documentation plus exact transfer/stage-validator implementation plan; no code/network/data | none |
+| `GATE-STRATEGYQA-REDIRECT-20260723` | `BLOCKED_RUNTIME_VERIFICATION` | `official-20210107` | helper committed; runtime redirect semantics still require a separate plan and audit before any execution | none |
 
 Planning-gate entries are not acquisition records or model runs.
 
