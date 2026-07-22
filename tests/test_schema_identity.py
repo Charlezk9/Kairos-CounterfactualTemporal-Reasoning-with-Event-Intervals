@@ -11,6 +11,7 @@ from kairos.schema import (
     InternalSplit,
     Relation,
     RelationAnnotation,
+    SourceProvenance,
     TemporalExample,
 )
 
@@ -45,6 +46,71 @@ def valid_payload():
 
 
 class SchemaTests(unittest.TestCase):
+    def test_source_provenance_is_exact_and_round_trips(self):
+        value = {
+            "relative_path": "extracted/source/train.jsonl",
+            "line_number": 7,
+            "source_file_sha256": "a" * 64,
+        }
+        provenance = SourceProvenance.from_dict(value)
+        self.assertEqual(provenance.to_dict(), value)
+        for mutation in (
+            {**value, "extra": 1},
+            {"relative_path": value["relative_path"]},
+        ):
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(ValueError):
+                    SourceProvenance.from_dict(mutation)
+        with self.assertRaises(TypeError):
+            SourceProvenance.from_dict([])
+
+    def test_source_provenance_rejects_invalid_numbers_and_hashes(self):
+        for line_number in (True, 1.0, "1", None):
+            with self.subTest(line_number=line_number):
+                with self.assertRaises(TypeError):
+                    SourceProvenance("source/train.jsonl", line_number, "0" * 64)
+        for line_number in (0, -1):
+            with self.subTest(line_number=line_number):
+                with self.assertRaises(ValueError):
+                    SourceProvenance("source/train.jsonl", line_number, "0" * 64)
+        for digest in (0, None, b"0" * 64):
+            with self.subTest(digest=digest):
+                with self.assertRaises(TypeError):
+                    SourceProvenance("source/train.jsonl", 1, digest)
+        for digest in ("A" * 64, "0" * 63, "g" * 64, ""):
+            with self.subTest(digest=digest):
+                with self.assertRaises(ValueError):
+                    SourceProvenance("source/train.jsonl", 1, digest)
+
+    def test_source_provenance_rejects_noncanonical_paths(self):
+        invalid = (
+            "",
+            "/absolute",
+            "a//b",
+            "./a",
+            "a/../b",
+            "a\\b",
+            "a\nb",
+            "a\x00b",
+            "a\u200bb",
+            "e\u0301/file",
+            "x" * 256,
+            "/".join(["x" * 255] * 17),
+        )
+        for path in invalid:
+            with self.subTest(path=repr(path)[:80]):
+                with self.assertRaises(ValueError):
+                    SourceProvenance(path, 1, "0" * 64)
+        for path in (None, 1, b"source/train.jsonl"):
+            with self.subTest(path=path):
+                with self.assertRaises(TypeError):
+                    SourceProvenance(path, 1, "0" * 64)
+
+    def test_source_provenance_accepts_utf8_boundaries(self):
+        path = "é/" + "界" * 85
+        provenance = SourceProvenance(path, 1, "0" * 64)
+        self.assertEqual(provenance.relative_path, path)
+
     def test_relation_inverse_and_symmetry(self):
         expected = {
             Relation.PRECEDES: Relation.FOLLOWS,

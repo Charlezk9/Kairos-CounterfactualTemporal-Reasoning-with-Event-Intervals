@@ -7,9 +7,35 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 import re
 from typing import Any, Mapping, Optional, Tuple
+import unicodedata
 
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _source_relative_path(value: Any) -> str:
+    if not isinstance(value, str):
+        raise TypeError("source relative_path must be a string")
+    if not value:
+        raise ValueError("source relative_path must be non-empty")
+    if value.startswith("/") or "\\" in value:
+        raise ValueError("source relative_path must be a POSIX relative path")
+    if unicodedata.normalize("NFC", value) != value:
+        raise ValueError("source relative_path must be NFC-normalized")
+    if any(unicodedata.category(character) in {"Cc", "Cf", "Cs"} for character in value):
+        raise ValueError("source relative_path contains a forbidden code point")
+    try:
+        encoded = value.encode("utf-8", errors="strict")
+    except UnicodeEncodeError as error:
+        raise ValueError("source relative_path must be valid UTF-8") from error
+    if len(encoded) > 4096:
+        raise ValueError("source relative_path exceeds 4096 UTF-8 bytes")
+    components = value.split("/")
+    if any(component in {"", ".", ".."} for component in components):
+        raise ValueError("source relative_path contains an invalid component")
+    if any(len(component.encode("utf-8")) > 255 for component in components):
+        raise ValueError("source relative_path component exceeds 255 UTF-8 bytes")
+    return value
 
 
 def _exact_mapping(value: Any, expected: set[str], name: str) -> Mapping[str, Any]:
@@ -254,6 +280,42 @@ class SplitAssignment:
             raise ValueError("official split must be non-empty")
         if self.official.casefold() != "train" and self.internal is not None:
             raise ValueError("only the official train split may receive an internal split")
+
+
+@dataclass(frozen=True)
+class SourceProvenance:
+    relative_path: str
+    line_number: int
+    source_file_sha256: str
+
+    def __post_init__(self) -> None:
+        _source_relative_path(self.relative_path)
+        if isinstance(self.line_number, bool) or not isinstance(self.line_number, int):
+            raise TypeError("source line_number must be an integer")
+        if self.line_number < 1:
+            raise ValueError("source line_number must be at least one")
+        if not isinstance(self.source_file_sha256, str):
+            raise TypeError("source_file_sha256 must be a string")
+        if not _SHA256_RE.fullmatch(self.source_file_sha256):
+            raise ValueError(
+                "source_file_sha256 must be 64 lowercase hexadecimal characters"
+            )
+
+    def to_dict(self) -> Mapping[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "SourceProvenance":
+        value = _exact_mapping(
+            value,
+            {"relative_path", "line_number", "source_file_sha256"},
+            "SourceProvenance",
+        )
+        return cls(
+            relative_path=value["relative_path"],
+            line_number=value["line_number"],
+            source_file_sha256=value["source_file_sha256"],
+        )
 
 
 @dataclass(frozen=True)
