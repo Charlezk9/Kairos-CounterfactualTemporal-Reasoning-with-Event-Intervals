@@ -26,3 +26,30 @@
 - sensitive/large files: none detected
 - known_hosts after remote access: still one verified Ed25519 entry
 - background/GPU work: none
+
+## 2026-07-22 — Phase 01 data-core first post-audit
+
+- verdict: BLOCKED, fixes applied and awaiting re-audit
+- paths/resources: passed; 17 staged files were limited to repository docs/src/tests, with no network, download, GPU, background task, secret, model, data or large artifact
+- Git/SSH: passed; branch, remote, repository-local SSH isolation and the single verified Ed25519 host key were unchanged
+- blocked defects:
+  - yes/no updater treated an unrelated relation query as known;
+  - canonical JSON coerced non-string mapping keys, allowing key collision;
+  - checkpoint omitted the complete reproducible cache/temp environment from its displayed test command
+- remediation: implementation and regression tests updated; checkpoint now records the complete command; full local suite passes 27 tests; final re-audit pending
+
+## 2026-07-22 — Phase 01 data-core second post-audit
+
+- verdict: BLOCKED on documentation only; implementation and safety checks passed
+- verified fixes: unrelated relation queries return `UNKNOWN`; canonical JSON rejects non-string mapping keys; 27/27 tests and regression coverage agree with the checkpoint
+- safety: staged paths, modes, sizes, secret scan, dangerous-operation scan, Git remote, local SSH command and single verified host key all passed
+- remaining defects: displayed `CONDARC` path was incorrect and `CURRENT.next_safe_action` was stale
+- remediation: `CONDARC` now points to `/data0/hk_data/kairos-zx/.condarc`; CURRENT now requests final audit followed by checkpoint commit/push; final re-audit pending
+
+## 2026-07-22 — Phase 01 data-core final post-audit
+
+- verdict: APPROVED TO COMMIT and ordinary non-force push
+- staged scope: 18 repository files under docs/src/tests; no unstaged drift, secrets, dangerous operations, external write paths or large artifacts
+- verification: 27/27 tests, pre-commit hook and cached diff check passed; the documented local Python, `.condarc`, cache and temporary paths exist within the two authorized roots
+- Git/SSH: branch tracking, remote URL, repository-local isolated SSH command and the one-line verified GitHub Ed25519 host key passed
+- restriction: this approval covers the deterministic data-core checkpoint only; real dataset acquisition, adapters, construction statistics and human audit require a new preflight

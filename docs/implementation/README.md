@@ -6,7 +6,7 @@
 
 统一 JSONL 记录包含：来源 ID、dataset/split/revision/SHA256、context/question/answers/answer type、事件字符与 token span、关系两端/标签/marker/provenance、反事实 pair/template/前后关系与答案，以及 explicit/implicit、answer-changing/unchanged、长度和事件数。
 
-关系集合固定为 `precedes`、`follows`、`overlaps`、`contains`、`during`、`unknown`。`unknown` 不进入 relation loss。方向、逆关系和对称性在编码前冻结并由测试覆盖。
+关系集合固定为 `precedes`、`follows`、`overlaps`、`contains`、`during`、`unknown`。`unknown` 不进入 relation loss。阶段 1的方向、逆关系、保守 marker、split 和 UpdateAnswer 规则已冻结在 `../ai-context/decisions.md` 的 D-003，并由测试覆盖。
 
 ## Kairos 流水线
 

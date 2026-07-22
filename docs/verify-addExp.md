@@ -5,7 +5,7 @@
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01，data pipeline planning
+- 当前阶段：Phase 01，deterministic data core implementation
 - 复现性质：independent reimplementation
 - 已完成实验：无
 - 当前结论：尚不能验证论文数值或新增 claim
@@ -20,7 +20,7 @@ restart-safe bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`。�
 
 ## 4. 技术实现路径
 
-待阶段 1–3完成后，根据 `docs/implementation/README.md` 和实际 commit 填写。
+阶段 1已实现第一个开发检查点：严格 JSONL schema、relation inverse、稳定 ID 与 split、唯一显式 marker 抽取、白名单反事实改写、保守 `UpdateAnswer` 和构造漏斗。该版本只支持 D-003 声明的高精度 v0 语义，不是通用事件抽取器。包含嵌套 schema、非字符串 canonical key 拒绝和无关 relation 更新拒绝的 27 项开发单元测试通过；未开始真实数据构造，因此未产生 `VERIFIED` 实验结果。
 
 ## 5. 实验设计与超参数
 
