@@ -73,3 +73,32 @@
 - verdict: APPROVED TO COMMIT SOURCE PLAN and ordinary non-force push
 - verified: five staged documentation files, hook/diff checks, fixed source revisions and licenses, curl 7.68-compatible bounded options, archive/path/type/member/expanded-size gates, 8 GiB budget, official-host allowlists and failure-without-mirror policy
 - scope restriction: this is not download approval; next action is limited to agent 1 implementing and testing the standard-library archive validator inside the repository
+
+## 2026-07-22 — Phase 01 archive-validator first staged audit
+
+- verdict: BLOCKED; validator must not be committed and no real download is approved
+- passed: no `extractall`; path normalization, duplicate/prefix, special member, encryption, declared/actual byte, member digest and final-file `O_EXCL` controls; 36/36 then-current tests
+- blocked defects:
+  - ZIP/TAR metadata was fully materialized before the 200,000-member limit and repeatedly loaded;
+  - an in-place rewrite after the first archive hash could mix an old reported SHA with new inspected content;
+  - source/parent symlinks were followed and destination path operations allowed parent replacement races
+- remediation: EOCD and bounded TAR metadata preflights, before/after SHA+fstat checks, root-anchored no-follow dirfds and nine additional regressions implemented; 45/45 tests pass; re-audit pending
+
+## 2026-07-22 — Phase 01 archive-validator second staged audit
+
+- verdict: BLOCKED; validator must not be committed and no real download is approved
+- passed: the first audit's metadata-materialization, in-place mutation, symlink and destination-parent race findings were remediated; 45/45 then-current tests passed
+- blocked defects:
+  - ZIP preflight trusted the EOCD entry count, so a forged smaller count could allow a larger central directory to be materialized;
+  - ZIP64 rejection did not cover a local-header `0x0001` extra field.
+- remediation: every central entry is now parsed with a `max_members + 1` immediate failure, the actual count and byte range must exactly match EOCD, central and local headers are cross-checked, and ZIP64/multi-disk sentinels plus ZIP64 extra fields are rejected. Forged-count, malformed-range and `force_zip64` regressions raise before `ZipFile`; 47/47 tests pass; final re-audit pending.
+
+## 2026-07-22 — Phase 01 archive-validator third staged audit
+
+- verdict: BLOCKED; validator must not be committed and no real download is approved
+- passed: forged EOCD count and local ZIP64 extra regressions now fail before `ZipFile`; 47/47 tests, hook/diff checks, secret/large-file/dangerous-command scans, no-unstaged-drift check and project-local Git/SSH checks passed
+- blocked defects:
+  - preflight allowed unaccounted bytes between the central directory end and EOCD, so a one-byte gap still reached `ZipFile` and could also hide unsupported ZIP metadata;
+  - local header comparison covered only filename/ZIP64, not version-needed, flags, compression, CRC32 and compressed/uncompressed sizes; mutated local values were accepted before materialization.
+- required remediation: require the central directory to end exactly at EOCD under the project's no-digital-signature/no-ZIP64 policy; compare all relevant central/local fields and conservatively reject data descriptors unless fully verified; add pre-`ZipFile` regressions for each mismatch and request another full staged audit.
+- remediation implemented: central end must equal EOCD offset; version-needed, flags, compression, CRC32 and both sizes are compared; encryption and bit-3 data descriptors are rejected in either header; gap and mismatch regressions fail before `ZipFile`. The full repository suite now has 49 tests; another staged audit is pending.

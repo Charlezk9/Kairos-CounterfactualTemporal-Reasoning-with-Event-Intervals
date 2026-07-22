@@ -22,6 +22,8 @@ restart-safe bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`。�
 
 阶段 1已实现第一个开发检查点：严格 JSONL schema、relation inverse、稳定 ID 与 split、唯一显式 marker 抽取、白名单反事实改写、保守 `UpdateAnswer` 和构造漏斗。该版本只支持 D-003 声明的高精度 v0 语义，不是通用事件抽取器。包含嵌套 schema、非字符串 canonical key 拒绝和无关 relation 更新拒绝的 27 项开发单元测试通过；未开始真实数据构造，因此未产生 `VERIFIED` 实验结果。
 
+数据获取前置实现已增加不使用 `extractall`/`getmembers` 的 ZIP/TAR/TAR.GZ 前置元数据门禁、全量检查与 dirfd 流式提取。三轮审计发现的无界元数据、原地改写、symlink/竞态、伪造 EOCD count、ZIP64、central-to-EOCD gap 与 central/local header 不一致均已增加前置门禁和回归测试。仓库全套 49 项开发测试通过，但完整 staged 复审与真实数据获取尚未完成，因此不产生 `VERIFIED` 实验证据。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

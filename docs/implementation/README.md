@@ -26,6 +26,10 @@
 
 正式实验只能从 clean commit 启动；dirty-tree smoke test 标为 `development-only`，不能进入论文结果。
 
+## Raw archive safety
+
+`kairos.archive_safety` 为 ZIP/TAR/TAR.GZ 提供标准库全量检查与新目录流式提取。它在标准库物化 archive 前逐条有界解析 ZIP 中心目录，要求中心目录紧邻 EOCD，且 EOCD 数量和字节范围与实际条目精确一致；central/local 的 version-needed、flags、compression、CRC 和大小逐字段交叉核验，data descriptor、ZIP64 与 multi-disk 均保守拒绝。TAR header/PAX/GNU metadata 也在物化前受成员与字节上限约束。模块拒绝 traversal、Windows/反斜杠路径、异常/超长/重复/前缀冲突成员、链接、设备、FIFO、sparse、加密 ZIP 和超预算 archive。源与目标必须为绝对无 symlink 路径；同一源 FD 在检查/提取前后重算 SHA/fstat，目标树使用 root-anchored dirfd 和 `O_NOFOLLOW|O_EXCL`。该模块不使用 `extractall`/`getmembers`，不保留上游 owner/permission，不覆盖已有路径。它只处理已经过 host/下载字节门禁的本地 archive，不负责网络获取或递归扫描嵌套 archive。
+
 ## 首批测试
 
 - schema 缺字段和非法 relation 拒绝。

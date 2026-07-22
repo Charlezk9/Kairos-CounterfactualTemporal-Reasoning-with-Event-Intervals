@@ -28,3 +28,12 @@
 - 只读核对六个官方数据源、HEAD revision、许可与公开 split；发现论文未发布原始四数据集的 temporal subset IDs，已在 D-004 冻结 independent reconstruction 的可识别性边界。
 - 未下载数据；已起草 0-GPU、8-GiB 硬限、顺序下载和 archive traversal 检查的获取门禁，等待智能体 2审核。
 - 智能体 2核对数据源事实后首次阻止下载：原门禁未覆盖 archive 特殊 entry、展开字节、Windows 路径和裸 `curl` 解析到根目录外 Anaconda 的风险。已将标准库 validator、`/usr/bin/curl`、`.part`、host allowlist、archive bomb 限制与新空目录门禁写入检查点，等待复审。
+- 数据源与采集门禁以 `b6491ec501ad18115bf5d3588cb250e01891d1e2` 提交并普通推送；该批准不包含下载。
+- 智能体 1实现标准库 archive validator 及恶意 TAR/ZIP 回归测试；主智能体使用局部 Python 独立复跑 36/36 测试通过。尚未下载真实数据，等待 staged-diff 安全审计。
+- 智能体 2首次 validator staged audit 为 `BLOCKED`：发现 ZIP/TAR 元数据在上限前无界物化、首次 SHA 后原地改写可混合新旧证据、以及源/目标父路径 symlink 与竞态逃逸。
+- 智能体 1改为 ZIP EOCD 前置门禁、TAR 有界 header/metadata 扫描、检查/提取前后 SHA+fstat 复核和 root-anchored dirfd/O_NOFOLLOW 操作；主智能体独立复跑 45/45 测试通过，等待复审。
+- 智能体 2第二次 validator staged audit 仍为 `BLOCKED`：EOCD 声明的条目数仍可被伪造以绕过实际中心目录数量门禁，且 local ZIP64 extra 未完整拒绝。
+- 智能体 1新增逐条有界中心目录解析、EOCD 数量/字节范围精确匹配、central/local header 交叉核验以及 ZIP64/multi-disk 拒绝；主智能体独立复跑 47/47 测试通过，等待最终复审。
+- 智能体 2第三次 validator staged audit 确认 forged-count 与 local ZIP64 已修复，但仍以可复现反例阻止提交：central directory 与 EOCD 之间可插入未计量 gap，local flags/compression/CRC/sizes 可与 central 不一致而通过前置门禁。
+- 上述两个缺陷已交由智能体 1修复；修复及新的 pre-ZipFile 回归测试获得智能体 2批准前，不提交且不下载。
+- 智能体 1已要求 central directory 紧邻 EOCD，逐字段比较 central/local version-needed、flags、compression、CRC 和大小，并保守拒绝 data descriptor；EOCD gap 和各字段不一致均有 pre-ZipFile 回归。主智能体将独立复跑 49 项测试后请求完整 staged 复审。

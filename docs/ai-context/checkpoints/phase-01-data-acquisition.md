@@ -29,7 +29,7 @@
 4. `/data0` 可用空间小于 120 GiB 立即停止；本次新增磁盘硬限 8 GiB。每次获取前按当前 raw 目录实际字节重算 remaining bytes，下载与声明展开字节任一超过余额即停止。archive 成员数上限 200,000。
 5. 只使用 `/usr/bin/curl` 7.68.0，不使用 PATH 中的 Anaconda curl。命令必须含该版本支持的 `--proto '=https' --proto-redir '=https' --fail --location --retry 3 --retry-connrefused --retry-delay 2 --retry-max-time 120 --connect-timeout 20 --max-time 1800 --max-filesize <remaining-bytes>`，顺序前台下载到新的 `*.part`，不覆盖任何已有路径。保存 effective URL，只允许冻结源的官方 host：GitHub `github.com`/`codeload.github.com`，StrategyQA `storage.googleapis.com`，MuSiQue `drive.google.com`/`drive.usercontent.google.com`，2Wiki `www.dropbox.com`/`dl.dropboxusercontent.com`。
 6. 下载后先检查 effective host、Content-Type/实际 archive 格式、SHA256 和成员列表；任一失败则保留 `.part` 作为证据并停止，不改最终名。全部验证通过且最终路径不存在时，才将 `.part` 改为 immutable archive 名。
-7. validator 必须拒绝绝对路径、`..`/`.`/空异常 component、Windows drive prefix、反斜杠和 NUL；只允许普通文件与目录，拒绝 symlink、hardlink、block/char device、FIFO 与其他特殊类型。解压前汇总成员数和声明展开总字节；只解压到刚创建的空 `extracted/`，失败不覆盖或清理旧目录。tar 等价操作必须禁止保留 owner/permission。
+7. validator 必须拒绝绝对路径、`..`/`.`/空异常 component、Windows drive prefix、反斜杠和 NUL；只允许普通文件与目录，拒绝 symlink、hardlink、block/char device、FIFO 与其他特殊类型。ZIP 必须在构造 `ZipFile` 前预检 EOCD/中心目录；TAR 必须先有界扫描 header/PAX/GNU metadata，不得调用 `getmembers`。解压前汇总成员数、metadata 与声明展开总字节；源与目标路径必须为绝对且全链无 symlink，使用根锚定 dirfd/相对 `O_NOFOLLOW|O_EXCL` 操作。只解压到刚创建的空 `extracted/`，失败保留 partial 证据且不覆盖或清理旧目录。仅当提取成功后存在独立的 completion manifest 时，adapter 才可消费该目录。禁止保留上游 owner/permission。
 8. 不执行任何上游代码、`download_data.sh`、`gdown` 或交互流程。下载后智能体 2复核实际写入集、容量、残留进程和 manifest。
 
 MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 10–20 秒内完成 HEAD 请求，故 availability/size 为 `UNVERIFIED`。执行时允许对 D-004 已冻结的官方 URL 做有界前台下载；若不可达、超出预算、HTTP 失败、需要交互、返回 HTML/登录页或跳转非允许 host，立即标记该源 `BLOCKED`。禁止静默改用第三方镜像或旧版 archive。
@@ -39,3 +39,14 @@ MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 1
 - 每个 source 的 immutable archive/snapshot、`extracted/`、upstream LICENSE/README 和 `SHA256SUMS`。
 - 一份不含 raw records 的仓库级 source manifest/checkpoint 摘要。
 - 仅在检查真实文件后冻结 D-005（实际 split/schema/adapter 决定）。
+
+## Validator implementation checkpoint
+
+- source plan commit: `b6491ec501ad18115bf5d3588cb250e01891d1e2`
+- implementation: `src/kairos/archive_safety.py`
+- APIs: `inspect_archive` / `safe_extract` / `normalize_member_path`
+- supported formats: ZIP, TAR, TAR.GZ
+- behavior: ZIP EOCD and every central/local header are bounded and cross-checked before `ZipFile`; the central directory must end exactly at EOCD, actual entry count and byte range must match EOCD, central/local version-needed, flags, compression, CRC and sizes must agree, and data descriptors, ZIP64 and multi-disk are rejected. TAR header/extended-metadata limits likewise run before standard-library archive materialization. Full SHA/member/content inspection, path/type/member/metadata/expanded-byte gates, absolute symlink-free source/destination paths, archive SHA/fstat checks before/after inspection and after extraction, and root-anchored dirfds with streamed `O_NOFOLLOW|O_EXCL` writes are mandatory. Output modes are normalized to 0755/0644 and partial extraction is retained on failure.
+- verification: 49/49 repository unit tests passed with the project-local Python and all cache/temp variables directed to `/data0/hk_data/kairos-zx`
+- residual scope: nested archives are not recursively inspected; the module does not claim to resist a malicious external process concurrently replacing destination parent directories
+- status: first staged audit was `BLOCKED` on unbounded metadata, in-place source mutation and symlink/parent-race defects. Second staged audit was `BLOCKED` because a forged EOCD count could hide additional central entries and local ZIP64 metadata was incompletely rejected. Third staged audit verified those fixes but remained `BLOCKED` on central-to-EOCD gaps and incomplete local-header field comparison. All three remediation sets and regressions are now implemented; another full staged re-audit is pending. No real data has been downloaded.
