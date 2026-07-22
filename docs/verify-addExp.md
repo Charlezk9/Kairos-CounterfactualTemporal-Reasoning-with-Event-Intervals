@@ -62,6 +62,8 @@ immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7
 
 MuSiQue 固定官方 Drive view URL 的 65,536-byte response-body probe helper 已以 commit `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2` 实现。真实 prlimit/procfd、whole-PGID cleanup、严格字节三方一致、零跳转、三态离线验证和 publication fatal fail-close 均有合成回归；最终 targeted 92/92、full 258/258 并通过四轮边界审计。这只是尚未执行的获取前置组件：未产生 MuSiQue 数据、样本统计、实验 run 或论文指标。当前 0775 trusted-ancestor 门禁会在联网前主动阻止 production execute，后续不得通过放宽策略绕过。
 
+执行策略复核已将 MuSiQue 获取工作项标为 `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`：固定路径的 0775 祖先在 stage 创建和网络前即被拒绝。该状态不是 ProbeStatus、HTTP 失败或 Drive 不可达证据；production probe 从未运行，MuSiQue 的 archive 与实验状态仍未验证。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

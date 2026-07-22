@@ -100,6 +100,13 @@ This checkpoint does not authorize production `execute`, network, real curl or
 Git preflight, probe-stage creation, or MuSiQue raw/processed access. No
 MuSiQue body was acquired by the implementation or audit work.
 
+The subsequent execution-policy review classified MuSiQue acquisition as
+`BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`: every allowed fixed path contains
+a live 0775 ancestor that the audited helper rejects before stage creation or
+network. This classification is local policy evidence only, not a probe result
+or a claim about Drive availability. Agent 2 approved moving to a StrategyQA
+source-plan review; no source request or write is included in that approval.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

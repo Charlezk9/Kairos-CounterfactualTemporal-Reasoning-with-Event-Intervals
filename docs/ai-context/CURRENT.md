@@ -1,16 +1,16 @@
 # Current State
 
-- updated_at: 2026-07-22 21:44:20 CST
+- updated_at: 2026-07-22 21:53:26 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2
-- last_verified_commit: cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2
+- git_head: d769d183083e8d126395b25f5299355bbae6d797
+- last_verified_commit: d769d183083e8d126395b25f5299355bbae6d797
 - last_completed_checkpoint: checkpoints/phase-01-musique-probe-helper.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue archive availability, size, MIME, SHA256, tree and schema remain unverified. The audited bounded probe helper intentionally rejects the current 0775 trusted ancestors, so production execute would fail closed before network access; its trust policy must not be silently weakened.
-- next_safe_action: 只由智能体 1提交 MuSiQue probe 执行策略计划，解释如何在不放宽 trusted-ancestor 门禁、不修改现有 0775 共享祖先且不越出两个允许根目录的前提下处理该阻塞；智能体 2批准独立执行单前，不运行 production execute、真实 Git preflight/curl/network，也不创建或读取 MuSiQue stage/raw/processed。
+- blockers: MuSiQue acquisition is `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`: fixed production traversal reaches 0775 ancestors and fails before stage creation or network. This is not a ProbeStatus or remote-source failure; availability, size, MIME, SHA256, tree and schema remain unverified.
+- next_safe_action: 只由智能体 1提交 StrategyQA 官方 GCS source 获取策略计划，固定 URL/host、`official-20210107` revision 表述、预算、archive 验证、immutable publication 和 trusted-ancestor 冲突处理；智能体 2批准前不做 HEAD/GET、联网、下载、production、raw/processed 写入或代码修改。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`

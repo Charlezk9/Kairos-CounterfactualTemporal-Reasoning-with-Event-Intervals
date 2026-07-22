@@ -72,3 +72,19 @@ current `/data0`, `/data0/hk_data` and project data-root ancestors are mode
 policy must not be weakened merely to make the probe run. The next step is a
 separate Agent 1 execution-policy plan and Agent 2 review; until then there is
 no authorization to create a probe stage or send a request.
+
+## Policy disposition
+
+Agent 1 and Agent 2 independently confirmed the fixed absolute traversal and
+the live mode table: `/data0`, `/data0/hk_data` and
+`/data0/hk_data/kairos-zx` are all `0775`. A `/home` relocation is neither a
+fixed-layout option nor a solution because `zx-tmp` and `kairos` are also
+`0775`. A private child, umask or environment variable cannot change an unsafe
+ancestor already rejected by the helper.
+
+The acquisition work item is therefore `BLOCKED_POLICY` with reason
+`TRUSTED_ANCESTOR_CONFLICT`. No production probe ran, so this is not a
+`ProbeStatus.BLOCKED`, an HTTP observation or evidence that the official Drive
+object is unavailable. Resolving it would require explicit user authorization
+and a new threat-model review; it may not be handled by silent chmod, root
+relocation, group/ACL allowlisting or weakening the trusted-chain predicate.

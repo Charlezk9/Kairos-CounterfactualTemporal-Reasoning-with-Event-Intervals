@@ -26,6 +26,15 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 
 Acquisition records track source provenance and file integrity only. They are not model runs and do not contain paper metrics.
 
+## Acquisition policy blocks
+
+| ID | Status | Source revision | Reason | Evidence | Artifacts |
+|---|---|---|---|---|---|
+| `POLICY-MUSIQUE-20260722` | `BLOCKED_POLICY` | `922ac98f19a201998dbdae6d7f2887a5258dbdeb` | `TRUSTED_ANCESTOR_CONFLICT` | fixed path contains 0775 ancestors rejected before stage/network; Agent 2 approved classification | none |
+
+This table records local execution-policy state only. It must not be interpreted
+as a source availability result, HTTP observation or paper experiment.
+
 ## Processed data artifacts
 
 | ID | Status | Dataset revision | Execution commit | Counts | Artifact binding | Path |

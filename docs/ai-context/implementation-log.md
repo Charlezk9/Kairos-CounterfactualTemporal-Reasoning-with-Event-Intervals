@@ -81,3 +81,5 @@
 - 固定 Drive view URL 的唯一 no-follow/no-body HEAD 在连接阶段 curl error 28；未收到 HTTP response。可达性、size/MIME/hash/tree/schema 均保持 `UNVERIFIED`，未下载或创建 MuSiQue 工件。
 - 智能体 1随后实现固定 65,536-byte MuSiQue response-body probe helper；四轮 staged 边界审计依次补齐真实 prlimit/procfd、whole-PGID、selector/pipe、双 fsync、三态和 publication fatal fail-close 语义。智能体 1最终 targeted 92/92、full 258/258，主智能体独立 full 258/258；智能体 2给出 `APPROVED TO COMMIT`。
 - 精确两文件实现提交为 `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2`。本工作未执行 production、真实 curl/Git preflight、网络或 MuSiQue 数据访问；当前 0775 trusted-ancestor 门禁会在联网前 fail closed，等待独立执行策略审查。
+- 智能体 1与智能体 2只读复核 fixed root、调用链和 `namei` mode 后确认：不 chmod、不改代码/信任策略且不扩大允许根时不存在合规执行路径。MuSiQue acquisition 记为 `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`，不是 ProbeStatus 或远端不可达证据；未创建 stage、未发请求。
+- 智能体 2批准下一步仅编写 StrategyQA 官方 GCS source 获取策略计划；HEAD/GET、下载、production、raw/processed 写入和代码修改仍未批准。

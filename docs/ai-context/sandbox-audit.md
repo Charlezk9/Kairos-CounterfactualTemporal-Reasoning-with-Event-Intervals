@@ -284,3 +284,11 @@
 - durable failure rule: a recovery result is successful only after required file/stage fsync and terminal rebinding; `fail-close unconfirmed` is fatal and requires manual isolation, never automatic continuation based on a later standalone verifier result
 - not approved or performed: production execute, network, real curl/Git preflight, MuSiQue stage/raw/processed access, GPU or dependency changes
 - remaining blocker: current 0775 trusted ancestors cause deliberate pre-network fail-closed behavior; the trust policy may not be weakened without a separate plan and audit
+
+## 2026-07-22 — MuSiQue execution-policy disposition
+
+- verdict: `APPROVED TO DOCUMENT POLICY BLOCK/PROCEED TO PLAN NEXT SOURCE`
+- evidence: fixed `/data0/hk_data/kairos-zx` traversal calls the trusted-directory predicate from `/`; `/data0`, `/data0/hk_data` and the project root are 0775, and the project root also fails the owned-directory predicate
+- classification: `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`, not `ProbeStatus.BLOCKED`, HTTP failure or remote unavailability; no stage, Git preflight, curl or network was run
+- prohibited resolution: no silent chmod, root relocation, group/ACL allowlist, namespace change or weakening of the trusted-chain threat model
+- approved next scope: Agent 1 may draft only the StrategyQA official-source plan; all network, production, data writes and code changes require a new Agent 2 approval
