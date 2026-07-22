@@ -87,6 +87,19 @@ MuSiQue Google Drive 和 2Wiki Dropbox 的官方 archive 在预检时未能于 1
 
 The approved download scope ended with this source. MuSiQue, StrategyQA, 2Wiki, TORQUE and TimeQA remain not acquired; no mirror or second run is authorized by this checkpoint.
 
+## MuSiQue bounded probe helper
+
+The fixed 65,536-byte response-body probe helper was implemented and passed
+four rounds of boundary remediation before the exact two-file snapshot received
+`APPROVED TO COMMIT` as commit
+`cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2`. Its complete protocol, verification
+evidence, fatal durability semantics and unresolved 0775 trusted-ancestor gate
+are recorded in `phase-01-musique-probe-helper.md`.
+
+This checkpoint does not authorize production `execute`, network, real curl or
+Git preflight, probe-stage creation, or MuSiQue raw/processed access. No
+MuSiQue body was acquired by the implementation or audit work.
+
 ## GSM8K D-005 discovery and freeze
 
 - status: `COMPLETE`; D-005 is `FROZEN BEFORE IMPLEMENTATION`

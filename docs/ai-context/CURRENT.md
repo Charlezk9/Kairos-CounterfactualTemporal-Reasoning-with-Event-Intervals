@@ -1,22 +1,23 @@
 # Current State
 
-- updated_at: 2026-07-22 19:55:17 CST
+- updated_at: 2026-07-22 21:44:20 CST
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 79b56bca305272525ffffb658bb8ffeaa9cc6137
-- last_verified_commit: 79b56bca305272525ffffb658bb8ffeaa9cc6137
-- last_completed_checkpoint: checkpoints/phase-01-musique-discovery.md
+- git_head: cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2
+- last_verified_commit: cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2
+- last_completed_checkpoint: checkpoints/phase-01-musique-probe-helper.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue official metadata is documented, but the fixed Drive object returned no HTTP response before curl error 28; archive availability, size, MIME, SHA256, tree, schema and acquisition implementation remain unverified.
-- next_safe_action: 只由智能体 1提交 MuSiQue 单次有界 acquisition/probe 方案，明确官方 fixed URL、允许 authority、字节/时间/磁盘硬上限、stage absent、HTTP 观测与失败保留；智能体 2重新批准前不发起网络请求、不下载、不创建 MuSiQue raw/processed、不修改代码。
+- blockers: MuSiQue archive availability, size, MIME, SHA256, tree and schema remain unverified. The audited bounded probe helper intentionally rejects the current 0775 trusted ancestors, so production execute would fail closed before network access; its trust policy must not be silently weakened.
+- next_safe_action: 只由智能体 1提交 MuSiQue probe 执行策略计划，解释如何在不放宽 trusted-ancestor 门禁、不修改现有 0775 共享祖先且不越出两个允许根目录的前提下处理该阻塞；智能体 2批准独立执行单前，不运行 production execute、真实 Git preflight/curl/network，也不创建或读取 MuSiQue stage/raw/processed。
 - required_reading:
   - `checkpoints/phase-01-data-core.md`
   - `checkpoints/phase-01-data-acquisition.md`
   - `checkpoints/phase-01-gsm8k-adapter.md`
   - `checkpoints/phase-01-gsm8k-conversion.md`
   - `checkpoints/phase-01-musique-discovery.md`
+  - `checkpoints/phase-01-musique-probe-helper.md`
   - `decisions.md`
   - `../implementation/README.md`
   - `../experiments/README.md`

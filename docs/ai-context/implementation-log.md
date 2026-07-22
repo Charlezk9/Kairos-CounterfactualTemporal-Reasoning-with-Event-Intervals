@@ -79,3 +79,5 @@
 - 智能体 1提交 MuSiQue 单源 discovery 计划；智能体 2分别批准仓库内论文只读核对和仅官方 GitHub/ACL/Drive HEAD 的 metadata discovery，明确禁止数据 body、Range、clone、写文件和第三方镜像。
 - 官方 metadata 确认 fixed commit `922ac98f...`、CC BY 4.0、Drive object ID、MuSiQue-Ans/Full train/dev/test、dev-as-validation、官方 answer/support F1、24,814 条 split 规模和 seed single-hop leakage 门禁。Kairos 的 418 条 temporal subset 仍不可识别。
 - 固定 Drive view URL 的唯一 no-follow/no-body HEAD 在连接阶段 curl error 28；未收到 HTTP response。可达性、size/MIME/hash/tree/schema 均保持 `UNVERIFIED`，未下载或创建 MuSiQue 工件。
+- 智能体 1随后实现固定 65,536-byte MuSiQue response-body probe helper；四轮 staged 边界审计依次补齐真实 prlimit/procfd、whole-PGID、selector/pipe、双 fsync、三态和 publication fatal fail-close 语义。智能体 1最终 targeted 92/92、full 258/258，主智能体独立 full 258/258；智能体 2给出 `APPROVED TO COMMIT`。
+- 精确两文件实现提交为 `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2`。本工作未执行 production、真实 curl/Git preflight、网络或 MuSiQue 数据访问；当前 0775 trusted-ancestor 门禁会在联网前 fail closed，等待独立执行策略审查。

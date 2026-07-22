@@ -60,6 +60,8 @@ immutable GSM8K source adapter 已以 commit `892b486b6bfb522de0aae4a675b651baf7
 
 随后从 clean checkpoint commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 完成唯一一次 production prepare 和唯一一次 offline verify，二者均 exit 0 且 canonical manifest 一致。工件 `PROC-P01-GSM8K-20260722` 已通过智能体 2事后边界审计；它验证数据转换可追溯性，不是论文模型实验。
 
+MuSiQue 固定官方 Drive view URL 的 65,536-byte response-body probe helper 已以 commit `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2` 实现。真实 prlimit/procfd、whole-PGID cleanup、严格字节三方一致、零跳转、三态离线验证和 publication fatal fail-close 均有合成回归；最终 targeted 92/92、full 258/258 并通过四轮边界审计。这只是尚未执行的获取前置组件：未产生 MuSiQue 数据、样本统计、实验 run 或论文指标。当前 0775 trusted-ancestor 门禁会在联网前主动阻止 production execute，后续不得通过放宽策略绕过。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

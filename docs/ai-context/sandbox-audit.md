@@ -275,3 +275,12 @@
 - Drive observation: one no-follow/no-body HEAD ended with curl error 28 and no HTTP response; a downstream `sed` masked the pipeline status, so redirect/MIME/size/availability remain `UNVERIFIED`
 - documentation verdict: `APPROVED TO DOCUMENT DISCOVERY`; no run ID, raw/processed artifact, SHA256, schema or download authorization may be inferred
 - boundary: next action is only an Agent 1 bounded acquisition/probe plan followed by a fresh Agent 2 review; no network retry, download, extraction, implementation or experiment is approved
+
+## 2026-07-22 — MuSiQue bounded probe implementation audit
+
+- final verdict: `APPROVED TO COMMIT` for exactly `src/kairos/musique_probe.py` and `tests/test_musique_probe.py`; implementation commit `cacbcbcc504ebfcb77c1e6329edc69f05de9a7e2`
+- audit history: four staged reviews blocked unbounded pipe waits, incomplete process-group cleanup, publication durability ambiguity, incorrect offline tri-state classification and resource-lifecycle gaps before final approval
+- final evidence: Agent 1 targeted 92/92 and full 258/258; main-agent full 258/258 in 10.427 seconds; cached diff check and pre-commit hook passed; synthetic owned descendants were reaped and no unknown process was touched
+- durable failure rule: a recovery result is successful only after required file/stage fsync and terminal rebinding; `fail-close unconfirmed` is fatal and requires manual isolation, never automatic continuation based on a later standalone verifier result
+- not approved or performed: production execute, network, real curl/Git preflight, MuSiQue stage/raw/processed access, GPU or dependency changes
+- remaining blocker: current 0775 trusted ancestors cause deliberate pre-network fail-closed behavior; the trust policy may not be weakened without a separate plan and audit
