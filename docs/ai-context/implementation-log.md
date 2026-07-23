@@ -173,3 +173,10 @@
 - prediction artifact 全量发布并通过 fresh CPU/offline replay：3 parsed、986 parse errors、总生成 8,998 tokens。metrics artifact 随后发布并由另一进程重放，strict normalized EM/token F1 均为 0.0%。
 - 只聚合错误类型、不打印响应的审计发现：966 个 terminal JSON value 非 string，18 个违反 terminal-line 约束，2 个 invalid JSON；0 条命中 128-token 上限，920 条生成不超过 16 tokens。失败主要是冻结格式不遵循，不是 max-token 截断。
 - 主结果不放宽 parser、不重跑覆盖。未来 scalar-coercion 只能作为明确的 post-hoc sensitivity，不能替换 strict primary；完整身份和 SHA 见 registry/checkpoint。
+
+## 2026-07-23 — TimeQA-Hard CoT formal baseline
+
+- clean `50c6456...` 资源门禁后，仅用 physical GPU 4 运行 989 条 CoT greedy（seed 13、batch 1、`max_new_tokens=512`、完整 context、不截断）。用时 9,262.608s，峰值 GPU bytes 20,210,055,680，结束后 GPU 释放。
+- prediction artifact 全量发布并经 fresh replay：20 parsed、969 parse errors、输入 603--24,597 tokens、总生成 226,010 tokens。metrics 双重 replay 得 strict EM/token F1 均 0.505561%。
+- 聚合错误为 907 non-string JSON objects、59 terminal-line violations、3 invalid JSON；17 条命中 512-token 上限。无值/样本输出的 whitelist audit 发现 907 objects 均无 `answer/final_answer/FINAL_ANSWER` 字段。
+- 因此不从 test raw outputs 设计 object-unwrapping parser，post-hoc sensitivity 暂缓。CoT 只比 Direct 高 0.506 pp，且两者都属于 strict-format failure；不作显著性或时间推理能力结论。

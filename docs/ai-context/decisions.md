@@ -213,3 +213,11 @@
 - Artifact v2：正式目录 exact 包含 `config.json`、`predictions.jsonl`、`generation-evidence.jsonl` 和最后发布的 `manifest.json`。Evidence 记录 raw response、parse status 与 token counts；它是 data-bearing 私有工件，不回显、不进入 Git。旧 v1 development contract 被 v2 在首次 production publication 前替代。
 - Metrics：派生指标不得写回冻结的 prediction 目录，固定发布到 `artifacts/derived-metrics/<run-id>`，只含 canonical `metrics.json` 和 manifest-last `manifest.json`。发布前后必须重放 prediction/source/aggregation，绑定 aggregation commit 和 prediction 的四个 SHA；offline verifier 必须重新计算指标。
 - 当前证据：首个正式 TORQUE Direct run 的完整身份、指标与 SHA 唯一登记在 `checkpoints/phase-03-torque-direct-baseline.md` 和 experiment registry。Prediction 与 metrics artifact 均通过独立 replay，状态为 `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`。
+
+## D-019：TimeQA strict primary 与 post-hoc recovery 边界
+
+- 状态：`FROZEN AFTER PRIMARY RUNS / NO SENSITIVITY IMPLEMENTED`。
+- Primary：Direct/CoT 均继续使用预先冻结的 terminal JSON string parser；parse failure 使用固定 sentinel 计错。不得用事后恢复值覆盖、重命名或删除 strict primary。
+- 已观察结构：Direct/CoT 分别有 966/907 个可解析 terminal JSON object，而非要求的 string。仅做不输出值/未知键名的结构计数：Direct 只有 7 个 object 含唯一可用 `answer` string，CoT 的 907 个没有 `answer/final_answer/FINAL_ANSWER` 字段；其余结构不通过白名单。
+- 决定：不读取 test raw object keys/values来设计 dataset-specific unwrapping，也不采用任意 first-value/recursive/stringification 规则。这样的规则会在观察测试输出后引入选择自由度且不可解释。未来若有训练外的预先定义 parser 或独立 validation 证据，可新登记 post-hoc sensitivity；当前不实现。
+- 证据：strict run、错误类别、上限命中和工件 SHA 见 `checkpoints/phase-03-timeqa-direct-baseline.md`、`checkpoints/phase-03-timeqa-cot-baseline.md` 与 registry。

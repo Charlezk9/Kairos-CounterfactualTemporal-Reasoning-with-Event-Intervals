@@ -124,7 +124,7 @@ Prompt-only Direct 与 CoT 正式 run 均已完成，并通过 immutable predict
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
-TORQUE Direct/CoT 与 TimeQA-Hard Direct 已完成正式迁移评测。两数据集 fixed official source 已进入本地 staging：
+TORQUE Direct/CoT 与 TimeQA-Hard Direct/CoT 已完成正式迁移评测。两数据集 fixed official source 已进入本地 staging：
 
 - TORQUE `ab27019c...`：archive SHA256 `7284c675f0cf21ddb1272c31919d4453d2fb53a426e88b46ad6a9a0fd9030cd0`；public dev 145 passages/1,483 answer-bearing QA，dev SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`。test 无 answer，不使用。
 - TimeQA `38b05989...`：archive SHA256 `f0df52a31e9d4bb0d5b7577d9e0131740bd017d2aad1e9b4bee7756bfecdfd07`；`human_test.hard.json` 为 989 条 JSONL，SHA256 `0318963bb2af931143be50ca24402d03c075c4b5a4898fda9bf4d5b2f0c6c188`。
@@ -150,8 +150,11 @@ TimeQA-Hard strict primary 结果如下：
 | Status | Method | Dataset/split | N | Seed | Normalized EM | Token F1 | Parse error | Run / commit |
 |---|---|---|---:|---:|---:|---:|---:|---|
 | `VERIFIED / SINGLE RUN / FORMAT FAILURE` | Qwen2.5-7B Direct greedy | TimeQA `human_test.hard` | 989 | 13 | 0.000 | 0.000 | 986/989 (99.697%) | `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907` / `709f712...` |
+| `VERIFIED / SINGLE RUN / FORMAT FAILURE` | Qwen2.5-7B CoT greedy | TimeQA `human_test.hard` | 989 | 13 | 0.506 | 0.506 | 969/989 (97.978%) | `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14` / `50c6456...` |
 
 该 run 使用完整 32,768 context，输入最大 24,584 tokens；没有样本命中 128-token 生成上限。错误聚合为 966 个 terminal JSON value 非 string、18 个 terminal-line violation、2 个 invalid JSON，说明 strict format following 是主要失败点。Primary parser 不在看过结果后放宽；任何 scalar-coercion 恢复值必须另列为 post-hoc sensitivity，不能覆盖这里的 0.0%。
+
+CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 exact match；969 个失败中有 907 个 non-string JSON objects、59 个 terminal-line violation、3 个 invalid JSON，17 条命中 512-token 上限。CoT 比 Direct 高 0.506 pp，但两者均被 strict-format failure 主导。结构审计没有在 907 objects 中找到白名单 `answer/final_answer/FINAL_ANSWER` 字段，因此没有根据 test raw output 定制恢复规则；这避免了 post-hoc parser 选择偏差。
 
 ## 10. 统计检验与实验结论
 
@@ -165,7 +168,7 @@ TimeQA-Hard strict primary 结果如下：
 
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
-| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE Direct/CoT 与 TimeQA Direct 均 VERIFIED；TimeQA Direct 为 strict-format negative result |
+| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | Direct/CoT 均 VERIFIED；TimeQA 两项均为 strict-format negative results |
 | Baseline 弱/监督不公平 | Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PLANNED |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
 | 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
@@ -177,4 +180,4 @@ TimeQA-Hard strict primary 结果如下：
 
 ## 14. Run、Commit 与工件追踪
 
-首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea6d0ba344454c06a56b8e1318fe16ddca5`；prediction/evidence/manifest SHA 为 `900a3872...` / `9fa093f9...` / `bbb32677...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712ff887ed7fa4ac8e7c183158977d1599a5`；prediction/evidence/manifest SHA 为 `54e3baf8...` / `d2ee6c73...` / `1251a8e1...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。新增 source records 为 `ACQ-STRATEGYQA-20260723`、`ACQ-TORQUE-20260723`、`ACQ-TIMEQA-20260723` 与 `ACQ-2WIKI-20260723`，状态和 manifest SHA 见 registry。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。所有完整值见 registry。数据获取、processed/construction artifact 与 Bootstrap implementation commit 的完整追踪也以 registry 为准。

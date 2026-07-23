@@ -4,14 +4,14 @@
 - active_phase: phase-03-model-and-baselines
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 709f712ff887ed7fa4ac8e7c183158977d1599a5
-- last_verified_commit: 709f712ff887ed7fa4ac8e7c183158977d1599a5
-- last_completed_checkpoint: checkpoints/phase-03-timeqa-direct-baseline.md
+- git_head: 50c6456cf91123868398ba66c35e4879f06196d4
+- last_verified_commit: 50c6456cf91123868398ba66c35e4879f06196d4
+- last_completed_checkpoint: checkpoints/phase-03-timeqa-cot-baseline.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT and TimeQA Direct are verified, but Kairos/matched-supervision runs and paired comparative intervals do not exist. TimeQA Direct has 986/989 strict parse failures; any scalar-coercion is post-hoc sensitivity only.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE and TimeQA Direct/CoT are verified, but Kairos/matched-supervision runs and paired comparative intervals do not exist. TimeQA strict format fails on 986/989 Direct and 969/989 CoT; D-019 defers post-hoc recovery because no predeclared object-unwrapping rule fits.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并推送 TimeQA Direct checkpoint；随后重复资源门禁，从 clean commit 在单张空闲 GPU 上运行 TimeQA-Hard CoT greedy full evaluation（seed 13、batch 1、max_new_tokens 512、完整 context、不截断）。CoT 结束前不实现或运行 post-hoc scalar sensitivity。不得使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
+- next_safe_action: 提交并推送 TimeQA CoT checkpoint；随后在 CPU-only synthetic tests 上实现 prediction-bound paired bootstrap/interval artifact（10,000 resamples、fixed seed、manifest-last/offline replay），先比较 TORQUE Direct vs CoT，再比较 TimeQA strict Direct vs CoT。不得实现 test-tuned TimeQA recovery、使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
 - required_reading:
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`
@@ -21,6 +21,7 @@
   - `checkpoints/phase-03-metrics-artifacts.md`
   - `checkpoints/phase-03-torque-cot-baseline.md`
   - `checkpoints/phase-03-timeqa-direct-baseline.md`
+  - `checkpoints/phase-03-timeqa-cot-baseline.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`
