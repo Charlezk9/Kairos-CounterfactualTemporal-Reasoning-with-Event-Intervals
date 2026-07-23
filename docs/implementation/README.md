@@ -118,4 +118,4 @@ Agent 1与主智能体分别通过 targeted 63/63 和全仓 166/166；Agent 2在
 
 ## 显式 marker 构造 v0
 
-D-011 的下一局部实现候选只组合已冻结的抽取、改写和 UpdateAnswer 原语，且仅使用内存中的合成 fixture。精确语义、实施步骤、测试矩阵与未授权边界的唯一详细来源是 `../ai-context/checkpoints/phase-01-temporal-construction-v0.md`。
+D-011 的 staged 局部实现只组合已冻结的抽取、改写和 UpdateAnswer 原语，且仅使用内存中的合成 fixture。只有 `KNOWN` 答案才原子产生 original/CF pair；`UNKNOWN` 不产生 dangling record。该实现不持久化 JSONL、manifest 或实验工件。精确语义、blob、测试证据与提交门禁的唯一详细来源是 `../ai-context/checkpoints/phase-01-temporal-construction-v0.md`。

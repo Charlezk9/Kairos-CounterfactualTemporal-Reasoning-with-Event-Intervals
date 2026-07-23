@@ -309,3 +309,10 @@
 - final evidence: main-agent targeted 79/79 and full 337/337; cached diff check passed; production marker/stage/formal and test temp paths were absent; no residual process; `RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False`
 - final verdict: `APPROVED TO COMMIT` the exact two-file snapshot, committed as `978ba4dea0792061340d0ec97241caa1efd6d6f2`
 - boundary: no real URL, redirect test, loopback server, Git/NSS/ACL, production acquisition, download or data write was approved or performed
+
+## 2026-07-23 — D-011 temporal-construction implementation audit
+
+- verdict: `POST_AUDIT_APPROVED / COMMIT_PENDING` for the exact two-code plus seven-document staged snapshot based on `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`
+- boundary: implementation is standard-library, in-memory and synthetic-only; no data/model read, network, GPU, persistence, formal run, construction artifact or residual process
+- evidence: targeted coverage and the 349/349 full-suite post-audit passed; an execution-preflight rejection before process creation is not counted as a run, and all exact temporary directories were removed
+- unique detail: exact blobs, test-run accounting, cleanup evidence, construction semantics and commit gate are recorded only in `checkpoints/phase-01-temporal-construction-v0.md`

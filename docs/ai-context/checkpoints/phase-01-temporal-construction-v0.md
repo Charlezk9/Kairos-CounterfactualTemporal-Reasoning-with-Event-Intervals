@@ -1,8 +1,9 @@
 # Phase 01 Explicit-Marker Temporal Construction v0
 
-- status: `FROZEN_BEFORE_IMPLEMENTATION / PLAN_ONLY`
+- status: `POST_AUDIT_APPROVED / COMMIT_PENDING`
 - branch: `experiment/reproduction-additional-evaluation`
-- base_head: `1a89c576455cd8caa37c1813b07d8d90d49946af`
+- staged_base_head: `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`
+- implementation_commit: pending
 - active_run_ids: none
 - artifacts: none
 - production_data_read: none
@@ -198,14 +199,13 @@ For `retained`, construct both `TemporalExample` values atomically:
 - `source_sha256` is source provenance and is copied unchanged to both records;
   it is not recomputed from rewritten text.
 
-## Proposed implementation and test plan
+## Implementation and test contract
 
-After a separate Agent 2 approval, Agent 1 may propose an exact two-file code
-snapshot: `src/kairos/construction.py` and `tests/test_construction.py`. The
-module should use frozen dataclasses/enums, `dataclasses.replace` or equivalent
-explicit construction, and only Python's standard library plus existing
-project modules. It must not add a CLI, dependency, filesystem call or dataset
-adapter.
+The approved exact two-file implementation snapshot is
+`src/kairos/construction.py` and `tests/test_construction.py`. The module uses
+frozen dataclasses/enums, explicit dataclass construction and only Python's
+standard library plus existing project modules. It adds no CLI, dependency,
+filesystem call or dataset adapter.
 
 Synthetic tests must cover:
 
@@ -240,21 +240,46 @@ parameterize from raw or processed dataset records. Future test execution must
 use the project-local Python and project-local cache/temp paths, consume CPU
 only, use no GPU/model/network, and create no persistent artifact.
 
+## Implementation verification and post-audit
+
+The staged implementation is based on clean commit
+`62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`; its implementation commit is
+pending and no future commit SHA is asserted. Exact staged Git blob identities
+are:
+
+- `src/kairos/construction.py`:
+  `127831adb991caf1569b7dca6c48b0bf57ce25cb`
+- `tests/test_construction.py`:
+  `f12544f0e03d0f44de3608c8f1bd146a442eda75`
+
+Agent 1 ran the synthetic targeted suite three times against the evolving
+approved two-file snapshot: the initial implementation passed 12/12, the
+exact empty-tuple precondition correction passed 12/12, and the audit-requested
+identity/field-inheritance assertion reinforcement passed 12/12. This records
+all three successful runs rather than presenting them as one run; the final
+staged blob is covered by the third run.
+
+The independently authorized full repository suite on the final staged
+snapshot passed 349/349 in 13.533 seconds with exit 0. An earlier full-suite
+launch attempt was rejected by execution preflight before a shell or test
+process started; it is not a run and is excluded from test counts. All approved
+tests used the project-local Python, CPU thread caps and disabled GPU/online
+model access. Every exact temporary run directory was verified and removed;
+post-audit found no residual process. No dataset, model, registry output,
+prediction, metric, checkpoint or other persistent artifact was created.
+
+Agent 2's implementation and post-test audit verdict is
+`POST_AUDIT_APPROVED / COMMIT_PENDING`. The approval covers the exact blobs
+above and the associated seven-document recovery update only; any source/test
+change invalidates it.
+
 ## Commit and authorization gate
 
-This checkpoint authorizes documentation freeze and staging only. The next
-safe action is for Agent 1 to submit a command/path/resource-level D-011 code
-implementation plan to Agent 2. Until Agent 2 returns a new explicit approval:
-
-- do not edit `src/` or `tests/`;
-- do not run tests;
-- do not read raw or processed data, including processed GSM8K;
-- do not access `/data0`, install dependencies, use network/GPU/model, or
-  create data, registry, result, run or experiment artifacts;
-- do not claim a temporal subset, construction yield or paper result.
-
-Any later commit requires the approved implementation snapshot, targeted and
-full-suite test evidence under local cache/temp controls, Agent 2 staged-diff
-and post-test review, updated recovery documents, and an ordinary non-force
-Git commit/push. The proposed commit message is
-`feat(data): add synthetic temporal construction pipeline`.
+The current staged tree contains exactly two implementation paths and seven
+recovery/documentation paths. Only after Agent 2 approves that exact nine-path
+snapshot may the main agent create the ordinary non-force commit
+`feat(data): add synthetic temporal construction pipeline` and push it through
+the project-only SSH configuration. Until then, do not edit, rerun tests,
+commit or push. This approval does not authorize reading raw/processed data,
+running a construction job, publishing JSONL, creating a formal run or making
+any paper claim.

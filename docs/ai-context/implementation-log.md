@@ -88,3 +88,9 @@
 - StrategyQA 固定 transfer/stage helper 经两轮 staged 事后审计。首轮在 75/75 targeted 和 333/333 full 通过后仍因 FD close retry、unknown marker 绑定前读取和 manifest pair 越过 commit point 而 `BLOCKED`。
 - 智能体 1修复所有权转移、marker inode 早拒绝和 pair pre-commit teardown；智能体 1与主智能体分别通过 targeted 79/79 和 full 337/337，无 production 路径、测试临时目录或残留进程。
 - 智能体 2对精确两文件 staged snapshot 给出 `APPROVED TO COMMIT`；已提交 `978ba4dea0792061340d0ec97241caa1efd6d6f2` (`feat(data): add bounded StrategyQA acquisition stage`)。`RUNTIME_REDIRECT_SEMANTICS_VERIFIED=False` 保持，未执行 HEAD/GET、网络、production、数据写入或真实 Git/NSS/ACL。
+
+## 2026-07-23 — D-011 explicit-marker construction v0
+
+- 两文件 staged 实现仅组合已冻结的 extraction、rewrite 与 UpdateAnswer；完整 `KNOWN` original/CF pair 原子保留，`UNKNOWN` 仅留内存诊断且不产生 dangling record。
+- 合成 targeted 和全仓测试通过，智能体 2事后审计状态为 `POST_AUDIT_APPROVED / COMMIT_PENDING`。实现、blob、测试、临时目录和非实验边界的唯一详细证据见 `checkpoints/phase-01-temporal-construction-v0.md`。
+- 本次未读取 production data，未写持久构造记录，未建立正式 run、模型指标或论文结果。
