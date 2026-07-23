@@ -238,3 +238,12 @@
 - 生成与失败：同一 Qwen revision、greedy、seed 13、batch 8、`max_new_tokens=32`。输出必须为唯一 terminal JSON integer 0/1；parse failure 固定回退 Direct。输入 run ID 与 manifest SHA、候选顺序、等价和 fallback 策略全部写入 config，结果后不放宽 parser。
 - 结果：980 次 verifier 调用仅 218 个 strict index parsed，762 个回退；EM/F1 14.228/14.681，均显著低于 Direct。该结果说明此固定 verifier 未提供增益，保留为负 Baseline，不据此调 prompt。
 - 证据：唯一完整资源、工件、SHA、选择计数、指标与 paired inference 见 `checkpoints/phase-03-torque-cot-verifier-baseline.md`。
+
+## D-022：GSM8K relation-only supervision v1
+
+- 状态：`IMPLEMENTED / DEVELOPMENT VERIFIED / PARTIAL PAPER DEVIATION`。
+- 触发原因：construction v0 的 production replay 已证明所有 GSM8K numeric answer update 均为 `UNKNOWN`，因此完整 original/CF pair 为零。复制 original answer、凭 marker 猜测 numeric CF answer 或把 relation label 冒充 answer supervision 都不可接受。
+- 决定：v1 只保留 original numeric answer，并为可确定重放的显式 marker pair 保存 original relation 及其 inverse relation。counterfactual answer 固定为 `unavailable-relation-only` 且 schema 不含 counterfactual answer 字段；使用者必须 mask CF answer loss。
+- 适用边界：该记录可支持 original-answer、relation 与 counterfactual-relation loss，不能支持 CF answer accuracy、update、stability 或 consistency。它是独立重实现中的部分监督桥接，不满足论文所称 reliable updated answer，也不恢复作者未公开的 subset IDs、prompt 或 updater。
+- 防泄漏门禁：实现与测试只用 synthetic fixture；在规则 clean commit 前不读取 production train/test。下一步只允许先冻结并实现 train-only immutable publisher/verifier；test split、训练和正式指标仍禁止。
+- 证据：实现 commit `17137bbf6e666381c148d40b7249032ab1d3a0b6`；精确 schema、测试和限制见 `checkpoints/phase-01-relation-only-supervision-v1.md`。

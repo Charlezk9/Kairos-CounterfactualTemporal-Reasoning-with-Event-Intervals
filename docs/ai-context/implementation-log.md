@@ -194,3 +194,10 @@
 - clean commit 上 preflight 确认 503/1,483 等价无需调用，余下 980 条为 193--514 input tokens。仅用 physical GPU 4 前台运行 166.261s，峰值 16,113,932,800 bytes，结束后 GPU 释放。
 - 218 个 index parsed、762 个回退；正式 EM/F1 14.228/14.681，cluster 两口径均 1.401。prediction/metrics fresh offline replay 通过。
 - 对 Direct 的 group bootstrap 显示 EM/F1 -1.416/-1.389 pp，CI 均低于零、Holm p=0.000800；cluster 差异不显著。负结果和严格格式限制均保留，完整证据见对应 checkpoint/registry。
+
+## 2026-07-23 — GSM8K relation-only supervision v1
+
+- construction v0 的 zero-retained 根因是 numeric CF answer 全部不可证明，因此没有复制 original answer 或伪造 CF gold；D-022 冻结为部分 relation-supervision bridge。
+- `17137bb...` 新增 exact in-memory pair schema、稳定身份、deterministic extraction/rewrite replay 与显式 `unavailable-relation-only` CF answer 状态；schema 不含 counterfactual answer 字段。
+- synthetic focused 8/8、最终 full 485/485（14.542s）通过。此前一次 full run 的旧 persistence fingerprint 测试出现瞬时失败，isolated replay 与最终 fresh full 均通过，已在 checkpoint 留痕。
+- 未读取 production train/test，未发布 JSONL/manifest、未训练或产生指标。下一步先实现 train-only immutable publisher/offline verifier。

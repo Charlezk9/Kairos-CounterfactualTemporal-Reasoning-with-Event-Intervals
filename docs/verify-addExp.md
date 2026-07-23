@@ -1,14 +1,14 @@
 # Kairos 补充实验技术与结果报告
 
-> 状态：PHASE 01 RUNNING
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有 source conversion 与 construction v0 两个 `VERIFIED` 数据工件，但所有论文效果数字仍仅为 `REPORTED`，尚无本项目 `VERIFIED` 模型实验结果。
+> 状态：PHASE 01/03 RUNNING
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier `VERIFIED / SINGLE RUN` 结果；Kairos 与匹配监督 Baseline 尚未形成正式结果。
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01，data pipeline；GSM8K source/example conversion 与 construction v0 production replay 已完成
+- 当前阶段：Phase 01 data remediation 与 Phase 03 baseline evaluation 并行；GSM8K source/example conversion、construction v0 replay 和三类 prompt baseline 已完成
 - 复现性质：independent reimplementation
-- 已完成实验：无
-- 当前结论：尚不能验证论文效果数值；已验证当前保守 v0 在 GSM8K 上为 0 retained，不能直接用于模型训练
+- 已完成实验：TORQUE Direct/CoT/CoT+Verifier，TimeQA-Hard Direct/CoT，以及配对 bootstrap/Holm 校正
+- 当前结论：尚不能验证论文 Kairos 核心效果；当前 TORQUE CoT 与 CoT+Verifier 均低于 Direct，TimeQA 结果被严格格式失败主导；GSM8K 保守 v0 为 0 retained，不能直接用于完整 CF-answer 训练
 
 ## 2. 复现范围、版本与 Git commit
 
@@ -87,6 +87,8 @@ D-011 显式 marker 构造 v0 已以 commit `24ce15d40bd038d61bd6581ed2bc2600724
 D-012 construction audit schema v1 已以 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 完成 synthetic development verification，parent 为 `2b7e3f03726fd1abf59fa18867593458f38e5b34`，普通 push 后 HEAD、origin 与 upstream 一致。其 source/test blob 为 `1bb1b167f3af5424b8fe199b2c9057c51638957f` 与 `3bfa86de8deb0b15ececad698808583acfe7aa45`；最终 fresh targeted 24/24、0.193s、exit 0，唯一一次 full suite 373/373、13.020s、exit 0，并通过 post-audit。该记录只证明内存 audit schema 的开发检查，不读取 production data，不生成 formal run、artifact、模型指标、论文效果数字或可进入作者结论的 `VERIFIED` effect claim；详细边界见 `docs/ai-context/checkpoints/phase-01-construction-audit-schema.md`。
 
 D-013/P2 与 fixed GSM8K driver 已完成 production integration。有效执行 commit 为 `3944bb56d5c16a11482de39c5f0295936b6ac035`；train/test immutable audit 均经独立 offline source-lockstep replay。当前 adapter 将 GSM8K `text` 与 `question` 设为同一值，冻结 D-011 对所有成功抽取记录触发 `text_question_alias_unsupported`，因此 valid CF 与 retained 均为 0。该结果验证了当前独立实现的数据策略不充分，不能解释为论文方法效果或用来反驳论文中不可识别的作者 subset。
+
+D-022 relation-only supervision v1 已以 commit `17137bbf6e666381c148d40b7249032ab1d3a0b6` 完成 synthetic development verification。它只为可确定重放的显式 marker pair 保存 original relation 与 inverse counterfactual relation，并保留 original numeric answer；counterfactual answer 明确为 `unavailable-relation-only`，序列化 schema 不存在 CF answer 字段。focused 8/8、最终 full 485/485 通过。该实现未读取 production train/test、未发布工件或产生指标；它只能作为 relation-supervision 的部分桥接，不能被写作 CF answer accuracy、update、stability 或 consistency 证据，也不满足论文的 reliable updated-answer 要求。
 
 Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427/427 full 及 synthetic backward：event/answer span mean pooling、`softplus+1e-6` interval、论文顺序的 8-d geometry、五类 relation graph、masked mean graph pool、`[u;g;u*g]` candidate scoring 和三项 loss。Pair-MLP 复用相同 supervision/masks/scorer，仅替换 interval geometry。该状态是 `DEVELOPMENT_VERIFIED TENSOR CORE`，不表示 Qwen/LoRA、端到端训练或模型效果已验证。
 

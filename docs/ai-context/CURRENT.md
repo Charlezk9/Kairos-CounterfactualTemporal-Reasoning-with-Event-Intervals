@@ -4,15 +4,16 @@
 - active_phase: phase-01-data-pipeline-remediation
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: e09a40fa9e192bb92971be61e795cbfabcb3117d
-- last_verified_commit: e09a40fa9e192bb92971be61e795cbfabcb3117d
-- last_completed_checkpoint: checkpoints/phase-03-torque-cot-verifier-baseline.md
+- git_head: 17137bbf6e666381c148d40b7249032ab1d3a0b6
+- last_verified_commit: 17137bbf6e666381c148d40b7249032ab1d3a0b6
+- last_completed_checkpoint: checkpoints/phase-01-relation-only-supervision-v1.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`: context/question segmentation alone cannot fix it because the frozen updater returns `UNKNOWN` for every numeric answer. A relation-only counterfactual supervision artifact or independently auditable numeric answer regeneration contract is required before training. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 is development-verified but deliberately has no CF answer and therefore cannot support full CF-answer training or accuracy. Its train-only immutable publisher/verifier and production train aggregate do not yet exist. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并推送 CoT+Verifier negative-result checkpoint；随后冻结 GSM8K relation-only supervision v1：保留 original numeric answer supervision，只对可证明的 original/inverted marker relation施加 relation/counterfactual-relation loss，counterfactual answer 必须显式 masked/unavailable，不能复制 original 或伪装成 CF accuracy。先做 synthetic tests 与 train-only aggregate，规则 clean commit 前不读取 test funnel、不覆盖 v0 工件、不训练；同时记录该设计与论文“reliable updated answer”要求的偏差。
+- next_safe_action: 为 `gsm8k-relation-only-pair-v1` 实现 fixed train-only immutable JSONL/manifest publisher 与 source-lockstep offline verifier；先只用 synthetic tests，从 clean commit 冻结持久化规则。之后仅对 official train 做一次 production aggregate 并登记 marker/relation yield；不读取或发布 official test、不覆盖 v0、不训练，CF answer loss 必须保持 masked。
 - required_reading:
+  - `checkpoints/phase-01-relation-only-supervision-v1.md`
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`
   - `checkpoints/phase-01-prediction-artifacts.md`

@@ -127,6 +127,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P03-METRICS-ARTIFACTS-20260723` | 2026-07-23 | immutable prediction-bound transfer metrics publication and independent reaggregation | clean commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` | focused 8/8; full 465/465 in 13.916s; production Direct metrics publish plus fresh offline replay passed | production artifact registered under the formal run above |
 | `DEV-P03-STATISTICAL-ARTIFACTS-20260723` | 2026-07-23 | immutable two-run paired bootstrap, intervals and Holm-adjusted inference | clean commit `db6efe20a6317edac47343d1c713e9f4ec51263b` | focused 6/6; full 471/471 in 14.807s; both production comparisons passed fresh offline replay | production artifacts registered under formal comparisons above |
 | `DEV-P03-TORQUE-VERIFIER-20260723` | 2026-07-23 | gold-free CoT+Verifier candidate selection with strict failure fallback | clean commit `e09a40fa9e192bb92971be61e795cbfabcb3117d` | focused 6/6; full 477/477 in 14.508s; production prediction, metrics and paired statistics passed fresh offline replay | production artifacts registered above |
+| `DEV-P01-RELATION-ONLY-20260723` | 2026-07-23 | strict in-memory GSM8K original/inverse relation supervision with explicitly unavailable CF answer; synthetic only | clean commit `17137bbf6e666381c148d40b7249032ab1d3a0b6` | focused 8/8 in 0.007s; final full 485/485 in 14.542s; no production source read | none |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

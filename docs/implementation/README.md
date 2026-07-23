@@ -146,3 +146,15 @@ identity、terminal 与 funnel。它不调用 D-011，不选择 subset，也不�
 `../ai-context/checkpoints/phase-01-construction-audit-persistence.md`。固定
 `kairos.gsm8k_construction` driver 在 production train/test 上得到 0 retained；
 原因和不可调参边界见 `../ai-context/checkpoints/phase-01-gsm8k-construction-v0.md`。
+
+## GSM8K relation-only supervision v1
+
+`kairos.relation_supervision` 在 commit
+`17137bbf6e666381c148d40b7249032ab1d3a0b6` 增加严格的 in-memory
+relation-only pair。它从同一显式 marker 规则重放 original relation 和 inverse
+counterfactual relation，保留 original numeric answer，但将 CF answer 固定标记为
+`unavailable-relation-only`，且序列化 schema 不提供 CF answer 字段。任何训练调用方
+必须 mask CF answer loss；该接口不能用于报告 CF accuracy/update/consistency。
+当前未实现 publisher、未读取 production data、未创建 train/test 工件。完整合同和
+论文偏差见 `../ai-context/checkpoints/phase-01-relation-only-supervision-v1.md` 与
+D-022。
