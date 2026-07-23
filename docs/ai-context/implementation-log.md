@@ -222,3 +222,10 @@
 - 初始 batch-1 尝试因明显低 GPU 利用率在 artifact 创建前主动中断并释放 GPU，状态为 `INTERRUPTED_PREFLIGHT / NO ARTIFACT`；batch-4/8 smoke 均不保留工件。正式运行从 clean commit 用 physical GPU 4 前台执行 3,778.678s，发布 1,483 条、11,864 samples、1,714,292 generated tokens。
 - 494 个 sample parse failures 被排除；1,482 题仍有 valid vote，仅 1 题八次全失败。prediction 与 metrics 经独立 CPU/offline replay，EM/F1 15.374/15.569，cluster 两口径 1.926。
 - 对 Direct 的 571-group bootstrap 显示 EM/F1 -0.270/-0.500 pp、cluster +0.350 pp，四项 CI 均跨零且 Holm p=1.0。保留为无可支持增益的 single-seed negative result；完整工件、SHA 与资源证据见对应 checkpoint/registry。
+
+## 2026-07-24 — TORQUE LLM-Graph formal baseline
+
+- `6c30c83...` 实现 gold-free strict graph JSON prompt/parser、五类关系、answer-event binding、greedy runner 与 source-bound replay；cleanup 误删 runtime `Tensor` import 后，第一次 GPU smoke 在 shape check fail closed、无 artifact。`99209b4...` 修复后 focused 6/6、full 515/515 通过。
+- token preflight 为 271--452 input tokens。固定 8-record smoke 虽 8/8 parse failure，但不据 dev 观察放宽已提交 schema。clean `99209b4...` 上 physical GPU 4 前台运行 1,927.260s，发布 1,483 条，峰值 16,012,927,488 bytes，结束后 GPU 释放。
+- 667 parsed、816 parse errors、348,766 generated tokens；仅 1 条触及 768-token 上限。prediction/metrics fresh replay 得 EM/F1 1.349、cluster 0。无值错误聚合显示 graph line 位置 336、non-exact event span 293 为主因。
+- 对 Direct 的 571-group bootstrap 四项 CI 均低于零；该显著负结果只约束严格 one-pass serialization 实现，不反驳 graph 方法或构成 Kairos claim。完整证据见对应 checkpoint/registry。

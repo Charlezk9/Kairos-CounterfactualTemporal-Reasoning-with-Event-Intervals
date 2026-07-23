@@ -263,3 +263,11 @@
 - 聚合：每个 sample 继续服从 strict terminal JSON string-array parser；无效 sample 不投票。对 normalized exact span set 作 plurality，平票取最早 valid sample；8 个全无效才输出固定 sentinel。原始 sample envelope 只保存在私有 evidence，offline verifier 必须逐题重算投票。
 - 结果：题级 EM/F1 为 15.374/15.569，相对 Direct 为 -0.270/-0.500 pp；cluster 两口径为 1.926，相对 Direct +0.350 pp。四项 571-group paired bootstrap CI 均跨零、Holm p 均为 1，因此只能报告 single-seed 下无可支持差异，不能宣称改进。
 - 边界：第一次 batch-1 尝试在 artifact 创建前因吞吐预检主动中断，登记为 `INTERRUPTED_PREFLIGHT / NO ARTIFACT`；结果后不修改投票、parser 或采样参数。唯一完整证据见 `checkpoints/phase-03-torque-self-consistency-baseline.md`。
+
+## D-025：TORQUE LLM-Graph 严格结构化基线
+
+- 状态：`IMPLEMENTED / PRODUCTION VERIFIED / SIGNIFICANT NEGATIVE RESULT`。
+- 输入与生成：只给 passage/question，不注入 gold/candidate；greedy、seed 13、batch 8、`max_new_tokens=768`。响应倒数第二个 non-empty line 必须是 strict `TEMPORAL_GRAPH` JSON，最后一行沿用 strict span-array answer。
+- Graph contract：节点 ID 为唯一 E1--E999、span 必须是 passage exact substring；边端点必须存在且不同，关系固定为 `precedes/follows/overlaps/contains/during`；非空答案必须在 TORQUE normalizer 下绑定 graph event。任何结构错误整题 sentinel，不作 post-hoc repair。
+- 结果：667/1,483 strict parsed，816 parse errors；EM/F1 均 1.349，cluster 两口径 0。对 Direct 的差为 -14.295/-14.721/-1.576/-1.576 pp，四项 group-bootstrap CI 均低于零。主要失败来自 graph line 位置和非 exact event span，只有 1 条命中 token 上限。
+- 解释边界：结果说明该模型下严格 one-pass graph serialization 基线失败，不说明 temporal graph 方法普遍无效，也不构成 Kairos effect。结果后不得用 dev raw output 放宽 primary parser；未来 repair/few-shot 只能另列 sensitivity。完整证据见 `checkpoints/phase-03-torque-llm-graph-baseline.md`。

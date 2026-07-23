@@ -89,6 +89,20 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`; aggregation commit `b2f889b02893d99751ee9aabacdb3038a3456e1e`; completed `2026-07-23T16:32:13Z`; metrics SHA256 `22ec0d7628613195f94bec788a5599bdfed7c1891250faf0cfbb7be54f42f27b`; metrics manifest SHA256 `7857e01aff7af1bd70afe316694b5b524839ba562680b230bf792d33688095ec`
 - verification: a fresh CPU/offline process recomputed every vote from the eight-sample envelope and another process independently reaggregated metrics. The paired comparison below finds no supported difference from Direct. An earlier batch-1 attempt was interrupted before artifact creation for throughput preflight and is not a formal run.
 
+### `20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`
+
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / SIGNIFICANT NEGATIVE RESULT / FORMAT-CONSTRAINED`
+- method: gold-free one-pass LLM-Graph; strict penultimate graph JSON and terminal answer array; five relation labels; exact-passage event spans; normalized answer-event binding; greedy batch 8, `max_new_tokens=768`
+- dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
+- model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
+- execution: clean commit `99209b4445df3a25fe678e3223cceac2c84e0041`, seed 13, physical GPU 4, `2026-07-23T16:50:48Z`--`2026-07-23T17:22:55Z`, exit 0, 1,927.260 s, peak GPU bytes 16,012,927,488
+- parse/token evidence: 667 parsed / 816 sentinel parse errors; input tokens 271--452; 348,766 generated tokens total; 1 response reached 768 tokens
+- replayed metrics: question set EM `1.3486176668914363`; question set F1 `1.3486176668914363`; cluster exact consistency `0.0`; cluster F1>=0.8 consistency `0.0` (all percentages)
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`
+- SHA256: config `d52c57809644bec378e607f13ebf0543dbcd5e8cb3db0a5d2b45323682ecec96`; predictions `64a6c2e7cfe8df700c48a07cee87016a9d83868b05272e1542bc987635f78286`; generation evidence `f8a8293407e8d790e01261bf39e46ab277b537085eeecfa5958ee4439b8de5cf`; manifest `c2573cfba4ed8ba73126743dff75c9e9f8304c9a3beaa675a7123fb194f01f28`
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`; aggregation commit `99209b4445df3a25fe678e3223cceac2c84e0041`; completed `2026-07-23T17:23:37Z`; metrics SHA256 `6ce16c3a1d6af5a5a68acdbd86a751e2d73c6e6d7bc8acf6867c96c90bcfd6b1`; metrics manifest SHA256 `cbe181d4e864753a4156a22c09d1801d6b8997d83b3f24e83bdddb8d92e2092c`
+- verification: independent source-bound graph replay and metrics replay passed. Aggregate-only errors were graph-line position 336, non-exact event span 293, final answer invalid 72, answer unbound 56, invalid graph JSON 38, graph keys 14, relation 5, event ID 1 and duplicate key 1. No raw value was printed; the result was not parser-tuned.
+
 ## Formal statistical comparisons
 
 ### `paired-torque-dev-cot-vs-direct-43410b587f33`
@@ -127,6 +141,15 @@
 - artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-self-consistency-vs-direct-24cdd74c9d32`; aggregation commit/time `b2f889b02893d99751ee9aabacdb3038a3456e1e` / `2026-07-23T16:32:49Z`; statistics SHA256 `8918c83b7a68e1c82e0c21d0eebac0eb3d3d43b220c439ef0095c54cc940baa8`; manifest SHA256 `d1712be7a616c5b32083037fbf7087536db1f3f053a7a1ef7693e302269f0019`
 - verification: a fresh CPU/offline process replayed all 10,000 resamples and reproduced both hashes. No interval excludes zero, so the single-seed result supports neither benefit nor harm relative to Direct.
 
+### `paired-torque-dev-llm-graph-vs-direct-a623ea036fa7`
+
+- status: `VERIFIED / PAIRED GROUP BOOTSTRAP / SIGNIFICANT NEGATIVE RESULT`
+- contrast: LLM-Graph minus Direct, same Qwen revision and model seed 13; 1,483 questions in 571 `(passage_id, cluster_id)` bootstrap units
+- inference: 10,000 resamples, bootstrap seed 20260723, percentile 95% CI, two-sided bootstrap sign p-value with add-one correction, Holm family of four metrics
+- results: question EM difference `-14.295347269049223`, CI `[-16.155442537119562, -12.516893036247506]`, raw/Holm p `0.00019998000199980003` / `0.0007999200079992001`; question F1 difference `-14.721232165601691`, CI `[-16.574820448220823, -12.936582434266198]`, raw/Holm p `0.00019998000199980003` / `0.0007999200079992001`; both cluster differences `-1.5761821366024518`, CI `[-2.626970227670753, -0.7005253940455342]`, raw/Holm p `0.0011998800119988001` / `0.0023997600239976003`
+- artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-llm-graph-vs-direct-a623ea036fa7`; aggregation commit/time `99209b4445df3a25fe678e3223cceac2c84e0041` / `2026-07-23T17:24:06Z`; statistics SHA256 `234e2d7b8436e11b22807f50b0891f7792acd74d45cfefab4e0a2ba97b4441f4`; manifest SHA256 `691b3259f4a2c6f622484e31507ae5361cdfef834dd8366a51b8e2b504d560e3`
+- verification: fresh CPU/offline replay reproduced every value and both hashes. The result is a negative finding for this strict serialization contract, not for temporal graph reasoning in general.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
@@ -154,6 +177,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-RELATION-ARTIFACTS-20260723` | 2026-07-23 | fixed official-train relation-supervision publisher and full source-lockstep verifier | clean commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`; atime fix `3fbe53fe9aa4faec65b8c948857869dc85574e7f` | artifact focused 8/8; combined 27/27; final full 494/494 in 14.788s | production artifact registered below |
 | `DEV-P01-RELATION-HUMAN-AUDIT-20260723` | 2026-07-23 | deterministic train-only stratified 200-pair packet and blank A/B reviewer templates | clean commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb` | focused 7/7; combined 23/23; full 501/501 in 15.366s | production packet registered below |
 | `DEV-P03-TORQUE-SELF-CONSISTENCY-20260723` | 2026-07-23 | fixed 8-sample CoT aggregation, private evidence envelope and offline vote replay | implementation `f6a43f36fc6d48014ca02b7d06dbaf297338b829`; execution commit `b2f889b02893d99751ee9aabacdb3038a3456e1e` | focused 8/8; full 509/509; batch-4/8 smoke passed; production prediction, metrics and paired statistics passed fresh replay | production artifacts registered above |
+| `DEV-P03-TORQUE-LLM-GRAPH-20260724` | 2026-07-24 | gold-free strict temporal-graph JSON prompt/parser, greedy generation and source-bound replay | implementation `6c30c83668095b246e64c9873c852ae5b06e0fb7`; execution fix `99209b4445df3a25fe678e3223cceac2c84e0041` | focused 6/6; full 515/515; token/smoke preflight completed; production prediction, metrics and paired statistics passed fresh replay | production artifacts registered above |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 
