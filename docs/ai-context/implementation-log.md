@@ -166,3 +166,10 @@
 - 全量 prediction artifact 发布成功：1,452 parsed、31 parse errors、输入 155--336 tokens、总生成 214,717 tokens。fresh CPU/offline prediction replay 通过。
 - prediction-bound metrics 发布并由另一 fresh 进程重放：set EM/F1 12.610/12.778，两个 cluster consistency 均 1.226（百分数）。完整 SHA 见 registry/checkpoint。
 - CoT 相对 Direct 的描述差为 EM -3.034 pp、F1 -3.292 pp；这是保留的负结果，不修改 prompt 或生成预算。paired bootstrap 未完成前不作显著性判断。
+
+## 2026-07-23 — TimeQA-Hard Direct formal baseline
+
+- clean `709f712...` 资源门禁后，仅用 physical GPU 4 对 989 条 `human_test.hard` 运行 Direct greedy（seed 13、batch 1、`max_new_tokens=128`）；完整 32,768 context、不截断，输入 590--24,584 tokens。用时 1,878.176s，峰值 GPU bytes 20,207,448,576，结束后 GPU 释放。
+- prediction artifact 全量发布并通过 fresh CPU/offline replay：3 parsed、986 parse errors、总生成 8,998 tokens。metrics artifact 随后发布并由另一进程重放，strict normalized EM/token F1 均为 0.0%。
+- 只聚合错误类型、不打印响应的审计发现：966 个 terminal JSON value 非 string，18 个违反 terminal-line 约束，2 个 invalid JSON；0 条命中 128-token 上限，920 条生成不超过 16 tokens。失败主要是冻结格式不遵循，不是 max-token 截断。
+- 主结果不放宽 parser、不重跑覆盖。未来 scalar-coercion 只能作为明确的 post-hoc sensitivity，不能替换 strict primary；完整身份和 SHA 见 registry/checkpoint。

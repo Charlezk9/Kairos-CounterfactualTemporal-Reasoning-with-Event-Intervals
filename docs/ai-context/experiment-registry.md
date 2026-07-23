@@ -32,6 +32,20 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T100959Z-cot-torque-dev-s13-05e077299faf`; aggregation commit `21b4eea6d0ba344454c06a56b8e1318fe16ddca5`; completed `2026-07-23T10:30:16Z`; metrics SHA256 `7c14f0d43a56cc87155c362df01a1700c76b4ee1f151ef4188abbb1a0499c6a2`; metrics manifest SHA256 `f8af11f7e1919c1cc5e51a94cce556130a2024529f9304d5becf8c07393ae7a7`
 - verification: independent CPU/offline prediction replay and a separate metrics replay both passed. CoT is 3.034 percentage points lower in EM and 3.292 points lower in F1 than Direct; this negative result is retained without prompt retuning. Significance is not claimed before paired bootstrap.
 
+### `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`
+
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NEGATIVE FORMAT-FAILURE RESULT`
+- method: deterministic greedy Direct; batch 1; `max_new_tokens=128`; no sampling; full 32,768 context with no truncation
+- dataset: TimeQA-Hard `human_test.hard`, revision `38b05989070c1168b2bef3d5a2656afeeba763dc`, source SHA256 `0318963bb2af931143be50ca24402d03c075c4b5a4898fda9bf4d5b2f0c6c188`, 989 records
+- model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
+- execution: clean commit `709f712ff887ed7fa4ac8e7c183158977d1599a5`, seed 13, physical GPU 4, `2026-07-23T10:34:03Z`--`2026-07-23T11:05:35Z`, exit 0, 1,878.176 s, peak GPU bytes 20,207,448,576
+- parse/token evidence: 3 parsed / 986 sentinel parse errors; input tokens 590--24,584; 8,998 generated tokens total
+- replayed metrics: normalized exact match `0.0`; token F1 `0.0` (percentages)
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`
+- SHA256: config `7ad791b6f907c328de6a0d8b0bcfcd751cf40a866c91281054ac5337dec05a4a`; predictions `54e3baf8142f4938a1e8547ea65f81983cb63164812cd6868a788c1ea4263f7a`; generation evidence `d2ee6c732c7e37e145bd34aee7eed74f835fc01db6e80700453b43082fa17d62`; manifest `1251a8e18164778d93ee7929b985cf7b4adf3067c9ddadc6c5b3ffbd6bb1dc82`
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`; aggregation commit `709f712ff887ed7fa4ac8e7c183158977d1599a5`; completed `2026-07-23T11:06:55Z`; metrics SHA256 `0e769343639e8cb785be1ee7e279b73f72b70386e324ba9df86550371f201eeb`; metrics manifest SHA256 `e05b4c019b447d79c2b4696b664ff752137b44ba158a8b9e7b9f6f4045c3d1df`
+- verification: fresh prediction and metrics replays passed. Post-run aggregate-only error audit found 966 non-string JSON terminal values, 18 terminal-line violations and 2 invalid JSON responses; no output hit the 128-token limit and 920/989 used at most 16 generated tokens. The frozen strict result remains primary; any later scalar-coercion analysis must be explicitly post hoc and cannot replace it.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
