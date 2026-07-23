@@ -120,7 +120,7 @@ Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f
 
 ## 8. 新增 Baseline 结果
 
-Prompt-only Direct 与 CoT 正式 run 均已完成，并通过 immutable prediction 与 machine-readable metrics 的两层离线重放。CoT 的描述性指标低于 Direct，该负结果保留且未据此调 prompt；paired bootstrap 尚待完成。Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph/Constraint-Rerank 仍待运行。
+Prompt-only Direct 与 CoT 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT 的题级指标显著低于 Direct，该负结果保留且未据此调 prompt；TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph/Constraint-Rerank 仍待运行。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
@@ -141,9 +141,9 @@ Direct 结果如下。指标均为百分数，parse error 使用固定 sentinel 
 | `VERIFIED / SINGLE RUN` | Qwen2.5-7B Direct greedy | TORQUE public dev | 1,483 / 571 | 13 | 15.644 | 16.070 | 1.576 | 1.576 | 42/1,483 (2.832%) | `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d` / `eae442b...` |
 | `VERIFIED / SINGLE RUN / NEGATIVE` | Qwen2.5-7B CoT greedy | TORQUE public dev | 1,483 / 571 | 13 | 12.610 | 12.778 | 1.226 | 1.226 | 31/1,483 (2.090%) | `20260723T100959Z-cot-torque-dev-s13-05e077299faf` / `21b4eea...` |
 
-Direct run 固定模型 revision `a09a354...`、数据 SHA `7a8dd84c...`，全量 source-order prediction/raw evidence 与派生 metrics 均通过独立离线 replay。Metrics aggregation commit 为 `61e96bc...`，metrics/manifest SHA 为 `c508305a...` / `1187e24d...`。当前两项 prompt-only 数值建立了外部迁移下界；在 Kairos、匹配监督 Baseline 和 paired bootstrap 完成前，不能据此声称 interval/graph 方法改进或显著差异。完整 SHA 与资源证据见 registry 和对应 checkpoint。
+Direct run 固定模型 revision `a09a354...`、数据 SHA `7a8dd84c...`，全量 source-order prediction/raw evidence 与派生 metrics 均通过独立离线 replay。Metrics aggregation commit 为 `61e96bc...`，metrics/manifest SHA 为 `c508305a...` / `1187e24d...`。当前两项 prompt-only 数值建立了外部迁移下界；配对统计只支持 CoT 与 Direct 的差异，在 Kairos 和匹配监督 Baseline 完成前，不能据此声称 interval/graph 方法改进。完整 SHA 与资源证据见 registry 和对应 checkpoint。
 
-CoT run 同样固定模型/数据 revision；prediction/evidence/manifest SHA 为 `900a3872...` / `9fa093f9...` / `bbb32677...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。相对 Direct，CoT 的 set EM/F1 描述差为 -3.034/-3.292 个百分点，parse error 反而少 11 条；这说明更高的格式成功率没有转化为更高任务指标。该句是确定性描述，不是显著性结论。
+CoT run 同样固定模型/数据 revision；prediction/evidence/manifest SHA 为 `900a3872...` / `9fa093f9...` / `bbb32677...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。相对 Direct，CoT 的 set EM/F1 差为 -3.034/-3.292 个百分点，parse error 反而少 11 条；571-group paired bootstrap 的 95% CI 分别为 `[-4.411,-1.709]` / `[-4.674,-1.954]`，Holm p 均为 0.000800。更高的格式成功率没有转化为更高题级任务指标；两项 cluster 差异均不显著。
 
 TimeQA-Hard strict primary 结果如下：
 
@@ -154,11 +154,22 @@ TimeQA-Hard strict primary 结果如下：
 
 该 run 使用完整 32,768 context，输入最大 24,584 tokens；没有样本命中 128-token 生成上限。错误聚合为 966 个 terminal JSON value 非 string、18 个 terminal-line violation、2 个 invalid JSON，说明 strict format following 是主要失败点。Primary parser 不在看过结果后放宽；任何 scalar-coercion 恢复值必须另列为 post-hoc sensitivity，不能覆盖这里的 0.0%。
 
-CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 exact match；969 个失败中有 907 个 non-string JSON objects、59 个 terminal-line violation、3 个 invalid JSON，17 条命中 512-token 上限。CoT 比 Direct 高 0.506 pp，但两者均被 strict-format failure 主导。结构审计没有在 907 objects 中找到白名单 `answer/final_answer/FINAL_ANSWER` 字段，因此没有根据 test raw output 定制恢复规则；这避免了 post-hoc parser 选择偏差。
+CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 exact match；969 个失败中有 907 个 non-string JSON objects、59 个 terminal-line violation、3 个 invalid JSON，17 条命中 512-token 上限。CoT 比 Direct 高 0.506 pp；989-record paired bootstrap CI 为 `[0.101,1.011]`，Holm p=0.030397。该非零差异只表示冻结 strict parser 下约五条 exact 与零条 exact 的差别，两者仍被 strict-format failure 主导，不能解释为 temporal reasoning 改进。结构审计没有在 907 objects 中找到白名单 `answer/final_answer/FINAL_ANSWER` 字段，因此没有根据 test raw output 定制恢复规则；这避免了 post-hoc parser 选择偏差。
 
 ## 10. 统计检验与实验结论
 
-待三个 seed 和 paired bootstrap 完成后填写。负结果和无显著差异必须保留。
+当前完成的是同一模型 revision、同一 model seed 下逐样本/组的 prompt-baseline 配对推断，不是三个训练 seed 的模型方差估计。所有差值为 CoT minus Direct；固定 10,000 resamples、bootstrap seed 20260723、percentile 95% CI、add-one 双侧 bootstrap sign p-value，并在每个数据集的全部报告指标内做 Holm 校正。
+
+| Dataset / unit | Metric | Difference (pp) | 95% CI | Raw p | Holm p | Conclusion |
+|---|---|---:|---:|---:|---:|---|
+| TORQUE / 571 contrast groups | Question set EM | -3.034 | [-4.411, -1.709] | 0.000200 | 0.000800 | CoT lower |
+| TORQUE / 571 contrast groups | Question set F1 | -3.292 | [-4.674, -1.954] | 0.000200 | 0.000800 | CoT lower |
+| TORQUE / 571 contrast groups | Cluster exact | -0.350 | [-1.226, 0.525] | 0.562944 | 1.000000 | no supported difference |
+| TORQUE / 571 contrast groups | Cluster F1>=0.8 | -0.350 | [-1.226, 0.525] | 0.562944 | 1.000000 | no supported difference |
+| TimeQA-Hard / 989 records | Strict normalized EM | +0.506 | [0.101, 1.011] | 0.015198 | 0.030397 | format-interaction only |
+| TimeQA-Hard / 989 records | Strict token F1 | +0.506 | [0.101, 1.011] | 0.015198 | 0.030397 | format-interaction only |
+
+TORQUE 结论是保留的负结果：在当前固定 prompt 下，CoT 显著降低题级 EM/F1，而稀疏的 cluster consistency 没有可支持差异。TimeQA 的统计非零不构成能力结论，因为 989 条中约只有 5 条 CoT strict exact，且 Direct/CoT 分别有 986/969 条 parser failure。主要 Kairos-vs-matched-baseline 比较仍需三个训练 seed；在完成前不作论文核心 claim 的显著性判断。
 
 ## 11. Interval/Graph 案例与失败分析
 
@@ -168,7 +179,7 @@ CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 ex
 
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
-| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | Direct/CoT 均 VERIFIED；TimeQA 两项均为 strict-format negative results |
+| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | Direct/CoT 与 paired inference 均 VERIFIED；TimeQA 为 strict-format failure-dominated result |
 | Baseline 弱/监督不公平 | Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PLANNED |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
 | 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
@@ -180,4 +191,4 @@ CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 ex
 
 ## 14. Run、Commit 与工件追踪
 
-首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。所有完整值见 registry。数据获取、processed/construction artifact 与 Bootstrap implementation commit 的完整追踪也以 registry 为准。
+首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。统计实现/aggregation commit 为 `db6efe20a6317edac47343d1c713e9f4ec51263b`；TORQUE comparison `paired-torque-dev-cot-vs-direct-43410b587f33` 的 statistics/manifest SHA 为 `38646b82...` / `d1b08455...`，TimeQA comparison `paired-timeqa-hard-cot-vs-direct-a03673eba45e` 为 `d1b5c7a9...` / `a44331e9...`。所有完整值见 registry。数据获取与 processed/construction artifact 的完整追踪也以 registry 为准。

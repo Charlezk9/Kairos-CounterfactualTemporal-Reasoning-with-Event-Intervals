@@ -6,7 +6,7 @@
 
 ### `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
 
-- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / PAIRED COMPARISON AVAILABLE`
 - method: deterministic greedy Direct; batch 8; `max_new_tokens=128`; no sampling
 - dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
 - model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
@@ -16,11 +16,11 @@
 - immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
 - SHA256: config `ec6ea450f14dea100f0d218cf3b543d12cb8a6c29f7b8a9b2f08b691613f7fb7`; predictions `6cc7298b769a45786f1cc844169f9e8c526ccfb5ace78f6a4d68c320a7003956`; generation evidence `c85c0335051eaadce1ab57781203aabf421bd859aeca4eac620390e670ef8722`; manifest `318136467a25a6b3d70ef6c0a30a24698a125cc338eae3fadb6278324be833b3`
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`; aggregation commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`; completed `2026-07-23T10:05:44Z`; metrics SHA256 `c508305a934eceac7defacd9c1d288562e6ab4dc3591d34b6c0bc9961a6e659a`; metrics manifest SHA256 `1187e24dba51e8a48bfb0bdbbba4c7596c3231553685ddd06a7ace19f4cceae9`
-- verification: fixed-source/order/schema/permission/link/hash replay passed in an independent CPU/offline process; immutable metrics publication reverified the prediction artifact before manifest and a fresh process independently reproduced all metrics. This validates the descriptive single-run values, not a cross-method confidence interval or significance claim.
+- verification: fixed-source/order/schema/permission/link/hash replay passed in an independent CPU/offline process; immutable metrics publication reverified the prediction artifact before manifest and a fresh process independently reproduced all metrics. Its registered CoT-vs-Direct paired group-bootstrap comparison is listed below.
 
 ### `20260723T100959Z-cot-torque-dev-s13-05e077299faf`
 
-- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NEGATIVE RESULT / NO COMPARATIVE CI`
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NEGATIVE RESULT / PAIRED COMPARISON AVAILABLE`
 - method: deterministic greedy CoT; batch 8; `max_new_tokens=512`; no sampling
 - dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
 - model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
@@ -30,7 +30,7 @@
 - immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T100959Z-cot-torque-dev-s13-05e077299faf`
 - SHA256: config `05e077299faf65ee75d6a3be0879ed16c9911b9bf9b5b1f9498482bc2bb71b66`; predictions `900a3872e39e9201ec3686ed7a1e6971f8c7ee93b5576f2b6120af9d2375a563`; generation evidence `9fa093f93025a138b1ecf1340633a7f3c73a4c925f9b6d7ffa5f92a446c9b3c4`; manifest `bbb32677f1903f9e736f25748036dea6d63eea39496139a693123e2d38f41fe5`
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T100959Z-cot-torque-dev-s13-05e077299faf`; aggregation commit `21b4eea6d0ba344454c06a56b8e1318fe16ddca5`; completed `2026-07-23T10:30:16Z`; metrics SHA256 `7c14f0d43a56cc87155c362df01a1700c76b4ee1f151ef4188abbb1a0499c6a2`; metrics manifest SHA256 `f8af11f7e1919c1cc5e51a94cce556130a2024529f9304d5becf8c07393ae7a7`
-- verification: independent CPU/offline prediction replay and a separate metrics replay both passed. CoT is 3.034 percentage points lower in EM and 3.292 points lower in F1 than Direct; this negative result is retained without prompt retuning. Significance is not claimed before paired bootstrap.
+- verification: independent CPU/offline prediction replay and a separate metrics replay both passed. CoT is 3.034 percentage points lower in EM and 3.292 points lower in F1 than Direct; the group-level paired comparison below supports both question-level negative differences after Holm correction. This negative result is retained without prompt retuning.
 
 ### `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`
 
@@ -60,6 +60,26 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`; aggregation commit `50c6456cf91123868398ba66c35e4879f06196d4`; completed `2026-07-23T13:48:07Z`; metrics SHA256 `da4637f142c09cebd1f125e6987eb5648543f218f57ae5cb6570a4967dd81cc7`; metrics manifest SHA256 `e7646799c75d3fa1f79a2e79fa64a8fbf0d07ab7271390169b1a7efa0ba734df`
 - verification: fresh prediction and metrics replays passed. Aggregate-only audit found 907 non-string JSON objects, 59 terminal-line violations and 3 invalid JSON responses; 17 outputs hit 512 tokens. Whitelist-shape audit found no `answer`, `final_answer` or `FINAL_ANSWER` field among the 907 objects, so no post-hoc recovery rule was selected. Strict primary remains unchanged.
 
+## Formal statistical comparisons
+
+### `paired-torque-dev-cot-vs-direct-43410b587f33`
+
+- status: `VERIFIED / PAIRED GROUP BOOTSTRAP / NEGATIVE QUESTION-LEVEL RESULT`
+- contrast: CoT minus Direct, same Qwen revision and model seed 13; 1,483 questions in 571 `(passage_id, cluster_id)` bootstrap units
+- inference: 10,000 resamples, bootstrap seed 20260723, percentile 95% CI, two-sided bootstrap sign p-value with add-one correction, Holm family of four metrics
+- results: question EM difference `-3.0343897505057313`, CI `[-4.410820779924873, -1.7088174982911826]`, raw/Holm p `0.00019998000199980003` / `0.0007999200079992001`; question F1 difference `-3.2920185381412654`, CI `[-4.673535185543669, -1.9538072463171003]`, raw/Holm p `0.00019998000199980003` / `0.0007999200079992001`; both cluster differences `-0.3502626970227669`, CI `[-1.2259194395796849, 0.5253940455341506]`, raw/Holm p `0.5629437056294371` / `1.0`
+- artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-cot-vs-direct-43410b587f33`; aggregation commit/time `db6efe20a6317edac47343d1c713e9f4ec51263b` / `2026-07-23T14:04:00Z`; statistics SHA256 `38646b8241d4c7a9985ca24a616261e393a301d42ff67dfeb7037f7d29b9044c`; manifest SHA256 `d1b08455308b8b3bb721aadde1abfafe626d3ebf93bb1fbc77cb68f5d0efeb7a`
+- verification: publication replayed both prediction and metrics artifacts before create and before manifest; a separate fresh CPU/offline process reproduced all 10,000-resample values and both hashes. The result compares prompt baselines only and is not a Kairos effect claim.
+
+### `paired-timeqa-hard-cot-vs-direct-a03673eba45e`
+
+- status: `VERIFIED / PAIRED RECORD BOOTSTRAP / STRICT FORMAT-INTERACTION RESULT`
+- contrast: CoT minus Direct, same Qwen revision and model seed 13; 989 record bootstrap units
+- inference: 10,000 resamples, bootstrap seed 20260723, percentile 95% CI, two-sided bootstrap sign p-value with add-one correction, Holm family of two metrics
+- results: normalized EM and token F1 differences both `0.5055611729019212`, CI `[0.10111223458038422, 1.0111223458038423]`, raw/Holm p `0.015198480151984802` / `0.030396960303969604`
+- artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-timeqa-hard-cot-vs-direct-a03673eba45e`; aggregation commit/time `db6efe20a6317edac47343d1c713e9f4ec51263b` / `2026-07-23T14:05:00Z`; statistics SHA256 `d1b5c7a908008fedbc0631965583d5d00861952b49347d19114ceceb555dab93`; manifest SHA256 `a44331e9ffa3c0a40e8d7e1e480e89af046a88107a3857f86853f2f98a4e823e`
+- verification: separate fresh CPU/offline replay reproduced the values and hashes. The nonzero strict difference is driven by approximately five CoT exact answers against zero Direct exact answers while parse failures are 969/989 and 986/989; it is not evidence of improved temporal reasoning and no post-hoc recovery was used.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
@@ -81,6 +101,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P03-KAIROS-TENSOR-20260723` | 2026-07-23 | paper-aligned interval geometry/relation graph/candidate scorer plus Pair-MLP same-supervision baseline | clean commit `c178d150bbfc8d4626ea70cd4e91c3a7ead13ec6` | focused 14/14; full 427/427 in 13.087s; synthetic forward/loss/backward passed with GPU hidden | none |
 | `DEV-P03-TRANSFER-GENERATION-20260723` | 2026-07-23 | deterministic Direct/CoT prompts, strict terminal JSON parsing, Qwen chat/span binding and resource-bounded greedy generation | prompts `994dfb8f34aaa9ae3fbaaecfc14a4beccdd1a0a0`; generation `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37`; effective sampling fix `eae442b850f0a1aa5cc27275717cf08b6de54bac` | focused generation 7/7; final full suite 457/457 in 13.355s; one-record GPU development smoke passed; no retained development artifact | none |
 | `DEV-P03-METRICS-ARTIFACTS-20260723` | 2026-07-23 | immutable prediction-bound transfer metrics publication and independent reaggregation | clean commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` | focused 8/8; full 465/465 in 13.916s; production Direct metrics publish plus fresh offline replay passed | production artifact registered under the formal run above |
+| `DEV-P03-STATISTICAL-ARTIFACTS-20260723` | 2026-07-23 | immutable two-run paired bootstrap, intervals and Holm-adjusted inference | clean commit `db6efe20a6317edac47343d1c713e9f4ec51263b` | focused 6/6; full 471/471 in 14.807s; both production comparisons passed fresh offline replay | production artifacts registered under formal comparisons above |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

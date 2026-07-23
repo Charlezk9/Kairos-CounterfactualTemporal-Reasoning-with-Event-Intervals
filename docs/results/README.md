@@ -10,6 +10,8 @@ run ID 使用稳定格式：`<UTC timestamp>-<method>-<dataset>-s<seed>-<short-c
 
 派生指标固定保存于 `/data0/hk_data/kairos-zx/artifacts/derived-metrics/<run-id>`，不得向已发布 prediction 目录追加文件。`kairos.metrics_artifacts` 只发布 canonical `metrics.json` 和最后发布的 `manifest.json`；发布前后重放 prediction/source，绑定 aggregation commit、prediction 四个 SHA，并由 offline verifier 重新聚合。实现 commit 为 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`。
 
+配对推断固定保存于 `/data0/hk_data/kairos-zx/artifacts/derived-statistics/<comparison-id>`。`kairos.statistical_artifacts` 只发布 canonical `statistics.json` 和 manifest-last `manifest.json`，绑定两侧 prediction/metrics manifest，并在发布前后与离线验证时重新计算 10,000 次确定性 bootstrap。TORQUE 使用 `(passage_id, cluster_id)` 组级单位，TimeQA 使用 record 单位；95% percentile CI、add-one 双侧 bootstrap sign p-value 与 dataset 内指标族 Holm 校正的冻结实现 commit 为 `db6efe20a6317edac47343d1c713e9f4ec51263b`。
+
 ## Result states
 
 - `REPORTED`：论文原值，未由本项目验证。

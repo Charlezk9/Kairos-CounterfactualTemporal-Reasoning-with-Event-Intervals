@@ -221,3 +221,12 @@
 - 已观察结构：Direct/CoT 分别有 966/907 个可解析 terminal JSON object，而非要求的 string。仅做不输出值/未知键名的结构计数：Direct 只有 7 个 object 含唯一可用 `answer` string，CoT 的 907 个没有 `answer/final_answer/FINAL_ANSWER` 字段；其余结构不通过白名单。
 - 决定：不读取 test raw object keys/values来设计 dataset-specific unwrapping，也不采用任意 first-value/recursive/stringification 规则。这样的规则会在观察测试输出后引入选择自由度且不可解释。未来若有训练外的预先定义 parser 或独立 validation 证据，可新登记 post-hoc sensitivity；当前不实现。
 - 证据：strict run、错误类别、上限命中和工件 SHA 见 `checkpoints/phase-03-timeqa-direct-baseline.md`、`checkpoints/phase-03-timeqa-cot-baseline.md` 与 registry。
+
+## D-020：配对 bootstrap、区间与多重校正
+
+- 状态：`IMPLEMENTED / PRODUCTION VERIFIED`。
+- 对比方向：所有差值固定为 candidate minus reference；当前 candidate 为 CoT、reference 为 Direct，模型 revision 与 model seed 必须相同。每项比较固定 10,000 resamples、bootstrap seed 20260723，不因观察结果调整。
+- 重采样单位：TORQUE 使用 `(passage_id, cluster_id)` contrast group，组被有放回抽取且组内全部题一起进入题级和 cluster 指标；TimeQA 使用 record。这样避免把同一 TORQUE contrast group 内问题误当作独立样本。
+- 推断：95% CI 使用 percentile linear interpolation；双侧 bootstrap sign p-value 使用 add-one correction；Holm 在每个 dataset comparison 的全部报告指标族内校正。该 p-value 是预先标明的 bootstrap sign 近似，不冒充 permutation test。
+- 工件：固定 manifest-last/no-replace 目录绑定两侧 prediction/metrics SHA、aggregation clean commit/time、seed 和 resamples；发布前后及 offline verifier 都从 fixed source、逐样本预测重算。唯一详细证据为 `checkpoints/phase-03-paired-bootstrap.md`。
+- 解释：TORQUE CoT 的题级下降得到统计支持，cluster 差异不显著。TimeQA strict 的 +0.506 pp 虽在该 bootstrap 下非零，但由约五条 CoT strict exact 与两方法 97.98%/99.70% parse failure 主导，只能解释 prompt/parser 格式交互，不能表述为 temporal reasoning 提升。D-019 不变。

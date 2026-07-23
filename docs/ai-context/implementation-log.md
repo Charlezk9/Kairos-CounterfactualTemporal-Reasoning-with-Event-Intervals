@@ -180,3 +180,10 @@
 - prediction artifact 全量发布并经 fresh replay：20 parsed、969 parse errors、输入 603--24,597 tokens、总生成 226,010 tokens。metrics 双重 replay 得 strict EM/token F1 均 0.505561%。
 - 聚合错误为 907 non-string JSON objects、59 terminal-line violations、3 invalid JSON；17 条命中 512-token 上限。无值/样本输出的 whitelist audit 发现 907 objects 均无 `answer/final_answer/FINAL_ANSWER` 字段。
 - 因此不从 test raw outputs 设计 object-unwrapping parser，post-hoc sensitivity 暂缓。CoT 只比 Direct 高 0.506 pp，且两者都属于 strict-format failure；不作显著性或时间推理能力结论。
+
+## 2026-07-23 — Paired bootstrap and Holm inference
+
+- `db6efe2...` 实现两侧 prediction/metrics-bound 的 immutable statistical artifact；SplitMix64、10,000 resamples、percentile 95% CI、add-one 双侧 bootstrap sign p-value 与 dataset 内 Holm 校正全部固定。focused 6/6、full 471/471（14.807s）通过。
+- TORQUE 以 571 个 contrast groups 重采样。CoT-Direct 的 question EM/F1 为 -3.034/-3.292 pp，95% CI 分别 `[-4.411,-1.709]` / `[-4.674,-1.954]`，Holm p 均 0.000800；两项 cluster 差异 -0.350 pp，CI 跨零且 Holm p=1。
+- TimeQA 以 989 records 重采样。strict EM/F1 差均 +0.506 pp，CI `[0.101,1.011]`、Holm p=0.030397；该差异只代表约五条 strict exact 和严重格式失败下的 parser interaction，不支持推理能力 claim。
+- 两个 manifest-last 工件均通过另一 fresh CPU/offline process 重算，SHA 与首次发布一致；完整身份、数值和限制见 `checkpoints/phase-03-paired-bootstrap.md` 与 registry。
