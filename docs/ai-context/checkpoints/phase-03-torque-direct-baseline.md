@@ -1,6 +1,6 @@
 # Phase 03 TORQUE Direct Baseline
 
-- status: `COMPLETE / PREDICTIONS VERIFIED / METRICS ARTIFACT PENDING`
+- status: `COMPLETE / VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`
 - run_id: `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
 - execution_commit: `eae442b850f0a1aa5cc27275717cf08b6de54bac`
 - date: 2026-07-23 CST
@@ -56,14 +56,35 @@ aggregation from the verified prediction rows exactly reproduced:
 | cluster exact consistency | 1.5761821366024518 |
 | cluster F1>=0.8 consistency | 1.5761821366024518 |
 
-## Interpretation and remaining gate
+## Immutable metrics artifact
+
+Implementation commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`
+published the independently reaggregated result at:
+
+`/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
+
+The exact two files are mode 0600/single-link under 0700 directories. Metrics
+completed at `2026-07-23T10:05:44Z`; `metrics.json` is 1,363 bytes with SHA256
+`c508305a934eceac7defacd9c1d288562e6ab4dc3591d34b6c0bc9961a6e659a`, and
+the 474-byte manifest SHA256 is
+`1187e24dba51e8a48bfb0bdbbba4c7596c3231553685ddd06a7ace19f4cceae9`.
+The manifest binds prediction manifest SHA
+`318136467a25a6b3d70ef6c0a30a24698a125cc338eae3fadb6278324be833b3`.
+
+The first production publish call supplied a mistyped expected commit and was
+rejected by the initial clean-HEAD gate before creating the metrics root or
+target. The successful retry used the exact HEAD above. A fresh CPU/offline
+process then reverified both the prediction and metrics artifacts and exactly
+reproduced the table.
+
+## Interpretation
 
 This is the independent reimplementation's prompt-only lower bound, not a
 reproduction of an author-provided prompt. Its low cluster consistency means
 the Direct output rarely answers every member of a contrast group correctly;
 it does not yet support a comparison or an interval/graph improvement claim.
 
-Prediction integrity and aggregation are verified, but the project result
-contract also requires an immutable machine-readable metrics artifact. Until
-that publisher/replay step is implemented and executed, the paper-facing state
-remains `PRELIMINARY / PREDICTIONS VERIFIED`.
+Prediction integrity, aggregation and machine-readable publication are
+verified, so the descriptive values are `VERIFIED`. This remains one
+deterministic seed/run; comparative confidence intervals and significance are
+not available until another method produces paired predictions.

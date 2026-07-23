@@ -120,7 +120,7 @@ Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f
 
 ## 8. 新增 Baseline 结果
 
-首个 prompt-only Direct 正式 run 已完成并通过 prediction/offline aggregation 复核；因独立 machine-readable metrics artifact 尚未发布，当前状态为 `PRELIMINARY / PREDICTIONS VERIFIED`，不得进入论文修改建议。Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph/Constraint-Rerank 仍待运行。
+首个 prompt-only Direct 正式 run 已完成，并通过 immutable prediction 与 machine-readable metrics 的两层离线重放，状态为 `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`。Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph/Constraint-Rerank 仍待运行。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
@@ -138,9 +138,9 @@ Direct 结果如下。指标均为百分数，parse error 使用固定 sentinel 
 
 | Status | Method | Dataset/split | N / groups | Seed | Set EM | Set F1 | Cluster exact | Cluster F1>=0.8 | Parse error | Run / commit |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
-| `PRELIMINARY / PREDICTIONS VERIFIED` | Qwen2.5-7B Direct greedy | TORQUE public dev | 1,483 / 571 | 13 | 15.644 | 16.070 | 1.576 | 1.576 | 42/1,483 (2.832%) | `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d` / `eae442b...` |
+| `VERIFIED / SINGLE RUN` | Qwen2.5-7B Direct greedy | TORQUE public dev | 1,483 / 571 | 13 | 15.644 | 16.070 | 1.576 | 1.576 | 42/1,483 (2.832%) | `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d` / `eae442b...` |
 
-该 run 固定模型 revision `a09a354...`、数据 SHA `7a8dd84c...`，全量 source-order prediction 和 raw evidence 通过独立离线 replay。当前数值只建立了 prompt-only 下界；在 CoT、Kairos 和匹配监督 Baseline 完成前，不能据此声称 interval/graph 方法改进。完整 SHA 与资源证据见 registry 和 `phase-03-torque-direct-baseline.md`。
+该 run 固定模型 revision `a09a354...`、数据 SHA `7a8dd84c...`，全量 source-order prediction/raw evidence 与派生 metrics 均通过独立离线 replay。Metrics aggregation commit 为 `61e96bc...`，metrics/manifest SHA 为 `c508305a...` / `1187e24d...`。当前数值只建立了 prompt-only 下界；在 CoT、Kairos 和匹配监督 Baseline 完成及 paired bootstrap 前，不能据此声称 interval/graph 方法改进或显著差异。完整 SHA 与资源证据见 registry 和 `phase-03-torque-direct-baseline.md`。
 
 ## 10. 统计检验与实验结论
 
@@ -154,7 +154,7 @@ Direct 结果如下。指标均为百分数，parse error 使用固定 sentinel 
 
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
-| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE Direct PRELIMINARY；TimeQA model evaluation PLANNED |
+| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE Direct VERIFIED single run；TimeQA model evaluation PLANNED |
 | Baseline 弱/监督不公平 | Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PLANNED |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
 | 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
@@ -166,4 +166,4 @@ Direct 结果如下。指标均为百分数，parse error 使用固定 sentinel 
 
 ## 14. Run、Commit 与工件追踪
 
-首个正式模型 run 为 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution commit `eae442b850f0a1aa5cc27275717cf08b6de54bac`；config/prediction/evidence/manifest SHA 分别为 `ec6ea450...`、`6cc7298b...`、`c85c0335...`、`31813646...`，完整值见 registry。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。新增 source records 为 `ACQ-STRATEGYQA-20260723`、`ACQ-TORQUE-20260723`、`ACQ-TIMEQA-20260723` 与 `ACQ-2WIKI-20260723`，状态和 manifest SHA 见 registry。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+首个正式模型 run 为 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution commit `eae442b850f0a1aa5cc27275717cf08b6de54bac`；config/prediction/evidence/manifest SHA 分别为 `ec6ea450...`、`6cc7298b...`、`c85c0335...`、`31813646...`。其 metrics aggregation commit 为 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`，metrics/manifest SHA 分别为 `c508305a...` / `1187e24d...`；完整值见 registry。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。新增 source records 为 `ACQ-STRATEGYQA-20260723`、`ACQ-TORQUE-20260723`、`ACQ-TIMEQA-20260723` 与 `ACQ-2WIKI-20260723`，状态和 manifest SHA 见 registry。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。

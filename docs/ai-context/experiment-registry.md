@@ -6,7 +6,7 @@
 
 ### `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
 
-- status: `PRELIMINARY / PREDICTIONS VERIFIED / METRICS ARTIFACT PENDING`
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`
 - method: deterministic greedy Direct; batch 8; `max_new_tokens=128`; no sampling
 - dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
 - model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
@@ -15,7 +15,8 @@
 - replayed metrics: question set EM `15.64396493594066`; question set F1 `16.069849832493126`; cluster exact consistency `1.5761821366024518`; cluster F1>=0.8 consistency `1.5761821366024518` (all percentages)
 - immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
 - SHA256: config `ec6ea450f14dea100f0d218cf3b543d12cb8a6c29f7b8a9b2f08b691613f7fb7`; predictions `6cc7298b769a45786f1cc844169f9e8c526ccfb5ace78f6a4d68c320a7003956`; generation evidence `c85c0335051eaadce1ab57781203aabf421bd859aeca4eac620390e670ef8722`; manifest `318136467a25a6b3d70ef6c0a30a24698a125cc338eae3fadb6278324be833b3`
-- verification: fixed-source/order/schema/permission/link/hash replay passed in an independent CPU/offline process; metrics exactly reaggregated from all prediction rows. A separate immutable metrics artifact is still required before promoting the result to `VERIFIED`.
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`; aggregation commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`; completed `2026-07-23T10:05:44Z`; metrics SHA256 `c508305a934eceac7defacd9c1d288562e6ab4dc3591d34b6c0bc9961a6e659a`; metrics manifest SHA256 `1187e24dba51e8a48bfb0bdbbba4c7596c3231553685ddd06a7ace19f4cceae9`
+- verification: fixed-source/order/schema/permission/link/hash replay passed in an independent CPU/offline process; immutable metrics publication reverified the prediction artifact before manifest and a fresh process independently reproduced all metrics. This validates the descriptive single-run values, not a cross-method confidence interval or significance claim.
 
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
@@ -37,6 +38,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-PREDICTION-ARTIFACTS-20260723` | 2026-07-23 | immutable model-agnostic prediction JSONL/manifest publication and offline source replay | clean commit `f12efa05459daa982b4a5583abf22d48e38b9a1a` | focused 12/12; full 413/413 in 13.163s; real isolated clean-Git gate passed; production publish not called | none |
 | `DEV-P03-KAIROS-TENSOR-20260723` | 2026-07-23 | paper-aligned interval geometry/relation graph/candidate scorer plus Pair-MLP same-supervision baseline | clean commit `c178d150bbfc8d4626ea70cd4e91c3a7ead13ec6` | focused 14/14; full 427/427 in 13.087s; synthetic forward/loss/backward passed with GPU hidden | none |
 | `DEV-P03-TRANSFER-GENERATION-20260723` | 2026-07-23 | deterministic Direct/CoT prompts, strict terminal JSON parsing, Qwen chat/span binding and resource-bounded greedy generation | prompts `994dfb8f34aaa9ae3fbaaecfc14a4beccdd1a0a0`; generation `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37`; effective sampling fix `eae442b850f0a1aa5cc27275717cf08b6de54bac` | focused generation 7/7; final full suite 457/457 in 13.355s; one-record GPU development smoke passed; no retained development artifact | none |
+| `DEV-P03-METRICS-ARTIFACTS-20260723` | 2026-07-23 | immutable prediction-bound transfer metrics publication and independent reaggregation | clean commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` | focused 8/8; full 465/465 in 13.916s; production Direct metrics publish plus fresh offline replay passed | production artifact registered under the formal run above |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

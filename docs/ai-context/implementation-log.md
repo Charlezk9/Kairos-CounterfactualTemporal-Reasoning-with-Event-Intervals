@@ -151,4 +151,11 @@
 - `f45c9e8...` 增加固定本地 Qwen revision 的 resource-bounded greedy generation，并将 raw response、parse status、input/output token counts 写入 prediction artifact v2；`eae442b...` 显式清除 greedy 模式下的 inactive sampling controls。最终 focused generation 7/7、full 457/457（13.355s）。
 - 无权重 token preflight 确认 TORQUE Direct/CoT 最大 323/336 input tokens；TimeQA Direct/CoT 最大 24,584/24,597，均在 32,768 context 内。TimeQA 有 253 条超过 8,192、79 条超过 16,384，后续不得使用较短默认 context 静默截断。
 - clean `eae442b...` 上完成首个正式运行 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`。TORQUE public dev 1,483 题全部发布，1,441 parsed、42 parse errors；独立 CPU/offline replay 通过并得到 set EM/F1 15.644/16.070、两种 cluster consistency 均 1.576（百分数）。
-- prediction/raw-evidence 工件和所有 SHA 已登记。由于 machine-readable metrics artifact 尚未发布，本结果暂为 `PRELIMINARY / PREDICTIONS VERIFIED`，不能进入作者建议。
+- prediction/raw-evidence 工件和所有 SHA 已登记。在该检查点 machine-readable metrics artifact 尚未发布，因此结果暂记为 `PRELIMINARY / PREDICTIONS VERIFIED`；下一节记录其后续升级。
+
+## 2026-07-23 — Immutable metrics artifacts and Direct promotion
+
+- `61e96bc...` 实现 prediction-bound `metrics.json`/manifest-last publication：发布前后均重放完整 prediction/source，绑定 aggregation commit/time 和四个 prediction SHA，独立 verifier 重新聚合而不是信任已存数值。
+- focused 8/8、full 465/465（13.916s）通过；测试覆盖 no-replace、双 Git gate、中途 prediction 变化、rehashed metric 篡改、权限、hardlink 和额外文件。
+- 首次 production 调用因手工输入的 expected commit SHA 错误在首次 Git gate 处 fail closed，目标目录未创建；使用实际 clean HEAD `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 重试后发布成功。
+- Direct metrics SHA `c508305a...`、manifest SHA `1187e24d...`；fresh CPU/offline replay 完全一致。结果升级为 `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`。

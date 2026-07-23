@@ -8,6 +8,8 @@ run ID 使用稳定格式：`<UTC timestamp>-<method>-<dataset>-s<seed>-<short-c
 
 实现 `kairos.prediction_artifacts` 固定支持 `torque-dev` 和 `timeqa-hard`，要求完整 record-ID coverage 和 source order，并在发布前/manifest 前检查 clean exact HEAD。目录为 0700、文件为 0600、publication no-replace；offline verifier 重放 source adapter 和所有 SHA/schema。v1 底层始于 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，v2 raw-generation evidence contract 在首次 production publication 前由 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结。首个 production artifact 是 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`；其状态与 SHA 见 experiment registry。
 
+派生指标固定保存于 `/data0/hk_data/kairos-zx/artifacts/derived-metrics/<run-id>`，不得向已发布 prediction 目录追加文件。`kairos.metrics_artifacts` 只发布 canonical `metrics.json` 和最后发布的 `manifest.json`；发布前后重放 prediction/source，绑定 aggregation commit、prediction 四个 SHA，并由 offline verifier 重新聚合。实现 commit 为 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`。
+
 ## Result states
 
 - `REPORTED`：论文原值，未由本项目验证。
