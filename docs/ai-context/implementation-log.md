@@ -96,3 +96,10 @@
 - 本次未读取 production data，未写持久构造记录，未建立正式 run、模型指标或论文结果。
 - 精确 2 code + 7 docs 共9路径快照已以普通 non-force commit `24ce15d40bd038d61bd6581ed2bc260072468c12` 提交，parent 为 `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`；项目专用 SSH 普通推送后 local/remote branch head 一致。
 - 该提交的状态是 `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`，仍非数据构造运行、模型实验、formal run 或论文证据。
+
+## 2026-07-23 — D-012 construction audit schema v1
+
+- 在 base HEAD `2b7e3f03726fd1abf59fa18867593458f38e5b34` 上实现只存内存的 frozen typed audit record；source/test blob 分别为 `1bb1b167f3af5424b8fe199b2c9057c51638957f` 与 `3bfa86de8deb0b15ececad698808583acfe7aa45`。
+- 两轮 staged 复审修复集中于显式 primitive scalar parsing、无载荷异常、D-011 optional/crosslink/role 矩阵和完整 synthetic regression；未扩展到 persistence、JSONL、manifest 或 CLI。
+- 最终 fresh targeted 为 24/24、0.193s、exit 0；唯一一次 full suite 为 373/373、13.020s、exit 0，full temp `/data0/hk_data/kairos-zx/.tmp/d012-full.r2tb5NGaAd` 已清理。智能体 2事后裁决为 `POST_AUDIT_APPROVED`。
+- 当前状态为 `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`，下一步仅是精确九路径 staged audit。没有 formal run、production data read、network、model/GPU、artifact、paper metric 或 `VERIFIED` 实验 claim。

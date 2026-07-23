@@ -318,3 +318,11 @@
 - unique detail: exact blobs, test-run accounting, cleanup evidence, construction semantics and commit gate are recorded only in `checkpoints/phase-01-temporal-construction-v0.md`
 - commit disposition: the exact nine-path snapshot was ordinarily committed as `24ce15d40bd038d61bd6581ed2bc260072468c12` with parent `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1` and ordinarily pushed through project-only SSH; local and remote heads matched
 - closeout boundary: the historical pre-commit verdict did not pre-authorize this closeout or any later work; the current separate authorization covers exactly this seven-document closeout and nothing beyond it—no P1 code or test action, data or network access, further registry/result change, or artifact creation is authorized
+
+## 2026-07-23 — D-012 construction-audit implementation audit
+
+- verdict: `POST_AUDIT_APPROVED / COMMIT_PENDING` for the exact two-code/test plus seven-document candidate based on `2b7e3f03726fd1abf59fa18867593458f38e5b34`
+- exact implementation blobs: source `1bb1b167f3af5424b8fe199b2c9057c51638957f`; test `3bfa86de8deb0b15ececad698808583acfe7aa45`
+- evidence: final fresh targeted 24/24 in 0.193 seconds, exit 0; the one full-suite run 373/373 in 13.020 seconds, exit 0; `/data0/hk_data/kairos-zx/.tmp/d012-full.r2tb5NGaAd` was exactly cleaned
+- boundary: standard-library, synthetic and in-memory only; no formal run, production data read, network, model/GPU, persistent artifact, paper metric, `VERIFIED` experiment claim or residual process
+- next gate: exact nine-path staged audit only; this approval does not authorize another test, commit, push or any P2 persistence work

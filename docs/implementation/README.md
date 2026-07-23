@@ -122,4 +122,6 @@ D-011 的局部实现已以 commit `24ce15d40bd038d61bd6581ed2bc260072468c12` �
 
 ## Construction audit schema v1
 
-D-012 冻结一个只存内存的 typed audit record，用稳定 source identity 生成 audit ID，并用独立 fingerprint 覆盖 order、完整结果和诊断。P1 不实现 JSONL、manifest、writer/verifier 或不可变发布；详细 schema、限额、测试和门禁的唯一来源是 `../ai-context/checkpoints/phase-01-construction-audit-schema.md`。
+`kairos.construction_audit` 将一个 pre-construction `TemporalExample` 和已经计算的 D-011 `ConstructionResult` 映射为 frozen typed audit record。稳定 audit ID 只绑定 source identity；独立 fingerprint 覆盖 caller order、完整 construction evidence、final roles 和诊断。显式 serializer/parser 保持 exact nested schema、深冻结诊断并 fail closed 校验 D-011 crosslinks。
+
+当前状态为 `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`。P1 不实现 JSONL、manifest、writer/verifier、CLI 或不可变发布；稳定契约、限额、精确 blobs、开发测试和提交门禁的唯一来源是 `../ai-context/checkpoints/phase-01-construction-audit-schema.md`。

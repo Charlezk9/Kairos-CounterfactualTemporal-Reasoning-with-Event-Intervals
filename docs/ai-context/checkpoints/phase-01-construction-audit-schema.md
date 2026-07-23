@@ -1,8 +1,10 @@
 # Phase 01 Construction Audit Schema v1
 
-- status: `FROZEN_BEFORE_IMPLEMENTATION / PLAN_ONLY`
+- status: `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`
 - branch: `experiment/reproduction-additional-evaluation`
-- base_head: `dcf841341f136b3aafcaea8b85e86e029373fde9`
+- base_head: `2b7e3f03726fd1abf59fa18867593458f38e5b34`
+- source_blob: `1bb1b167f3af5424b8fe199b2c9057c51638957f`
+- test_blob: `3bfa86de8deb0b15ececad698808583acfe7aa45`
 - active_run_ids: none
 - artifacts: none
 - production_data_read: none
@@ -335,10 +337,37 @@ manifest-last completion, file bytes/count/SHA, terminal counts/funnel replay
 and exact-directory verification. P1 creates no manifest schema and grants no
 production CLI or publication authority.
 
-## Authorization and next gate
+## Implementation verification and next gate
 
-This checkpoint authorizes only the four-document schema freeze. The next safe
-action is for Agent 1 to submit an exact two-file implementation plan to Agent
-2. Until a new explicit approval, do not modify code/tests, run tests, access
-data or `/data0`, use network/model/GPU, modify registry/results, create an
-artifact, or claim a construction run or paper result.
+The implementation candidate is based on clean commit
+`2b7e3f03726fd1abf59fa18867593458f38e5b34`. Its exact implementation blobs
+are `1bb1b167f3af5424b8fe199b2c9057c51638957f` for
+`src/kairos/construction_audit.py` and
+`3bfa86de8deb0b15ececad698808583acfe7aa45` for
+`tests/test_construction_audit.py`. Two review-remediation rounds tightened
+primitive scalar parsing, crosslink/role tests and fixed no-payload failures.
+
+The final fresh targeted run passed 24/24 tests in 0.193 seconds with exit 0.
+The one and only full-suite run passed 373/373 tests in 13.020 seconds with
+exit 0. Its unique temporary directory,
+`/data0/hk_data/kairos-zx/.tmp/d012-full.r2tb5NGaAd`, was removed after the
+run. Agent 2's post-execution audit is `POST_AUDIT_APPROVED`. These are
+synthetic development checks, not a formal run, dataset observation, model
+evaluation or paper metric.
+
+The commit candidate contains exactly these nine paths:
+
+- `src/kairos/construction_audit.py`
+- `tests/test_construction_audit.py`
+- `docs/ai-context/CURRENT.md`
+- `docs/ai-context/checkpoints/phase-01-construction-audit-schema.md`
+- `docs/ai-context/experiment-registry.md`
+- `docs/ai-context/implementation-log.md`
+- `docs/ai-context/sandbox-audit.md`
+- `docs/implementation/README.md`
+- `docs/verify-addExp.md`
+
+Status is `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`. The next safe
+action is an exact nine-path staged audit. No further test, commit, push,
+production data read, network, model/GPU operation, artifact, paper metric or
+`VERIFIED` experimental claim is authorized by this checkpoint.
