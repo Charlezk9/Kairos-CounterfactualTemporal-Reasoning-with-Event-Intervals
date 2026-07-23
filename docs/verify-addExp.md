@@ -1,14 +1,14 @@
 # Kairos 补充实验技术与结果报告
 
-> 状态：PLANNED
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有一个 `VERIFIED` 数据准备工件，但所有论文效果数字仍仅为 `REPORTED`，尚无本项目 `VERIFIED` 模型实验结果。
+> 状态：PHASE 01 RUNNING
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有 source conversion 与 construction v0 两个 `VERIFIED` 数据工件，但所有论文效果数字仍仅为 `REPORTED`，尚无本项目 `VERIFIED` 模型实验结果。
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01，data pipeline；GSM8K source/example production conversion 已完成
+- 当前阶段：Phase 01，data pipeline；GSM8K source/example conversion 与 construction v0 production replay 已完成
 - 复现性质：independent reimplementation
 - 已完成实验：无
-- 当前结论：尚不能验证论文数值或新增 claim
+- 当前结论：尚不能验证论文效果数值；已验证当前保守 v0 在 GSM8K 上为 0 retained，不能直接用于模型训练
 
 ## 2. 复现范围、版本与 Git commit
 
@@ -86,6 +86,8 @@ D-011 显式 marker 构造 v0 已以 commit `24ce15d40bd038d61bd6581ed2bc2600724
 
 D-012 construction audit schema v1 已以 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 完成 synthetic development verification，parent 为 `2b7e3f03726fd1abf59fa18867593458f38e5b34`，普通 push 后 HEAD、origin 与 upstream 一致。其 source/test blob 为 `1bb1b167f3af5424b8fe199b2c9057c51638957f` 与 `3bfa86de8deb0b15ececad698808583acfe7aa45`；最终 fresh targeted 24/24、0.193s、exit 0，唯一一次 full suite 373/373、13.020s、exit 0，并通过 post-audit。该记录只证明内存 audit schema 的开发检查，不读取 production data，不生成 formal run、artifact、模型指标、论文效果数字或可进入作者结论的 `VERIFIED` effect claim；详细边界见 `docs/ai-context/checkpoints/phase-01-construction-audit-schema.md`。
 
+D-013/P2 与 fixed GSM8K driver 已完成 production integration。有效执行 commit 为 `3944bb56d5c16a11482de39c5f0295936b6ac035`；train/test immutable audit 均经独立 offline source-lockstep replay。当前 adapter 将 GSM8K `text` 与 `question` 设为同一值，冻结 D-011 对所有成功抽取记录触发 `text_question_alias_unsupported`，因此 valid CF 与 retained 均为 0。该结果验证了当前独立实现的数据策略不充分，不能解释为论文方法效果或用来反驳论文中不可识别的作者 subset。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
@@ -99,7 +101,16 @@ GSM8K 固定 upstream revision `3101c7d5072418e28b9008a6636bde82a006892c` 的 so
 | `VERIFIED DATA ARTIFACT` | `PROC-P01-GSM8K-20260722` | train | 7,473 | 7,473 | 0 / 0 | `3e34c9c6da06a0364b84ef97492331e59a764a45` |
 | `VERIFIED DATA ARTIFACT` | `PROC-P01-GSM8K-20260722` | test | 1,319 | 1,319 | 0 / 0 | `3e34c9c6da06a0364b84ef97492331e59a764a45` |
 
-processed manifest SHA256 为 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`；四个 ledger 的逐文件 SHA256 与 bytes 位于 `docs/ai-context/checkpoints/phase-01-gsm8k-conversion.md`。这里的 `VERIFIED DATA ARTIFACT` 不等于实验效果 `VERIFIED`。事件抽取、关系可靠性、反事实有效率、人工审计和 Cohen's kappa 尚未运行。
+processed manifest SHA256 为 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`；四个 ledger 的逐文件 SHA256 与 bytes 位于 `docs/ai-context/checkpoints/phase-01-gsm8k-conversion.md`。
+
+Construction v0 的已验证漏斗为：
+
+| Status | Artifact ID | Split | Raw | Temporal filtered | Extraction/reliable | Valid CF | Retained | Execution commit |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| `VERIFIED DATA ARTIFACT / ZERO_RETAINED` | `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` | train | 7,473 | 1,845 (24.69%) | 370 (4.95%) | 0 | 0 | `3944bb56d5c16a11482de39c5f0295936b6ac035` |
+| `VERIFIED DATA ARTIFACT / ZERO_RETAINED` | `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` | test | 1,319 | 361 (27.37%) | 79 (5.99%) | 0 | 0 | `3944bb56d5c16a11482de39c5f0295936b6ac035` |
+
+Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f6540fe04361cdb346` / `41edd3255de9e6b3c9f6df4a7d2ca9f05d6dc7ad33a65f2f7d3b044e8a15412f`；test 为 `14393b5e2c8aace358babaaf38e37bd2d4e8fcbcdd52452127b3bf49b9f6a4e4` / `dda773ba105b59eb5d4e27fe8ea4ea0dcc2b661b4c639a2d3cd2ba297f9a129c`。这里的 `VERIFIED DATA ARTIFACT` 不等于实验效果 `VERIFIED`。两人 200 条人工审计与 Cohen's kappa 尚未完成；在冻结 construction v1 前不得开始 GSM8K LoRA 训练。
 
 ## 7. 已有实验复现结果
 
@@ -128,7 +139,7 @@ processed manifest SHA256 为 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a
 | 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | PLANNED |
 | Baseline 弱/监督不公平 | Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PLANNED |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
-| 数据构造不透明 | 构造漏斗、哈希、人工审计 | PLANNED |
+| 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
 | interval 可解释性不足 | interval/graph 可视化与消融 | PLANNED |
 
 ## 13. 论文修改建议
@@ -137,4 +148,4 @@ processed manifest SHA256 为 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a
 
 ## 14. Run、Commit 与工件追踪
 
-当前无正式模型 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+当前无正式模型 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。

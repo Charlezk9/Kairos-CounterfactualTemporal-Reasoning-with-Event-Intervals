@@ -4,15 +4,16 @@
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5
-- last_verified_commit: 63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5
-- last_completed_checkpoint: checkpoints/phase-01-construction-audit-persistence.md
+- git_head: 3944bb56d5c16a11482de39c5f0295936b6ac035
+- last_verified_commit: 3944bb56d5c16a11482de39c5f0295936b6ac035
+- last_completed_checkpoint: checkpoints/phase-01-gsm8k-construction-v0.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`（策略阻塞，等待手动解决目录权限）。StrategyQA / 2Wiki / TORQUE / TimeQA 四数据集获取因工具限制被阻塞（`NO_NATIVE_EXEC_ENV`），优先采用手动下载方式绕过，放入 `/data0/hk_data/kairos-zx/data/raw/<dataset>/`。
+- blockers: GSM8K construction v0 is `VERIFIED / ZERO_RETAINED`; LoRA training on this artifact is blocked until a separately frozen train-led v1 and two-human audit exist. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`（不得静默放宽）。StrategyQA / 2Wiki / TORQUE / TimeQA acquisition remains incomplete; manual official-source download is the preferred independent path.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 实现固定 GSM8K construction driver：只读取已验证的 processed example train/test，逐条调用 D-011 与 D-012，再交给已提交的 P2 publisher；使用 synthetic tests 验证后原子提交。随后只能从 clean commit 运行一次 train/test production construction，并如实登记 funnel（包括可能的 0 retained）。
+- next_safe_action: 仅基于论文规范与 GSM8K train-side 设计证据冻结 construction v1 和 200 条分层人工审计准备方案；不得根据已查看的 test funnel 调参，也不得在 0-retained v0 上启动 LoRA。与此同时可按固定官方 revision 手动获取 StrategyQA、2Wiki、TORQUE、TimeQA，先做资源门禁并只写 `/data0/hk_data/kairos-zx/data/raw/<dataset>/<revision>`。
 - required_reading:
+  - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`
   - `checkpoints/phase-01-temporal-construction-v0.md`

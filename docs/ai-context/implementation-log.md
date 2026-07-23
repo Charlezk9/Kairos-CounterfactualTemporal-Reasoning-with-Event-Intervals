@@ -111,3 +111,10 @@
 - 新增固定 GSM8K source binding 的 immutable JSONL/manifest publisher、offline verifier 和 observer；实现 commit 为 `63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5`，已普通推送。
 - focused 8/8 与 clean-commit full 381/381（13.234s）通过；GPU 禁用、CPU 线程 2、cache/temp 均位于 `/data0/hk_data/kairos-zx`。
 - 本里程碑没有创建 production audit、run ID 或论文数值。下一步实现 fixed production driver，再从 clean commit 运行 train/test 构造并登记实际 funnel。
+
+## 2026-07-23 — GSM8K construction v0 production
+
+- fixed driver commit `c8f5cecf...` 的首次 train 调用在 target 创建前发现 completion hardlink binding 不匹配并 fail closed，target 保持 absent。根因是 P2 合成 fixture 未模拟 acquisition 的 guard/final 同 inode nlink=2 协议，同时 completion digest 常量少一位。
+- `3944bb56...` 严格绑定双链接 completion pair、修正 64-hex digest 并加入回归；focused 10/10、clean full 388/388，production source gate 通过。
+- 从 clean `3944bb56...` 各执行一次 train/test，随后独立 offline replay 均为 `STRUCTURALLY_VERIFIED`。train 7,473 → temporal 1,845 → extracted/reliable 370 → valid CF/retained 0；test 1,319 → 361 → 79 → 0。
+- 工件 ID 为 `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723`。零 retained 是冻结 alias-safety/numeric-update 约束的负数据结果，不是模型指标；不得在查看 test funnel 后静默调整 v0。

@@ -129,9 +129,12 @@ P1 已以 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 完成，状态为 `
 ## Construction audit persistence v1
 
 `kairos.construction_audit_persistence` 在 commit
-`63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5` 实现 P2。它只接受已经构造的
+`63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5` 实现 P2，生产 integration fix
+为 `3944bb56d5c16a11482de39c5f0295936b6ac035`。它只接受已经构造的
 typed audit stream，绑定固定 GSM8K processed source，执行 canonical JSONL、
 manifest-last/no-replace publication，并通过 source lockstep replay 验证 order、
 identity、terminal 与 funnel。它不调用 D-011，不选择 subset，也不复用会覆盖目标的
 `io.write_examples()`。生产 driver 尚未实现；完整合同和验证证据见
-`../ai-context/checkpoints/phase-01-construction-audit-persistence.md`。
+`../ai-context/checkpoints/phase-01-construction-audit-persistence.md`。固定
+`kairos.gsm8k_construction` driver 在 production train/test 上得到 0 retained；
+原因和不可调参边界见 `../ai-context/checkpoints/phase-01-gsm8k-construction-v0.md`。

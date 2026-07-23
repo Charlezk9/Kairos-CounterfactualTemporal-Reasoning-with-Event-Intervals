@@ -1,7 +1,8 @@
 # Phase 01 Construction Audit Persistence (P2)
 
 - status: `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`
-- implementation_commit: `63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5`
+- initial_implementation_commit: `63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5`
+- effective_implementation_commit: `3944bb56d5c16a11482de39c5f0295936b6ac035`
 - branch: `experiment/reproduction-additional-evaluation`
 - production_run: none
 - active_run_ids: none
@@ -65,8 +66,11 @@ with GPU disabled, two CPU threads, offline model settings and project-local
 cache/temp paths. Tests cover manifest-last publication, full replay,
 no-replace, stream order/count failures, partial-state preservation, tamper
 detection, observer states, commit/split validation and redacted CLI failures.
-No production target, run ID, network access, model operation or experiment
-metric was created.
+The initial development checkpoint created no production target. Production
+integration later exposed and fixed the acquisition completion hardlink-pair
+binding in `3944bb56...`; focused tests passed 10/10 and the clean full suite
+passed 388/388. The resulting production artifact is recorded separately in
+`phase-01-gsm8k-construction-v0.md`.
 
 ## Next gate
 
