@@ -20,16 +20,22 @@ from .transfer_eval import load_timeqa_hard, load_torque_dev
 
 _PROJECT_ROOT = Path("/home/yangbin/zx-tmp/kairos")
 _ARTIFACT_ROOT = Path("/data0/hk_data/kairos-zx/artifacts")
-_MANIFEST_SCHEMA = "prediction-run-manifest-v1"
+_MANIFEST_SCHEMA = "prediction-run-manifest-v2"
 _RECORD_SCHEMA = "prediction-record-v1"
+_EVIDENCE_SCHEMA = "generation-evidence-v1"
 _STATUS = "PREDICTIONS_COMPLETE"
 _CONFIG_NAME = "config.json"
 _PREDICTIONS_NAME = "predictions.jsonl"
+_EVIDENCE_NAME = "generation-evidence.jsonl"
 _MANIFEST_NAME = "manifest.json"
-_FINAL_NAMES = frozenset({_CONFIG_NAME, _PREDICTIONS_NAME, _MANIFEST_NAME})
+_FINAL_NAMES = frozenset(
+    {_CONFIG_NAME, _PREDICTIONS_NAME, _EVIDENCE_NAME, _MANIFEST_NAME}
+)
 _CONFIG_LIMIT = 1_048_576
 _PREDICTION_LINE_LIMIT = 262_144
 _PREDICTIONS_LIMIT = 128 * 1024 * 1024
+_EVIDENCE_LINE_LIMIT = 262_144
+_EVIDENCE_LIMIT = 256 * 1024 * 1024
 _MANIFEST_LIMIT = 262_144
 _HEX40 = re.compile(r"^[0-9a-f]{40}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -241,11 +247,32 @@ class PredictionRecord:
 
 
 @dataclass(frozen=True)
+class GenerationEvidence:
+    raw_response: str
+    parse_status: str
+    input_token_count: int
+    generated_token_count: int
+
+    def __post_init__(self) -> None:
+        raw = _text(self.raw_response, "raw response", allow_empty=True)
+        if len(raw.encode("utf-8")) > 65_536:
+            raise PredictionArtifactError("raw response exceeds its byte limit")
+        if self.parse_status not in {"PARSED", "PARSE_ERROR", "NOT_APPLICABLE"}:
+            raise PredictionArtifactError("parse_status is invalid")
+        _integer(self.input_token_count, "input_token_count", 0, 32_768)
+        _integer(self.generated_token_count, "generated_token_count", 0, 4_096)
+        if self.parse_status == "PARSED" and not raw:
+            raise PredictionArtifactError("parsed raw response must be non-empty")
+
+
+@dataclass(frozen=True)
 class VerifiedPredictionArtifact:
     spec: RunSpec
     records: tuple[PredictionRecord, ...]
+    evidence: tuple[GenerationEvidence, ...]
     config_sha256: str
     predictions_sha256: str
+    evidence_sha256: str
     manifest_sha256: str
     artifact_path: Path
 
@@ -344,11 +371,56 @@ def _prediction_bytes(
     return b"".join(lines)
 
 
+def _evidence_bytes(
+    binding: _DatasetBinding,
+    run_id: str,
+    record_ids: Sequence[str],
+    evidence: Mapping[str, GenerationEvidence],
+) -> bytes:
+    if not isinstance(evidence, MappingABC):
+        raise PredictionArtifactError("generation evidence must be a mapping")
+    if any(not isinstance(key, str) for key in evidence):
+        raise PredictionArtifactError("generation evidence keys must be strings")
+    missing = set(record_ids).difference(evidence)
+    extra = set(evidence).difference(record_ids)
+    if missing or extra:
+        raise PredictionArtifactError(
+            f"generation evidence key mismatch; missing={len(missing)}, extra={len(extra)}"
+        )
+    lines: list[bytes] = []
+    total = 0
+    for record_id in record_ids:
+        item = evidence[record_id]
+        if not isinstance(item, GenerationEvidence):
+            raise PredictionArtifactError(
+                "generation evidence values must be GenerationEvidence"
+            )
+        value = {
+            "schema_version": _EVIDENCE_SCHEMA,
+            "run_id": run_id,
+            "dataset": binding.name,
+            "record_id": record_id,
+            "raw_response": item.raw_response,
+            "parse_status": item.parse_status,
+            "input_token_count": item.input_token_count,
+            "generated_token_count": item.generated_token_count,
+        }
+        line = canonical_json(value).encode("utf-8") + b"\n"
+        if len(line) > _EVIDENCE_LINE_LIMIT:
+            raise PredictionArtifactError("generation evidence line exceeds its byte limit")
+        total += len(line)
+        if total > _EVIDENCE_LIMIT:
+            raise PredictionArtifactError("generation evidence exceeds its byte limit")
+        lines.append(line)
+    return b"".join(lines)
+
+
 def _manifest(
     binding: _DatasetBinding,
     spec: RunSpec,
     config: bytes,
     predictions: bytes,
+    evidence: bytes,
     record_count: int,
 ) -> Mapping[str, Any]:
     return {
@@ -394,6 +466,13 @@ def _manifest(
             "byte_size": len(predictions),
             "record_count": record_count,
             "record_schema_version": _RECORD_SCHEMA,
+        },
+        "generation_evidence": {
+            "path": _EVIDENCE_NAME,
+            "sha256": hashlib.sha256(evidence).hexdigest(),
+            "byte_size": len(evidence),
+            "record_count": record_count,
+            "record_schema_version": _EVIDENCE_SCHEMA,
         },
     }
 
@@ -508,6 +587,7 @@ def _publish(
     binding: _DatasetBinding,
     spec: RunSpec,
     predictions: Mapping[str, Any],
+    evidence: Mapping[str, GenerationEvidence],
     git_gate: Callable[[str], None],
 ) -> VerifiedPredictionArtifact:
     if spec.dataset != binding.name:
@@ -517,8 +597,11 @@ def _publish(
     prediction_payload = _prediction_bytes(
         binding, spec.run_id, record_ids, predictions
     )
+    evidence_payload = _evidence_bytes(
+        binding, spec.run_id, record_ids, evidence
+    )
     manifest = _manifest(
-        binding, spec, config, prediction_payload, len(record_ids)
+        binding, spec, config, prediction_payload, evidence_payload, len(record_ids)
     )
     manifest_payload = canonical_json(manifest).encode("utf-8") + b"\n"
     if len(manifest_payload) > _MANIFEST_LIMIT:
@@ -532,6 +615,7 @@ def _publish(
         raise PredictionArtifactError("run artifact already exists") from error
     _write_exclusive(target / _CONFIG_NAME, config)
     _write_exclusive(target / _PREDICTIONS_NAME, prediction_payload)
+    _write_exclusive(target / _EVIDENCE_NAME, evidence_payload)
     _fsync_directory(target)
     git_gate(spec.execution_commit)
     _write_exclusive(target / _MANIFEST_NAME, manifest_payload)
@@ -541,12 +625,19 @@ def _publish(
 
 
 def publish_predictions(
-    spec: RunSpec, predictions: Mapping[str, Any]
+    spec: RunSpec,
+    predictions: Mapping[str, Any],
+    evidence: Mapping[str, GenerationEvidence],
 ) -> VerifiedPredictionArtifact:
     """Publish one complete prediction run to the fixed artifact root."""
 
     return _publish(
-        _ARTIFACT_ROOT, _BINDINGS[spec.dataset], spec, predictions, _git_gate
+        _ARTIFACT_ROOT,
+        _BINDINGS[spec.dataset],
+        spec,
+        predictions,
+        evidence,
+        _git_gate,
     )
 
 
@@ -558,6 +649,7 @@ def _parse_manifest(
         {
             "schema_version", "status", "run_id", "dataset", "method",
             "execution", "resources", "configuration", "predictions",
+            "generation_evidence",
         },
         "prediction manifest",
     )
@@ -650,6 +742,50 @@ def _parse_prediction_records(
     return tuple(records)
 
 
+def _parse_evidence_records(
+    payload: bytes,
+    binding: _DatasetBinding,
+    run_id: str,
+    expected_ids: Sequence[str],
+) -> tuple[GenerationEvidence, ...]:
+    if not payload or not payload.endswith(b"\n"):
+        raise PredictionArtifactError("generation evidence must be non-empty LF JSONL")
+    ids: list[str] = []
+    result: list[GenerationEvidence] = []
+    for line_number, raw in enumerate(payload.splitlines(keepends=True), start=1):
+        if not raw.endswith(b"\n") or raw.endswith(b"\r\n"):
+            raise PredictionArtifactError("generation evidence line is not LF-delimited")
+        if len(raw) > _EVIDENCE_LINE_LIMIT:
+            raise PredictionArtifactError("generation evidence line exceeds its byte limit")
+        value = _exact_mapping(
+            _strict_json(raw[:-1], f"generation evidence line {line_number}"),
+            {
+                "schema_version", "run_id", "dataset", "record_id",
+                "raw_response", "parse_status", "input_token_count",
+                "generated_token_count",
+            },
+            "generation evidence record",
+        )
+        if canonical_json(value).encode("utf-8") + b"\n" != raw:
+            raise PredictionArtifactError("generation evidence is not canonical JSON")
+        if value["schema_version"] != _EVIDENCE_SCHEMA:
+            raise PredictionArtifactError("generation evidence schema differs")
+        if value["run_id"] != run_id or value["dataset"] != binding.name:
+            raise PredictionArtifactError("generation evidence binding differs")
+        ids.append(value["record_id"])
+        result.append(
+            GenerationEvidence(
+                raw_response=value["raw_response"],
+                parse_status=value["parse_status"],
+                input_token_count=value["input_token_count"],
+                generated_token_count=value["generated_token_count"],
+            )
+        )
+    if tuple(ids) != tuple(expected_ids):
+        raise PredictionArtifactError("generation evidence order or coverage differs")
+    return tuple(result)
+
+
 def _verify(
     root: Path, binding: _DatasetBinding, run_id: str
 ) -> VerifiedPredictionArtifact:
@@ -675,6 +811,9 @@ def _verify(
     predictions_payload = _read_artifact_file(
         target / _PREDICTIONS_NAME, _PREDICTIONS_LIMIT, _PREDICTIONS_NAME
     )
+    evidence_payload = _read_artifact_file(
+        target / _EVIDENCE_NAME, _EVIDENCE_LIMIT, _EVIDENCE_NAME
+    )
     manifest_payload = _read_artifact_file(
         target / _MANIFEST_NAME, _MANIFEST_LIMIT, _MANIFEST_NAME
     )
@@ -685,11 +824,13 @@ def _verify(
         {
             "schema_version", "status", "run_id", "dataset", "method",
             "execution", "resources", "configuration", "predictions",
+            "generation_evidence",
         },
         "prediction manifest",
     )
     configuration = manifest_shell["configuration"]
     prediction_facts = manifest_shell["predictions"]
+    evidence_facts = manifest_shell["generation_evidence"]
     configuration = _exact_mapping(
         configuration, {"path", "sha256", "byte_size"}, "manifest configuration"
     )
@@ -697,6 +838,11 @@ def _verify(
         prediction_facts,
         {"path", "sha256", "byte_size", "record_count", "record_schema_version"},
         "manifest predictions",
+    )
+    evidence_facts = _exact_mapping(
+        evidence_facts,
+        {"path", "sha256", "byte_size", "record_count", "record_schema_version"},
+        "manifest generation evidence",
     )
     if configuration != {
         "path": _CONFIG_NAME,
@@ -712,6 +858,14 @@ def _verify(
         "record_schema_version": _RECORD_SCHEMA,
     }:
         raise PredictionArtifactError("prediction manifest facts differ")
+    if evidence_facts != {
+        "path": _EVIDENCE_NAME,
+        "sha256": hashlib.sha256(evidence_payload).hexdigest(),
+        "byte_size": len(evidence_payload),
+        "record_count": binding.record_count,
+        "record_schema_version": _EVIDENCE_SCHEMA,
+    }:
+        raise PredictionArtifactError("generation evidence manifest facts differ")
     spec = _parse_manifest(manifest_shell, binding, config)
     if spec.run_id != run_id:
         raise PredictionArtifactError("directory run ID differs from manifest")
@@ -719,11 +873,16 @@ def _verify(
     records = _parse_prediction_records(
         predictions_payload, binding, run_id, expected_ids
     )
+    evidence = _parse_evidence_records(
+        evidence_payload, binding, run_id, expected_ids
+    )
     return VerifiedPredictionArtifact(
         spec=spec,
         records=records,
+        evidence=evidence,
         config_sha256=hashlib.sha256(config_payload).hexdigest(),
         predictions_sha256=hashlib.sha256(predictions_payload).hexdigest(),
+        evidence_sha256=hashlib.sha256(evidence_payload).hexdigest(),
         manifest_sha256=hashlib.sha256(manifest_payload).hexdigest(),
         artifact_path=target,
     )

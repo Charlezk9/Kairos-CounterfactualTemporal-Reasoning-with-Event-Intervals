@@ -62,6 +62,23 @@ def _spec(dataset="torque-dev", **changes):
     return prediction_artifacts.RunSpec(**values)
 
 
+def _evidence(status="PARSED"):
+    return {
+        "record-1": prediction_artifacts.GenerationEvidence(
+            raw_response='FINAL_ANSWER: ["Alpha"]',
+            parse_status=status,
+            input_token_count=120,
+            generated_token_count=8,
+        ),
+        "record-2": prediction_artifacts.GenerationEvidence(
+            raw_response="FINAL_ANSWER: []",
+            parse_status=status,
+            input_token_count=100,
+            generated_token_count=4,
+        ),
+    }
+
+
 class ArtifactFixture(unittest.TestCase):
     def setUp(self):
         TEST_TMP.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -88,7 +105,12 @@ class ArtifactFixture(unittest.TestCase):
                 else {"record-1": "answer", "record-2": ""}
             )
         artifact = prediction_artifacts._publish(
-            self.root, binding, spec, predictions, gate or self.gate
+            self.root,
+            binding,
+            spec,
+            predictions,
+            _evidence(),
+            gate or self.gate,
         )
         return binding, spec, artifact
 
@@ -138,6 +160,35 @@ class RunSpecTests(unittest.TestCase):
                 with self.assertRaises(prediction_artifacts.PredictionArtifactError):
                     _spec(config=config)
 
+    def test_generation_evidence_schema_is_bounded(self):
+        valid = prediction_artifacts.GenerationEvidence(
+            raw_response="FINAL_ANSWER: []",
+            parse_status="PARSED",
+            input_token_count=20,
+            generated_token_count=4,
+        )
+        self.assertEqual(valid.parse_status, "PARSED")
+        cases = [
+            ({"raw_response": "", "parse_status": "PARSED"}, "non-empty"),
+            ({"raw_response": "x", "parse_status": "UNKNOWN"}, "invalid"),
+            ({"raw_response": "x", "input_token_count": 32769}, "allowed range"),
+            ({"raw_response": "x", "generated_token_count": 4097}, "allowed range"),
+        ]
+        base = {
+            "raw_response": "x",
+            "parse_status": "PARSE_ERROR",
+            "input_token_count": 20,
+            "generated_token_count": 4,
+        }
+        for changes, message in cases:
+            with self.subTest(changes=changes):
+                values = dict(base)
+                values.update(changes)
+                with self.assertRaisesRegex(
+                    prediction_artifacts.PredictionArtifactError, message
+                ):
+                    prediction_artifacts.GenerationEvidence(**values)
+
 
 class PublicationTests(ArtifactFixture):
     def test_torque_publish_and_offline_verify(self):
@@ -151,11 +202,18 @@ class PublicationTests(ArtifactFixture):
         )
         self.assertEqual(artifact.records[0].prediction, ["Alpha"])
         self.assertEqual(artifact.records[1].prediction, [])
+        self.assertEqual(artifact.evidence[0].parse_status, "PARSED")
+        self.assertEqual(artifact.evidence[0].input_token_count, 120)
         self.assertEqual(stat.S_IMODE(self.root.stat().st_mode), 0o700)
         self.assertEqual(stat.S_IMODE(artifact.artifact_path.stat().st_mode), 0o700)
         self.assertEqual(
             {path.name for path in artifact.artifact_path.iterdir()},
-            {"config.json", "predictions.jsonl", "manifest.json"},
+            {
+                "config.json",
+                "predictions.jsonl",
+                "generation-evidence.jsonl",
+                "manifest.json",
+            },
         )
         for path in artifact.artifact_path.iterdir():
             self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
@@ -184,7 +242,12 @@ class PublicationTests(ArtifactFixture):
                     prediction_artifacts.PredictionArtifactError, message
                 ):
                     prediction_artifacts._publish(
-                        root, _binding(), _spec(), predictions, self.gate
+                        root,
+                        _binding(),
+                        _spec(),
+                        predictions,
+                        _evidence(),
+                        self.gate,
                     )
                 self.assertFalse(root.exists())
 
@@ -196,8 +259,32 @@ class PublicationTests(ArtifactFixture):
                 _binding("timeqa-hard"),
                 _spec("timeqa-hard"),
                 {"record-1": [], "record-2": ""},
+                _evidence(),
                 self.gate,
             )
+
+    def test_generation_evidence_coverage_and_types_fail_before_create(self):
+        predictions = {"record-1": ["A"], "record-2": []}
+        cases = [
+            ({"record-1": _evidence()["record-1"]}, "key mismatch"),
+            ({**_evidence(), "extra": _evidence()["record-1"]}, "key mismatch"),
+            ({"record-1": "raw", "record-2": _evidence()["record-2"]}, "values"),
+        ]
+        for number, (evidence, message) in enumerate(cases):
+            root = self.base / f"invalid-evidence-{number}"
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(
+                    prediction_artifacts.PredictionArtifactError, message
+                ):
+                    prediction_artifacts._publish(
+                        root,
+                        _binding(),
+                        _spec(),
+                        predictions,
+                        evidence,
+                        self.gate,
+                    )
+                self.assertFalse(root.exists())
 
     def test_git_gates_precede_create_and_manifest(self):
         def fail_first(unused):
@@ -220,7 +307,7 @@ class PublicationTests(ArtifactFixture):
         target = self.root / _spec().run_id
         self.assertEqual(
             {path.name for path in target.iterdir()},
-            {"config.json", "predictions.jsonl"},
+            {"config.json", "predictions.jsonl", "generation-evidence.jsonl"},
         )
 
     def test_existing_run_is_never_replaced(self):
@@ -237,6 +324,7 @@ class PublicationTests(ArtifactFixture):
                 _binding(),
                 spec,
                 {"record-1": ["changed"], "record-2": []},
+                _evidence(),
                 self.gate,
             )
         after = {
@@ -247,7 +335,7 @@ class PublicationTests(ArtifactFixture):
 
 
 class VerificationTests(ArtifactFixture):
-    def test_tampered_config_prediction_and_manifest_are_rejected(self):
+    def test_tampered_config_is_rejected(self):
         binding, spec, artifact = self.publish()
         target = artifact.artifact_path
         (target / "config.json").write_bytes(b'{"changed":true}\n')
@@ -255,6 +343,18 @@ class VerificationTests(ArtifactFixture):
         with self.assertRaisesRegex(
             prediction_artifacts.PredictionArtifactError,
             "configuration manifest facts differ",
+        ):
+            prediction_artifacts._verify(self.root, binding, spec.run_id)
+
+    def test_tampered_evidence_prediction_and_manifest_are_rejected(self):
+        binding, spec, artifact = self.publish()
+        target = artifact.artifact_path
+        path = target / "generation-evidence.jsonl"
+        path.write_bytes(path.read_bytes().replace(b"PARSED", b"PARSE_ERROR", 1))
+        os.chmod(path, 0o600)
+        with self.assertRaisesRegex(
+            prediction_artifacts.PredictionArtifactError,
+            "generation evidence manifest facts differ",
         ):
             prediction_artifacts._verify(self.root, binding, spec.run_id)
 
