@@ -46,7 +46,7 @@ class SelfConsistencyConfig:
     top_p: float = TOP_P
     top_k: int = TOP_K
     max_new_tokens: int = MAX_NEW_TOKENS
-    batch_size: int = 1
+    batch_size: int = 4
 
     def __post_init__(self) -> None:
         if (
@@ -66,7 +66,7 @@ class SelfConsistencyConfig:
             or self.top_p != TOP_P
             or self.top_k != TOP_K
             or self.max_new_tokens != MAX_NEW_TOKENS
-            or self.batch_size != 1
+            or self.batch_size != 4
         ):
             raise SelfConsistencyError("Self-Consistency config differs from freeze")
 
@@ -304,7 +304,7 @@ def run_self_consistency(
         dataset="torque-dev",
         style=PromptStyle.COT,
         max_new_tokens=config.max_new_tokens,
-        batch_size=1,
+        batch_size=config.batch_size,
     )
     try:
         values = generation._examples(examples, validation_config)
@@ -347,12 +347,16 @@ def run_self_consistency(
     total_generated = 0
     total_parse_errors = 0
     all_invalid = 0
-    for example in values:
-        prompt = generation._prompt(example, validation_config)
-        encoded = generation._token_batch(tokenizer, (prompt,))
-        input_count = int(encoded["attention_mask"].sum().item())
+    for offset in range(0, len(values), config.batch_size):
+        examples_batch = values[offset : offset + config.batch_size]
+        prompts = [
+            generation._prompt(example, validation_config)
+            for example in examples_batch
+        ]
+        encoded = generation._token_batch(tokenizer, prompts)
+        counts = encoded["attention_mask"].sum(dim=1)
         input_width = encoded["input_ids"].shape[1]
-        if input_count <= 0 or input_count > config.max_input_tokens:
+        if torch.any(counts <= 0) or torch.any(counts > config.max_input_tokens):
             raise SelfConsistencyError("prompt exceeds Self-Consistency context budget")
         if input_width + config.max_new_tokens > generation.MODEL_CONTEXT_TOKENS:
             raise SelfConsistencyError("padded prompt exceeds model context")
@@ -379,42 +383,48 @@ def run_self_consistency(
         if (
             not isinstance(generated, Tensor)
             or generated.ndim != 2
-            or generated.shape[0] != SAMPLE_COUNT
+            or generated.shape[0] != len(examples_batch) * SAMPLE_COUNT
             or generated.shape[1] < input_width
             or generated.shape[1] > input_width + config.max_new_tokens
         ):
             raise SelfConsistencyError("Self-Consistency generation shape differs")
         new_tokens = generated[:, input_width:].detach().cpu()
-        responses = []
-        token_counts = []
-        for token_row in new_tokens:
-            try:
-                response = tokenizer.decode(
-                    token_row,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=False,
+        for batch_index, example in enumerate(examples_batch):
+            input_count = int(counts[batch_index].item())
+            start = batch_index * SAMPLE_COUNT
+            rows = new_tokens[start : start + SAMPLE_COUNT]
+            responses = []
+            token_counts = []
+            for token_row in rows:
+                try:
+                    response = tokenizer.decode(
+                        token_row,
+                        skip_special_tokens=True,
+                        clean_up_tokenization_spaces=False,
+                    )
+                except Exception as error:
+                    raise SelfConsistencyError(
+                        "Self-Consistency decode failed"
+                    ) from error
+                responses.append(response)
+                count = generation._generated_token_count(
+                    token_row, eos_ids, pad_token_id
                 )
-            except Exception as error:
-                raise SelfConsistencyError("Self-Consistency decode failed") from error
-            responses.append(response)
-            count = generation._generated_token_count(
-                token_row, eos_ids, pad_token_id
+                token_counts.append(count)
+            prediction, parse_errors, valid_count = aggregate_responses(responses)
+            envelope = _envelope(responses, input_count, token_counts)
+            parse_status = "PARSED" if valid_count else "PARSE_ERROR"
+            predictions[example.record_id] = prediction
+            evidence[example.record_id] = GenerationEvidence(
+                raw_response=envelope,
+                parse_status=parse_status,
+                input_token_count=input_count,
+                generated_token_count=sum(token_counts),
             )
-            token_counts.append(count)
-        prediction, parse_errors, valid_count = aggregate_responses(responses)
-        envelope = _envelope(responses, input_count, token_counts)
-        parse_status = "PARSED" if valid_count else "PARSE_ERROR"
-        predictions[example.record_id] = prediction
-        evidence[example.record_id] = GenerationEvidence(
-            raw_response=envelope,
-            parse_status=parse_status,
-            input_token_count=input_count,
-            generated_token_count=sum(token_counts),
-        )
-        input_counts.append(input_count)
-        total_generated += sum(token_counts)
-        total_parse_errors += parse_errors
-        all_invalid += int(valid_count == 0)
+            input_counts.append(input_count)
+            total_generated += sum(token_counts)
+            total_parse_errors += parse_errors
+            all_invalid += int(valid_count == 0)
     return SelfConsistencyResult(
         predictions=predictions,
         evidence=evidence,

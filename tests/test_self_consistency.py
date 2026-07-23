@@ -59,14 +59,19 @@ class FakeModel:
         self.starts = starts or (10, 11, 10, 11, 12, 12, 12, 12)
         self.invalid_shape = invalid_shape
         self.last_kwargs = None
+        self.last_input_batch = None
 
     def generate(self, input_ids, attention_mask, **kwargs):
         self.last_kwargs = kwargs
-        rows = 7 if self.invalid_shape else self_consistency.SAMPLE_COUNT
-        prefix = input_ids.cpu().repeat(rows, 1)
+        self.last_input_batch = input_ids.shape[0]
+        expected_rows = input_ids.shape[0] * self_consistency.SAMPLE_COUNT
+        rows = expected_rows - 1 if self.invalid_shape else expected_rows
+        prefix = input_ids.cpu().repeat_interleave(
+            self_consistency.SAMPLE_COUNT, dim=0
+        )[:rows]
         suffix = torch.zeros(rows, 2, dtype=torch.long)
         for index in range(rows):
-            suffix[index, 0] = self.starts[index]
+            suffix[index, 0] = self.starts[index % len(self.starts)]
         return torch.cat((prefix, suffix), dim=1)
 
 
@@ -107,7 +112,7 @@ class SelfConsistencyAggregationTests(unittest.TestCase):
             {"sample_count": 7},
             {"temperature": 1.0},
             {"top_p": 1.0},
-            {"batch_size": 2},
+            {"batch_size": 1},
             {"sample_count": 8.0},
             {"temperature": 1},
             {"top_k": 0.0},
@@ -182,6 +187,21 @@ class SelfConsistencyGenerationTests(unittest.TestCase):
                 "cpu",
                 13,
             )
+
+    def test_multiple_prompts_share_one_generation_batch_without_vote_mixing(self):
+        model = FakeModel()
+        result = self_consistency.run_self_consistency(
+            model,
+            FakeTokenizer(),
+            (_torque("r1"), _torque("r2")),
+            self_consistency.SelfConsistencyConfig(),
+            "cpu",
+            13,
+        )
+        self.assertEqual(model.last_input_batch, 2)
+        self.assertEqual(result.predictions, {"r1": ["Alpha"], "r2": ["Alpha"]})
+        self.assertEqual(result.sample_parse_error_count, 8)
+        self.assertEqual(result.generated_token_total, 32)
         with self.assertRaisesRegex(
             self_consistency.SelfConsistencyError, "shape differs"
         ):
