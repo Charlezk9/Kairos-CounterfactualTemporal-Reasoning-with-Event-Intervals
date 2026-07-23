@@ -247,3 +247,11 @@
 - 适用边界：该记录可支持 original-answer、relation 与 counterfactual-relation loss，不能支持 CF answer accuracy、update、stability 或 consistency。它是独立重实现中的部分监督桥接，不满足论文所称 reliable updated answer，也不恢复作者未公开的 subset IDs、prompt 或 updater。
 - 防泄漏门禁：schema/publisher 均在 clean commit 前只用 synthetic fixture；随后只读取并发布 official train，CLI 与 production layout 不提供 test split。train 7,473 条中得到 370 个 pair；test、训练和正式模型指标仍禁止，直至两人 200 条人工审计完成。
 - 证据：schema commit `17137bbf6e666381c148d40b7249032ab1d3a0b6`，publisher/execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`；精确 schema 与 production 工件证据分别见 `checkpoints/phase-01-relation-only-supervision-v1.md`、`checkpoints/phase-01-relation-only-train-artifact.md`。
+
+## D-023：Relation-only 200 条双人盲审包
+
+- 状态：`PACKET VERIFIED / HUMAN REVIEW PENDING`；不是数据有效性结论或训练批准。
+- 抽样：只绑定 official-train 的 370-pair immutable artifact；固定 seed 20260723，以 `(template_id, original_relation)` 分层，Hamilton largest remainder 分配 200 条，stratum 内选择与最终展示分别用独立 SHA256 rank。结果为 259→140 的 after/follows 与 111→60 的 before/precedes。
+- 盲审：A/B 两个 reviewer slot 的模板完全相同且所有人工字段为 null；reviewer 彼此隔离。检查 event span、original relation、CF relation、grammar、non-target preservation，`overall_valid` 必须是前五项逻辑与。模板不可原地覆盖，完成副本必须先锁定哈希再互看。
+- 判定：primary agreement 为 200 条 `overall_valid` 的 Cohen's kappa，阈值 0.80；分歧经作者共识后 validity threshold 为 95%。任一不达标则修订规则并使用新样本重审。AI 不得填写、推断或替代人工标签。
+- 门禁：人工表未完成，因此 kappa/validity 均为 unavailable，GSM8K LoRA 仍禁止。实现 commit、五文件 SHA、资源和 replay 见 `checkpoints/phase-01-relation-human-audit-packet.md`。

@@ -52,6 +52,8 @@ TORQUE 和 TimeQA 只作冻结后的迁移评测，不用于训练。训练数�
 
 反事实数据至少由两名人类对 200 条分层样本独立审核，检查事件、关系、语法、非目标内容和答案更新。目标为 Cohen's kappa >= 0.80、有效率 >= 95%；未达标则修正规则并用新样本复审。AI 判断不能替代该审计。
 
+relation-only v1 因 CF answer 明确 unavailable，不伪造 answer-update 审计项。其固定 train-only 审计包使用 seed 20260723，按 `(template_id, original_relation)` 分层并以 Hamilton largest remainder 抽取 200/370 条；A/B 独立检查 event span、original/CF relation、grammar 与 non-target preservation，`overall_valid` 为五项逻辑与。两份表锁定前不得互看；primary Cohen's kappa 在 `overall_valid` 上计算，分歧经作者共识后计算 validity。当前包已生成但人工字段全为 null，所以阈值尚未评估、训练仍被阻断。唯一工件证据见 `../ai-context/checkpoints/phase-01-relation-human-audit-packet.md`。
+
 ## 复现判定与 PDF 表映射
 
 - 数值复现：原值落入 95% CI 或绝对差不超过 2 个百分点。

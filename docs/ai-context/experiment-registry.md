@@ -129,6 +129,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P03-TORQUE-VERIFIER-20260723` | 2026-07-23 | gold-free CoT+Verifier candidate selection with strict failure fallback | clean commit `e09a40fa9e192bb92971be61e795cbfabcb3117d` | focused 6/6; full 477/477 in 14.508s; production prediction, metrics and paired statistics passed fresh offline replay | production artifacts registered above |
 | `DEV-P01-RELATION-ONLY-20260723` | 2026-07-23 | strict in-memory GSM8K original/inverse relation supervision with explicitly unavailable CF answer; synthetic only | clean commit `17137bbf6e666381c148d40b7249032ab1d3a0b6` | focused 8/8 in 0.007s; final full 485/485 in 14.542s; no production source read | none |
 | `DEV-P01-RELATION-ARTIFACTS-20260723` | 2026-07-23 | fixed official-train relation-supervision publisher and full source-lockstep verifier | clean commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`; atime fix `3fbe53fe9aa4faec65b8c948857869dc85574e7f` | artifact focused 8/8; combined 27/27; final full 494/494 in 14.788s | production artifact registered below |
+| `DEV-P01-RELATION-HUMAN-AUDIT-20260723` | 2026-07-23 | deterministic train-only stratified 200-pair packet and blank A/B reviewer templates | clean commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb` | focused 7/7; combined 23/23; full 501/501 in 15.366s | production packet registered below |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 
@@ -182,3 +183,11 @@ records supersede the old `NO_NATIVE_EXEC_ENV` planning state without erasing it
 | `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723` | `VERIFIED / TRAIN ONLY / CF ANSWER UNAVAILABLE` | `3101c7d5072418e28b9008a6636bde82a006892c` | `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578` | train raw/no-marker/extraction-rejected/rewrite-rejected/retained = 7,473/5,628/1,475/0/370; all four identity sets unique 370; no test artifact | JSONL/manifest SHA256 `525e3b09c6a6d03942a6bc3e03ebcd1722c3a68f4f224753dbc641f98465c12a` / `4e22ff135d97c89ded50a54fc1007f25d9646db67ce112e4637d4e8c8b63674a`; fresh full source replay passed; CF answer loss fixed masked | `/data0/hk_data/kairos-zx/data/processed/gsm8k/3101c7d5072418e28b9008a6636bde82a006892c/relation-supervision-v1/explicit-marker-relation-only-v1/train` |
 
 `VERIFIED` in this table means the immutable processed data artifact passed replay verification. It is not a model metric and cannot by itself support a paper performance claim.
+
+## Human audit packets
+
+| ID | Status | Source | Sampling | Artifact binding | Path |
+|---|---|---|---|---|---|
+| `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723` | `PACKET VERIFIED / HUMAN REVIEW PENDING` | `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`, 370 train pairs, JSONL/manifest `525e3b09...` / `4e22ff13...` | seed 20260723; after/follows 259→140, before/precedes 111→60; A/B fields all null | items `0f37bc96...`; A `3a2618b9...`; B `390e7cb5...`; instructions `8ee14494...`; manifest `da5d7fb0...`; fresh replay passed | `/data0/hk_data/kairos-zx/data/processed/gsm8k/3101c7d5072418e28b9008a6636bde82a006892c/human-audit-v1/explicit-marker-relation-only-v1/train` |
+
+Packet verification proves deterministic sampling and integrity only. Cohen's kappa, adjudicated validity and training permission remain unavailable until two human submissions are completed and hash-locked.

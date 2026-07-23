@@ -209,3 +209,9 @@
 - 资源门禁为 `/data0` 155 GiB free、memory 229 GiB available；未触碰 GPUs 1/2/3/6 的既有 VLLM，GPU 显式禁用、CPU 2 线程。
 - clean commit 上一次发布与 fresh offline replay均通过：7,473 → no marker 5,628 / extraction rejected 1,475 / rewrite rejected 0 / retained 370。JSONL/manifest SHA 为 `525e3b09...` / `4e22ff13...`。
 - 工件只含 original answer 和 original/inverted relations，CF answer unavailable/masked；没有 test 工件、训练或模型指标。下一步准备 200-pair 两人盲审包。
+
+## 2026-07-23 — Relation-only 200-pair human-audit packet
+
+- `6f56fcb...` 实现 train-only Hamilton proportional stratification、seed-bound SHA256 selection/presentation、两份全 null reviewer templates、instructions 和 immutable full replay；focused 7/7、combined 23/23、full 501/501 通过。
+- clean commit、155 GiB `/data0` free、229 GiB memory available、GPU disabled 下发布 200/370 条：after/follows 259→140，before/precedes 111→60。
+- fresh replay 复现 items/reviewer-A/reviewer-B/instructions/manifest SHA；模板没有人工判断，包状态为 `HUMAN REVIEW PENDING`，不能计算 kappa/validity或解锁训练。

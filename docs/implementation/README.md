@@ -161,3 +161,12 @@ retained-only JSONL、manifest-last/no-replace 和 exact namespace。production 
 工件保留 370 pairs 并通过 fresh replay；CLI 不接受 split/path，production layout 不含
 test。完整合同、哈希和论文偏差见
 `../ai-context/checkpoints/phase-01-relation-only-train-artifact.md` 与 D-022。
+
+## Relation-only human-audit packet
+
+`kairos.relation_human_audit` 在 `6f56fcb...` 实现 fixed train-only 200-pair
+stratified sampler、空白 reviewer A/B templates、instructions、manifest-last
+publication 和 full source replay。抽样/展示均为 seed-bound SHA256 rank，模板所有人工
+字段为 null；程序不实现自动标注。production 包及完整 SHA 见
+`../ai-context/checkpoints/phase-01-relation-human-audit-packet.md`。在两位作者独立
+完成并达到 kappa/validity 阈值前，任何 relation-only 训练 reader 都不得消费该数据。

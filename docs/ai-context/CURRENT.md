@@ -1,18 +1,19 @@
 # Current State
 
 - updated_at: 2026-07-23 CST
-- active_phase: phase-01-data-pipeline-remediation
+- active_phase: phase-03-prompt-baselines (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578
-- last_verified_commit: 5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578
-- last_completed_checkpoint: checkpoints/phase-01-relation-only-train-artifact.md
+- git_head: 6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb
+- last_verified_commit: 6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb
+- last_completed_checkpoint: checkpoints/phase-01-relation-human-audit-packet.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 official-train artifact is verified at 370 pairs but deliberately has no CF answer. Two independent human reviewers have not completed the frozen 200-pair audit, so GSM8K LoRA training remains blocked and the artifact cannot support CF-answer metrics. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Self-Consistency, Kairos and matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 冻结并实现 relation-only official-train 的确定性 200-pair 分层人工审计包与两份 blinded reviewer 表单；只从已验证 train 工件取样，记录抽样 seed/strata/manifest/hash，不读取 test、不自动填写人工标签、不训练。待两位作者独立完成后再计算 Cohen's kappa 与有效率。
+- next_safe_action: 在不消费未通过人工审计的 GSM8K train artifact 前提下，实现冻结的 TORQUE Self-Consistency baseline：8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13、评测禁止 gold injection；先完成 synthetic aggregation/tie-break/prediction-artifact tests 与 token/resource preflight，再从 clean commit 决定 formal run。
 - required_reading:
+  - `checkpoints/phase-01-relation-human-audit-packet.md`
   - `checkpoints/phase-01-relation-only-train-artifact.md`
   - `checkpoints/phase-01-relation-only-supervision-v1.md`
   - `checkpoints/phase-01-manual-source-acquisition.md`
