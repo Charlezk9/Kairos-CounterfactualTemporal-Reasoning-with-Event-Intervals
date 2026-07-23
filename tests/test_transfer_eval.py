@@ -75,7 +75,7 @@ def _timeqa_records():
             "idx": "hard-1",
             "paragraphs": [{"title": "Title", "text": "Body"}],
             "question": "What is the answer?",
-            "targets": ["The Answer!", "alternative"],
+            "targets": ["The Answer!", "alternative", ""],
         },
         {
             "context": "Another context.",
@@ -193,7 +193,9 @@ class SyntheticFiles(unittest.TestCase):
         self.assertEqual(examples[0].idx, "hard-1")
         self.assertEqual(examples[0].paragraphs[0].title, "Title")
         self.assertEqual(examples[1].paragraphs, ())
-        self.assertEqual(examples[0].targets, ("The Answer!", "alternative"))
+        self.assertEqual(
+            examples[0].targets, ("The Answer!", "alternative", "")
+        )
 
     def test_timeqa_loader_rejects_delimiter_duplicate_idx_schema_and_hash(self):
         records = _timeqa_records()
@@ -300,6 +302,14 @@ class TimeQaMetricTests(unittest.TestCase):
         )
         self.assertEqual(transfer_eval.timeqa_f1("", ""), 1.0)
         self.assertEqual(transfer_eval.timeqa_f1("alpha", "beta"), 0.0)
+
+    def test_empty_official_target_can_be_scored(self):
+        example = self.examples()[0]
+        metrics = transfer_eval.evaluate_timeqa(
+            [example], {example.record_id: ""}
+        )
+        self.assertEqual(metrics["exact_match"], 100.0)
+        self.assertEqual(metrics["token_f1"], 100.0)
 
     def test_multi_target_exact_and_token_f1(self):
         examples = self.examples()

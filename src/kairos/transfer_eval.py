@@ -244,7 +244,10 @@ class TimeQaExample:
         ):
             raise TransferEvalError("TimeQA paragraphs must be a paragraph tuple")
         targets = _string_sequence(
-            self.targets, "TimeQA targets", allow_empty=False
+            self.targets,
+            "TimeQA targets",
+            allow_empty=False,
+            item_nonempty=False,
         )
         if targets != self.targets:
             raise TransferEvalError("TimeQA targets must be a tuple")
@@ -452,7 +455,10 @@ def _parse_timeqa(payload: bytes) -> tuple[TimeQaExample, ...]:
                 )
             )
         targets = _string_sequence(
-            raw["targets"], "TimeQA targets", allow_empty=False
+            raw["targets"],
+            "TimeQA targets",
+            allow_empty=False,
+            item_nonempty=False,
         )
         record_id = make_stable_id(
             "timeqa-example", {"revision": TIMEQA_REVISION, "idx": idx}
