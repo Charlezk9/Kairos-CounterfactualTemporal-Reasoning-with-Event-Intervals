@@ -271,3 +271,11 @@
 - Graph contract：节点 ID 为唯一 E1--E999、span 必须是 passage exact substring；边端点必须存在且不同，关系固定为 `precedes/follows/overlaps/contains/during`；非空答案必须在 TORQUE normalizer 下绑定 graph event。任何结构错误整题 sentinel，不作 post-hoc repair。
 - 结果：667/1,483 strict parsed，816 parse errors；EM/F1 均 1.349，cluster 两口径 0。对 Direct 的差为 -14.295/-14.721/-1.576/-1.576 pp，四项 group-bootstrap CI 均低于零。主要失败来自 graph line 位置和非 exact event span，只有 1 条命中 token 上限。
 - 解释边界：结果说明该模型下严格 one-pass graph serialization 基线失败，不说明 temporal graph 方法普遍无效，也不构成 Kairos effect。结果后不得用 dev raw output 放宽 primary parser；未来 repair/few-shot 只能另列 sensitivity。完整证据见 `checkpoints/phase-03-torque-llm-graph-baseline.md`。
+
+## D-026：Qwen hidden-state 到 Kairos/Pair-MLP 的共享训练接口
+
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED / SYNTHETIC ONLY`。
+- 公平性：Kairos 与 Pair-MLP 必须接收同一 strict batch、Qwen hidden states、event/candidate masks、answer/relation/CF-relation targets 和 `lambda_rel=lambda_cf=1`；除 interval geometry 与 pair MLP 外不得分叉输入或监督。
+- Backbone：优先调用 `backbone.model`，固定 `use_cache=False`、`output_hidden_states=False`，只接受 exact finite last hidden state；仅 valid candidates 进入 encoder，padded candidates 全零回填后再走共享 span pool。
+- LoRA 默认：rank 16、alpha 32、dropout 0.05、bias none、gradient checkpointing；targets 固定 Qwen attention/MLP 的 `q/k/v/o/gate/up/down_proj` 七类。当前只读验证目标存在且为 Linear，不注入 PEFT，属于独立默认而非作者设置。
+- 边界：trainable-state 仅内存严格 round-trip，不是持久 checkpoint；optimizer/RNG/manifest/resume 和 production runner 均未实现。没有读取 production data/weights，人工审计训练门禁不变。唯一详细证据见 `checkpoints/phase-03-qwen-core-training-adapter.md`。

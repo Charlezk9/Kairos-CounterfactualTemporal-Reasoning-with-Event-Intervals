@@ -92,6 +92,8 @@ D-022 relation-only supervision v1 已以 commit `17137bbf6e666381c148d40b724903
 
 Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427/427 full 及 synthetic backward：event/answer span mean pooling、`softplus+1e-6` interval、论文顺序的 8-d geometry、五类 relation graph、masked mean graph pool、`[u;g;u*g]` candidate scoring 和三项 loss。Pair-MLP 复用相同 supervision/masks/scorer，仅替换 interval geometry。该状态是 `DEVELOPMENT_VERIFIED TENSOR CORE`，不表示 Qwen/LoRA、端到端训练或模型效果已验证。
 
+`14f7104...` 进一步完成 synthetic-only Qwen-to-core adapter：Kairos/Pair-MLP 共用 original/CF/candidate batch、hidden states、span masks 和三项 loss；只编码 valid candidates，Qwen base decoder 禁用 cache 且不保留所有层 hidden states。LoRA 独立默认固定 rank 16/alpha 32/dropout 0.05，并验证 `q/k/v/o/gate/up/down_proj` 七类 target suffix；当前没有注入 PEFT、加载 7B、持久 checkpoint 或正式训练。focused 7/7、full 522/522 与两个 core 的 synthetic backward 通过。
+
 TORQUE Self-Consistency 在 `b2f889b...` 冻结为每题 8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13；invalid sample 不投票，normalized span-set plurality 平票取最早 valid sample，八次全失败才输出 sentinel。focused 8/8、full 509/509 后完成正式运行，私有 evidence 支持逐题离线重算投票。该实现是 prompt baseline，不使用 interval/graph 或训练监督。
 
 TORQUE LLM-Graph 在 `99209b4...` 冻结为 gold-free one-pass structured prompt：倒数第二个 non-empty line 是 strict temporal graph JSON，最后一行是 strict answer array；节点须绑定 passage exact spans，五类边须绑定已有节点，答案须引用 graph event。focused 6/6、full 515/515 后完成正式运行，source-bound verifier 逐条重解析。该严格 primary 不在看过 dev 输出后 repair 或放宽。

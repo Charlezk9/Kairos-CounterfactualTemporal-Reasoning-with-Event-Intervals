@@ -229,3 +229,10 @@
 - token preflight 为 271--452 input tokens。固定 8-record smoke 虽 8/8 parse failure，但不据 dev 观察放宽已提交 schema。clean `99209b4...` 上 physical GPU 4 前台运行 1,927.260s，发布 1,483 条，峰值 16,012,927,488 bytes，结束后 GPU 释放。
 - 667 parsed、816 parse errors、348,766 generated tokens；仅 1 条触及 768-token 上限。prediction/metrics fresh replay 得 EM/F1 1.349、cluster 0。无值错误聚合显示 graph line 位置 336、non-exact event span 293 为主因。
 - 对 Direct 的 571-group bootstrap 四项 CI 均低于零；该显著负结果只约束严格 one-pass serialization 实现，不反驳 graph 方法或构成 Kairos claim。完整证据见对应 checkpoint/registry。
+
+## 2026-07-24 — Qwen-to-core synthetic training adapter
+
+- `14f7104...` 新增 strict original/counterfactual/candidate training batch，把 Qwen-compatible last hidden state、event/candidate span masks 接到既有 Kairos 与 Pair-MLP，并共用 answer/relation/CF-relation loss。
+- 仅 valid candidates 进入 backbone；Qwen base decoder 固定 `use_cache=False`、不保留全层 hidden states。LoRA rank/alpha/dropout 与七类 attention/MLP projection targets 被只读冻结/验证，未注入 PEFT 或加载权重。
+- focused 7/7、full 522/522（14.955s）通过，覆盖两个 core 的 full forward/loss/backward、padding/target/CF group、hidden contract、LoRA coverage 与 trainable-state strict round-trip。
+- 本项只用 CPU synthetic tensors，不读取 production data/model，不运行训练或产生指标；持久 checkpoint、optimizer/RNG/resume/runner 仍待实现，人工审计门禁不变。
