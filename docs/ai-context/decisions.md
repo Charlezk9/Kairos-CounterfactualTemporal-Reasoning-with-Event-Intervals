@@ -155,3 +155,11 @@
 - 决定：下一个 dependency-independent 实现只组合 D-003 已有的保守抽取、marker 改写与确定性 UpdateAnswer；只有答案更新为 `KNOWN` 时才保留完整 original/counterfactual pair。它不定义 GSM8K temporal subset，不扩展 marker、模板或 task-specific updater。
 - 输出边界：构造 envelope 仅存内存；不写 JSONL/manifest，不产生 relation-only 记录、数据或实验工件。本决定的精确输入先决条件、门禁顺序、terminal enum、funnel、ID、envelope、字段继承和测试合同的唯一详细来源是 `checkpoints/phase-01-temporal-construction-v0.md`。
 - 实施门禁：当前只冻结语义与计划。智能体 1需另行提交仅限标准库和合成 fixture 的精确实施计划，智能体 2批准前不得修改源码或测试。
+
+## D-012：Construction audit schema v1
+
+- 状态：`FROZEN BEFORE IMPLEMENTATION`。
+- 决定：以固定 `construction-audit-v1` schema 将一个未构造 `TemporalExample`、其 zero-based 输入顺序和 D-011 `ConstructionResult` 绑定为 typed、frozen、in-memory audit record。Audit ID 只由固定 source identity 载荷生成；完整记录 fingerprint 覆盖 audit ID、order、结果和诊断，free-text diagnostic 不参与稳定身份。
+- 安全边界：P1 只提供显式 typed serialize/parse 和 in-memory 校验，不使用 `asdict`，不记录 repr，不读写 JSONL/manifest，不增加 CLI、registry、result 或工件。持久化 writer/verifier、batch order/uniqueness、no-replace 与 manifest-last 必须作为 P2 另行冻结。
+- 唯一详细来源：16 个顶层字段及顺序、所有 nested exact schemas、ID/fingerprint 公式、diagnostic 深拷贝与上限、crosslink、测试和实施门禁只见 `checkpoints/phase-01-construction-audit-schema.md`。
+- 实施门禁：当前只批准文档冻结。智能体 1可下一步起草精确两文件实施计划；智能体 2新批准前不得编码或运行测试。
