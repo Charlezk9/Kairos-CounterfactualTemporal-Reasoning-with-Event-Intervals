@@ -3,6 +3,7 @@ import io
 import os
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -154,6 +155,36 @@ class ConstructionAuditPersistenceTests(unittest.TestCase):
             *(facts.sha256 for facts in persistence._PRODUCTION_LAYOUT.splits.values()),
         )
         self.assertTrue(all(persistence._HEX64.fullmatch(value) for value in values))
+
+    def test_hash_stability_ignores_read_atime_but_not_content_metadata(self):
+        path = Path(self.temporary.name) / "atime-fixture"
+        path.write_bytes(b"stable\n")
+        os.chmod(path, 0o600)
+        original = path.lstat()
+        stable_fields = {
+            name: getattr(original, name)
+            for name in (
+                "st_dev", "st_ino", "st_mode", "st_nlink", "st_uid",
+                "st_gid", "st_size", "st_mtime_ns", "st_ctime_ns",
+            )
+        }
+        before = SimpleNamespace(**stable_fields, st_atime_ns=1)
+        after_atime = SimpleNamespace(**stable_fields, st_atime_ns=2)
+        with patch.object(Path, "lstat", side_effect=(before, after_atime)):
+            digest, size = persistence._sha256_file(path, 64)
+        self.assertEqual(digest, hashlib.sha256(b"stable\n").hexdigest())
+        self.assertEqual(size, 7)
+
+        changed_size = SimpleNamespace(
+            **{**stable_fields, "st_size": original.st_size + 1},
+            st_atime_ns=2,
+        )
+        with patch.object(Path, "lstat", side_effect=(before, changed_size)):
+            with self.assertRaisesRegex(
+                persistence.ConstructionAuditPersistenceError,
+                "^bound input changed while reading$",
+            ):
+                persistence._sha256_file(path, 64)
 
     def test_manifest_last_publication_and_full_replay(self):
         result = self.publish()

@@ -166,7 +166,32 @@ def _sha256_file(
         after = path.lstat()
     except (FileNotFoundError, PermissionError, OSError):
         _fail("bound input cannot be read")
-    if before != after:
+    # Reading may legitimately update atime under the filesystem's mount
+    # policy.  Bind every identity/content-relevant field while deliberately
+    # excluding atime so a read cannot fail its own stability check.
+    stable_before = (
+        before.st_dev,
+        before.st_ino,
+        before.st_mode,
+        before.st_nlink,
+        before.st_uid,
+        before.st_gid,
+        before.st_size,
+        before.st_mtime_ns,
+        before.st_ctime_ns,
+    )
+    stable_after = (
+        after.st_dev,
+        after.st_ino,
+        after.st_mode,
+        after.st_nlink,
+        after.st_uid,
+        after.st_gid,
+        after.st_size,
+        after.st_mtime_ns,
+        after.st_ctime_ns,
+    )
+    if stable_before != stable_after:
         _fail("bound input changed while reading")
     return digest.hexdigest(), size
 
