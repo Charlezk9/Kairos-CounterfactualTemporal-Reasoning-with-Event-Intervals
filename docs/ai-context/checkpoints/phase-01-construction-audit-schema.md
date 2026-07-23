@@ -1,8 +1,10 @@
 # Phase 01 Construction Audit Schema v1
 
-- status: `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`
+- status: `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`
 - branch: `experiment/reproduction-additional-evaluation`
 - base_head: `2b7e3f03726fd1abf59fa18867593458f38e5b34`
+- implementation_commit: `633618b6dc81503b7c5794380e8fa524f37c4c4c`
+- implementation_parent: `2b7e3f03726fd1abf59fa18867593458f38e5b34`
 - source_blob: `1bb1b167f3af5424b8fe199b2c9057c51638957f`
 - test_blob: `3bfa86de8deb0b15ececad698808583acfe7aa45`
 - active_run_ids: none
@@ -339,7 +341,7 @@ production CLI or publication authority.
 
 ## Implementation verification and next gate
 
-The implementation candidate is based on clean commit
+The implementation is based on clean commit
 `2b7e3f03726fd1abf59fa18867593458f38e5b34`. Its exact implementation blobs
 are `1bb1b167f3af5424b8fe199b2c9057c51638957f` for
 `src/kairos/construction_audit.py` and
@@ -355,7 +357,9 @@ run. Agent 2's post-execution audit is `POST_AUDIT_APPROVED`. These are
 synthetic development checks, not a formal run, dataset observation, model
 evaluation or paper metric.
 
-The commit candidate contains exactly these nine paths:
+Implementation commit `633618b6dc81503b7c5794380e8fa524f37c4c4c`
+has parent `2b7e3f03726fd1abf59fa18867593458f38e5b34` and contains exactly these nine
+paths:
 
 - `src/kairos/construction_audit.py`
 - `tests/test_construction_audit.py`
@@ -367,7 +371,11 @@ The commit candidate contains exactly these nine paths:
 - `docs/implementation/README.md`
 - `docs/verify-addExp.md`
 
-Status is `DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING`. The next safe
-action is an exact nine-path staged audit. No further test, commit, push,
-production data read, network, model/GPU operation, artifact, paper metric or
-`VERIFIED` experimental claim is authorized by this checkpoint.
+The implementation commit was ordinarily pushed; local HEAD,
+`origin/experiment/reproduction-additional-evaluation` and the configured
+upstream all resolved to `633618b6dc81503b7c5794380e8fa524f37c4c4c` after
+push. Status is `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`. The next safe
+action is only an Agent 1 documentation-only P2 persistence/publication plan
+for Agent 2 review. No P2 code/test, production data read, network, model/GPU
+operation, artifact, paper metric or `VERIFIED` experimental effect claim is
+authorized by this checkpoint.

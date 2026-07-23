@@ -84,7 +84,7 @@ TimeQA A/B/C snapshot/acquisition 计划随后被判定为 `BLOCKED_PLAN / NO_NA
 
 D-011 显式 marker 构造 v0 已以 commit `24ce15d40bd038d61bd6581ed2bc260072468c12` 完成 development-only 实现与验证。它仅在内存中组合保守 extraction/rewrite/UpdateAnswer：只有可证明的 `KNOWN` 答案才保留完整 original/CF pair，`UNKNOWN` 不产生 dangling record。该开发验证未读取 production data，未定义、生成或统计 GSM8K temporal subset，未运行数据构造，未产生 yield、样本统计、模型指标、论文结果或持久工件，也不是 formal run 或 `VERIFIED` 实验证据。唯一详细证据见 `docs/ai-context/checkpoints/phase-01-temporal-construction-v0.md`。
 
-D-012 construction audit schema v1 在 base `2b7e3f03726fd1abf59fa18867593458f38e5b34` 上完成 synthetic development verification，当前为 `COMMIT_PENDING`。其 source/test blob 为 `1bb1b167f3af5424b8fe199b2c9057c51638957f` 与 `3bfa86de8deb0b15ececad698808583acfe7aa45`；最终 fresh targeted 24/24、0.193s、exit 0，唯一一次 full suite 373/373、13.020s、exit 0，并通过 post-audit。该记录只证明内存 audit schema 的开发检查，不读取 production data，不生成 formal run、artifact、模型指标、论文效果数字或可进入作者结论的 `VERIFIED` claim；详细边界见 `docs/ai-context/checkpoints/phase-01-construction-audit-schema.md`。
+D-012 construction audit schema v1 已以 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 完成 synthetic development verification，parent 为 `2b7e3f03726fd1abf59fa18867593458f38e5b34`，普通 push 后 HEAD、origin 与 upstream 一致。其 source/test blob 为 `1bb1b167f3af5424b8fe199b2c9057c51638957f` 与 `3bfa86de8deb0b15ececad698808583acfe7aa45`；最终 fresh targeted 24/24、0.193s、exit 0，唯一一次 full suite 373/373、13.020s、exit 0，并通过 post-audit。该记录只证明内存 audit schema 的开发检查，不读取 production data，不生成 formal run、artifact、模型指标、论文效果数字或可进入作者结论的 `VERIFIED` effect claim；详细边界见 `docs/ai-context/checkpoints/phase-01-construction-audit-schema.md`。
 
 ## 5. 实验设计与超参数
 

@@ -2,15 +2,15 @@
 
 - updated_at: 2026-07-23 CST
 - active_phase: phase-01-data-pipeline
-- phase_status: DEVELOPMENT_VERIFICATION_PASSED / COMMIT_PENDING
+- phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 2b7e3f03726fd1abf59fa18867593458f38e5b34
-- last_verified_commit: 2b7e3f03726fd1abf59fa18867593458f38e5b34
+- git_head: 633618b6dc81503b7c5794380e8fa524f37c4c4c
+- last_verified_commit: 633618b6dc81503b7c5794380e8fa524f37c4c4c
 - last_completed_checkpoint: checkpoints/phase-01-construction-audit-schema.md
 - active_run_ids: none
 - running_processes: none
 - blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`. TimeQA direct primary-PDF reading is `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`; see `checkpoints/phase-01-timeqa-discovery.md`. The independent TimeQA fixed-revision snapshot/acquisition plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see the same checkpoint.
-- next_safe_action: 由智能体 2对 `checkpoints/phase-01-construction-audit-schema.md` 列出的精确九路径 staged snapshot 做提交前审计；未获 `APPROVED TO COMMIT` 前不得提交、推送、运行测试、访问数据、联网或创建工件。
+- next_safe_action: 仅由智能体 1起草 P2 audit persistence/publication 的 documentation-only 计划并提交智能体 2审核；未获新批准前不得修改代码、运行测试、访问数据、联网或创建工件。
 - required_reading:
   - `checkpoints/phase-01-construction-audit-schema.md`
   - `checkpoints/phase-01-temporal-construction-v0.md`
