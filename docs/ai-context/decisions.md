@@ -196,3 +196,11 @@
 - 决定：正式预测只能以固定 source order 的完整 JSONL 发布，且同时绑定 run ID、dataset revision/SHA、adapter/metric schema、method/model revision、canonical config、clean commit、seed、UTC 时间和资源声明。TORQUE 值为 string array，TimeQA 值为 string。
 - 发布/验证：0700 新 run 目录，0600 config/predictions/manifest；exclusive no-replace、manifest-last、创建前和 manifest 前 clean Git gate。offline verifier 重放 fixed adapter、record coverage/order、canonical bytes、SHA/size/count、权限/link 和 exact schemas。
 - 边界：该层不运行模型、不聚合指标、不自动写 registry；partial/既有 run 永不覆盖或修复。唯一详细来源为 `checkpoints/phase-01-prediction-artifacts.md`。
+
+## D-017：Kairos tensor core independent defaults
+
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED`；不是端到端模型或实验结果。
+- 论文对齐：event span pool → latent start/positive duration/end → exact 8-d geometry → five known relation softmax → valid directed-pair graph pool → shared answer/graph candidate score；loss 为 answer + relation + counterfactual relation。
+- 独立默认：mean span/graph pooling；directed non-self pairs；relation 顺序 `precedes/follows/overlaps/contains/during`；unknown/padding=`-100`；`softplus+1e-6` duration；shared size 256；Pair-MLP `[h_i,h_j,h_i-h_j,h_i*h_j]`/hidden 256。它们均非恢复出的作者配置。
+- Pair-MLP 公平性：复用相同 event/candidate representations、pair mask、五类 label、graph pool、candidate scorer 和 losses，仅用 MLP pair features 替代 interval geometry。
+- 边界：backbone、LoRA、event extraction/token alignment、candidate generation/prompt parsing 和 runner 不在本决定内。唯一详细来源为 `checkpoints/phase-03-kairos-tensor-core.md`。

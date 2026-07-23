@@ -88,6 +88,8 @@ D-012 construction audit schema v1 已以 commit `633618b6dc81503b7c5794380e8fa5
 
 D-013/P2 与 fixed GSM8K driver 已完成 production integration。有效执行 commit 为 `3944bb56d5c16a11482de39c5f0295936b6ac035`；train/test immutable audit 均经独立 offline source-lockstep replay。当前 adapter 将 GSM8K `text` 与 `question` 设为同一值，冻结 D-011 对所有成功抽取记录触发 `text_question_alias_unsupported`，因此 valid CF 与 retained 均为 0。该结果验证了当前独立实现的数据策略不充分，不能解释为论文方法效果或用来反驳论文中不可识别的作者 subset。
 
+Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427/427 full 及 synthetic backward：event/answer span mean pooling、`softplus+1e-6` interval、论文顺序的 8-d geometry、五类 relation graph、masked mean graph pool、`[u;g;u*g]` candidate scoring 和三项 loss。Pair-MLP 复用相同 supervision/masks/scorer，仅替换 interval geometry。该状态是 `DEVELOPMENT_VERIFIED TENSOR CORE`，不表示 Qwen/LoRA、端到端训练或模型效果已验证。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。

@@ -138,3 +138,9 @@
 - `f12efa0...` 实现 model-agnostic run spec、stable run ID、canonical config/prediction JSONL、manifest-last/no-replace 发布、两次 clean Git gate 和 fixed-source offline replay。
 - focused 12/12、full 413/413（13.163s）通过；提交后的真实隔离 Git gate 在 exact HEAD 上通过。测试覆盖 coverage/type、篡改、rehashed reorder、权限、hardlink/symlink 和 partial publication。
 - 未调用 production publisher、未创建 `/data0/.../artifacts`、未登记 formal run 或模型指标。详细合同唯一来源为 `checkpoints/phase-01-prediction-artifacts.md`。
+
+## 2026-07-23 — Kairos tensor core and Pair-MLP
+
+- `c178d15...` 实现 event/answer span mean pool、positive interval、论文 8 维 geometry、五类 relation graph、masked graph pool、graph-aware candidate scorer、三项 loss，以及无 interval 的 Pair-MLP same-supervision baseline。
+- focused 14/14、full 427/427（13.087s）通过，包含 full forward/loss/backward；GPU 隐藏、CPU 2 线程，未加载 Qwen 或 production data。
+- 该提交只覆盖可训练 tensor core。backbone/token alignment/prompt/candidate/evaluation runner 仍待实现，工程默认和非结果边界见 `checkpoints/phase-03-kairos-tensor-core.md`。

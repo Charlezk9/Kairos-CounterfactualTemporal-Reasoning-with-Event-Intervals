@@ -20,6 +20,20 @@
 
 匹配 Baseline 必须复用相同数据、候选、解析器和指标，避免实现差异造成不公平比较。
 
+### Tensor core implementation status
+
+Commit `c178d150bbfc8d4626ea70cd4e91c3a7ead13ec6` implements the formula path in
+`kairos.modeling`: strict event/answer span mean pooling, positive latent
+intervals, the exact ordered 8-dimensional geometry, five known-relation
+distributions, directed non-self masked graph pooling, graph-aware candidate
+scoring and answer/relation/counterfactual losses. `unknown` and padding use
+`-100` and never enter relation loss or graph pooling. The same module includes
+a Pair-MLP same-supervision baseline that shares all downstream components.
+
+This is a backbone-independent tensor core, not a complete Qwen/LoRA model. Its
+independent defaults and verification boundary are uniquely recorded in
+`../ai-context/checkpoints/phase-03-kairos-tensor-core.md`.
+
 ## CLI 与 manifest
 
 计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、clean Git 双门禁、manifest-last/no-replace 和 offline replay；commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`。它不是完整 CLI/evaluation runner。

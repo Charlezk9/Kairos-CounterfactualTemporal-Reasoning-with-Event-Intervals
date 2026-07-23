@@ -22,6 +22,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-GSM8K-CONSTRUCTION-DRIVER-20260723` | 2026-07-23 | fixed D-011 → D-012 → P2 GSM8K driver and acquisition completion integration | driver `c8f5cecfccca1037a12660424ebcbc7a7dc70914`; effective fix `3944bb56d5c16a11482de39c5f0295936b6ac035` | driver focused 5/5 and full 386/386; completion-pair focused 10/10 and clean full 388/388 in 13.057s | none |
 | `DEV-P01-TRANSFER-EVAL-20260723` | 2026-07-23 | fixed read-only TORQUE dev and TimeQA-Hard adapters plus frozen metrics | implementation `e89bbfd5c13792e51f69ceb21b4525efcc30736b`; effective empty-gold fix `8b57ffeb007dfb6e51d218c85f53011cce364f6e` | focused 13/13; full 401/401 in 13.033s; clean production read-only smoke verified 1,483 TORQUE QA/571 local contrast groups and 989 TimeQA-Hard records; no predictions or model metrics | none |
 | `DEV-P01-PREDICTION-ARTIFACTS-20260723` | 2026-07-23 | immutable model-agnostic prediction JSONL/manifest publication and offline source replay | clean commit `f12efa05459daa982b4a5583abf22d48e38b9a1a` | focused 12/12; full 413/413 in 13.163s; real isolated clean-Git gate passed; production publish not called | none |
+| `DEV-P03-KAIROS-TENSOR-20260723` | 2026-07-23 | paper-aligned interval geometry/relation graph/candidate scorer plus Pair-MLP same-supervision baseline | clean commit `c178d150bbfc8d4626ea70cd4e91c3a7ead13ec6` | focused 14/14; full 427/427 in 13.087s; synthetic forward/loss/backward passed with GPU hidden | none |
 
 这些条目不是正式 run，不产生可进入论文的数值；正式模型实验仍为空。
 
