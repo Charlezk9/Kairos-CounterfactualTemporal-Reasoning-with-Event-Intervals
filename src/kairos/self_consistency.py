@@ -46,7 +46,7 @@ class SelfConsistencyConfig:
     top_p: float = TOP_P
     top_k: int = TOP_K
     max_new_tokens: int = MAX_NEW_TOKENS
-    batch_size: int = 4
+    batch_size: int = 8
 
     def __post_init__(self) -> None:
         if (
@@ -66,7 +66,7 @@ class SelfConsistencyConfig:
             or self.top_p != TOP_P
             or self.top_k != TOP_K
             or self.max_new_tokens != MAX_NEW_TOKENS
-            or self.batch_size != 4
+            or self.batch_size != 8
         ):
             raise SelfConsistencyError("Self-Consistency config differs from freeze")
 
