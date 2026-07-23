@@ -1,9 +1,9 @@
 # Phase 01 Explicit-Marker Temporal Construction v0
 
-- status: `POST_AUDIT_APPROVED / COMMIT_PENDING`
+- status: `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`
 - branch: `experiment/reproduction-additional-evaluation`
 - staged_base_head: `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`
-- implementation_commit: pending
+- implementation_commit: `24ce15d40bd038d61bd6581ed2bc260072468c12`
 - active_run_ids: none
 - artifacts: none
 - production_data_read: none
@@ -242,10 +242,10 @@ only, use no GPU/model/network, and create no persistent artifact.
 
 ## Implementation verification and post-audit
 
-The staged implementation is based on clean commit
-`62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`; its implementation commit is
-pending and no future commit SHA is asserted. Exact staged Git blob identities
-are:
+The implementation was staged from clean parent commit
+`62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1` and committed as
+`24ce15d40bd038d61bd6581ed2bc260072468c12`. Exact implementation Git blob
+identities are:
 
 - `src/kairos/construction.py`:
   `127831adb991caf1569b7dca6c48b0bf57ce25cb`
@@ -268,18 +268,20 @@ model access. Every exact temporary run directory was verified and removed;
 post-audit found no residual process. No dataset, model, registry output,
 prediction, metric, checkpoint or other persistent artifact was created.
 
-Agent 2's implementation and post-test audit verdict is
-`POST_AUDIT_APPROVED / COMMIT_PENDING`. The approval covers the exact blobs
-above and the associated seven-document recovery update only; any source/test
-change invalidates it.
+Agent 2's pre-commit implementation and post-test audit verdict was
+`POST_AUDIT_APPROVED / COMMIT_PENDING`. The exact audited blobs above are now
+recorded in the implementation commit without any source/test change.
 
-## Commit and authorization gate
+## Commit disposition and next planning gate
 
-The current staged tree contains exactly two implementation paths and seven
-recovery/documentation paths. Only after Agent 2 approves that exact nine-path
-snapshot may the main agent create the ordinary non-force commit
-`feat(data): add synthetic temporal construction pipeline` and push it through
-the project-only SSH configuration. Until then, do not edit, rerun tests,
-commit or push. This approval does not authorize reading raw/processed data,
-running a construction job, publishing JSONL, creating a formal run or making
-any paper claim.
+The exact two-implementation plus seven-document snapshot was committed by an
+ordinary non-force commit as
+`24ce15d40bd038d61bd6581ed2bc260072468c12` with parent
+`62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1`, then ordinarily pushed through
+the project-only SSH configuration; local and remote branch heads matched.
+
+The next safe action is planning only: draft a P1 construction
+audit/persistence schema candidate for Agent 2 review. This completion does not
+authorize code or test changes, data or `/data0` access, network, registry or
+result changes, persistent construction output, an experiment artifact, a
+formal run or any paper claim.

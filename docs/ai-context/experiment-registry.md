@@ -16,7 +16,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-GSM8K-ADAPTER-20260722` | 2026-07-22 | immutable GSM8K source-ledger/canonical-example adapter | committed as `892b486` | targeted 63/63; full 166/166; third staged audit approved after two remediation rounds | none |
 | `DEV-P01-MUSIQUE-PROBE-20260722` | 2026-07-22 | fixed 65,536-byte MuSiQue response-body probe helper; offline synthetic verification only | committed as `cacbcbc` | targeted 92/92; full 258/258; fourth staged audit approved | none |
 | `DEV-P01-STRATEGYQA-ACQUIRE-20260723` | 2026-07-23 | fixed StrategyQA transfer/stage helper; offline synthetic verification only | committed as `978ba4d` | targeted 79/79; full 337/337; second staged audit approved | none |
-| `DEV-P01-TEMPORAL-CONSTRUCTION-20260723` | 2026-07-23 | D-011 in-memory explicit-marker construction; synthetic verification only | staged tree based on `62d1b21`; implementation commit pending | Agent 1 targeted 12/12 on the final reinforced snapshot; full 349/349 in 13.533s, exit 0; post-audit approved | none |
+| `DEV-P01-TEMPORAL-CONSTRUCTION-20260723` | 2026-07-23 | D-011 in-memory explicit-marker construction; synthetic verification only | committed as `24ce15d` | Agent 1 targeted 12/12 on the final reinforced snapshot; full 349/349 in 13.533s, exit 0; development verification passed | none |
 
 这些条目不是正式 run，不产生可进入论文的数值；正式模型实验仍为空。
 

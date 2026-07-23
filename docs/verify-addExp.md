@@ -82,7 +82,7 @@ TimeQA 当前只有固定 README/LICENSE 和 official arXiv landing 的 metadata
 
 TimeQA A/B/C snapshot/acquisition 计划随后被判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。唯一 candidate 和全部 transfer/helper 字段仍为 proposed/unexecuted；不存在 request、approval、record、stage、snapshot、data、code 或 experiment artifact。该 planning blocker 不是 acquisition、数据验证或实验结果。
 
-D-011 显式 marker 构造 v0 已完成 development-only staged 实现与事后审计。它仅在内存中组合保守 extraction/rewrite/UpdateAnswer：只有可证明的 `KNOWN` 答案才保留完整 original/CF pair，`UNKNOWN` 不产生 dangling record。该开发验证未读取 production data，未定义、生成或统计 GSM8K temporal subset，未运行数据构造，未产生 yield、样本统计、模型指标、论文结果或持久工件，也不是 formal run 或 `VERIFIED` 实验证据。唯一详细证据见 `docs/ai-context/checkpoints/phase-01-temporal-construction-v0.md`。
+D-011 显式 marker 构造 v0 已以 commit `24ce15d40bd038d61bd6581ed2bc260072468c12` 完成 development-only 实现与验证。它仅在内存中组合保守 extraction/rewrite/UpdateAnswer：只有可证明的 `KNOWN` 答案才保留完整 original/CF pair，`UNKNOWN` 不产生 dangling record。该开发验证未读取 production data，未定义、生成或统计 GSM8K temporal subset，未运行数据构造，未产生 yield、样本统计、模型指标、论文结果或持久工件，也不是 formal run 或 `VERIFIED` 实验证据。唯一详细证据见 `docs/ai-context/checkpoints/phase-01-temporal-construction-v0.md`。
 
 ## 5. 实验设计与超参数
 

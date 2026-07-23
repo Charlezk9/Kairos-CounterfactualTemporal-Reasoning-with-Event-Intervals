@@ -316,3 +316,5 @@
 - boundary: implementation is standard-library, in-memory and synthetic-only; no data/model read, network, GPU, persistence, formal run, construction artifact or residual process
 - evidence: targeted coverage and the 349/349 full-suite post-audit passed; an execution-preflight rejection before process creation is not counted as a run, and all exact temporary directories were removed
 - unique detail: exact blobs, test-run accounting, cleanup evidence, construction semantics and commit gate are recorded only in `checkpoints/phase-01-temporal-construction-v0.md`
+- commit disposition: the exact nine-path snapshot was ordinarily committed as `24ce15d40bd038d61bd6581ed2bc260072468c12` with parent `62d1b21b39b4ceb05a83500c45181a3c1e1ac5e1` and ordinarily pushed through project-only SSH; local and remote heads matched
+- closeout boundary: the historical pre-commit verdict did not pre-authorize this closeout or any later work; the current separate authorization covers exactly this seven-document closeout and nothing beyond it—no P1 code or test action, data or network access, further registry/result change, or artifact creation is authorized
