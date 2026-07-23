@@ -82,6 +82,10 @@ class SyntheticLayout:
             path.write_bytes(payload)
             os.chmod(path, mode)
             evidence[relative] = hashlib.sha256(payload).hexdigest()
+        os.link(
+            self.root / completion_rel,
+            self.root / "data/raw/completion-manifest.guard",
+        )
 
         self.layout = persistence._Layout(
             data_root=self.root,
@@ -140,6 +144,16 @@ class ConstructionAuditPersistenceTests(unittest.TestCase):
             self.commit,
             no_git_gate,
         )
+
+    def test_fixed_production_hashes_are_lowercase_sha256(self):
+        values = (
+            persistence._SOURCE_MANIFEST_SHA256,
+            persistence._COMPLETION_SHA256,
+            persistence._SHA256SUMS_SHA256,
+            persistence._FORMAL_TREE_SHA256,
+            *(facts.sha256 for facts in persistence._PRODUCTION_LAYOUT.splits.values()),
+        )
+        self.assertTrue(all(persistence._HEX64.fullmatch(value) for value in values))
 
     def test_manifest_last_publication_and_full_replay(self):
         result = self.publish()
@@ -261,6 +275,17 @@ class ConstructionAuditPersistenceTests(unittest.TestCase):
                     persistence._validate_execution_commit(value)
         with self.assertRaises(persistence.ConstructionAuditPersistenceError):
             persistence._validate_split("test", self.fixture.layout)
+
+    def test_completion_requires_the_fixed_same_inode_guard_pair(self):
+        guard = Path(self.temporary.name) / "data/raw/completion-manifest.guard"
+        guard.unlink()
+        guard.write_bytes(b"completion\n")
+        os.chmod(guard, 0o600)
+        with self.assertRaisesRegex(
+            persistence.ConstructionAuditPersistenceError,
+            "^bound path has an invalid regular-file binding$",
+        ):
+            persistence._source_gate(self.fixture.layout, "train")
 
     def test_cli_success_and_redacted_failure(self):
         expected = {"observer_state": "ABSENT"}

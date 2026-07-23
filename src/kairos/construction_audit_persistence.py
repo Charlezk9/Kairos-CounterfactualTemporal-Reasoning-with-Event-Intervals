@@ -40,7 +40,7 @@ _SOURCE_MANIFEST_SHA256 = (
 _RAW_DIR_REL = f"data/raw/gsm8k/{REVISION}"
 _COMPLETION_REL = f"{_RAW_DIR_REL}/completion-manifest.json"
 _COMPLETION_SHA256 = (
-    "d8861250e197bf04e1f24fee4dbb7fe07194f485095f77cdcc8669412e35047"
+    "d8861250e197bf04e1f24fee4dbb7bfe07194f485095f77cdcc8669412e35047"
 )
 _SHA256SUMS_REL = f"{_RAW_DIR_REL}/SHA256SUMS"
 _SHA256SUMS_SHA256 = (
@@ -142,11 +142,16 @@ def _fail(message: str) -> None:
     raise ConstructionAuditPersistenceError(message) from None
 
 
-def _sha256_file(path: Path, limit: int) -> tuple[str, int]:
+def _sha256_file(
+    path: Path,
+    limit: int,
+    *,
+    expected_nlink: int = 1,
+) -> tuple[str, int]:
     try:
         before = path.lstat()
-        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
-            _fail("bound input is not a single-link regular file")
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != expected_nlink:
+            _fail("bound input has an invalid regular-file binding")
         digest = hashlib.sha256()
         size = 0
         with path.open("rb") as handle:
@@ -295,7 +300,13 @@ def _relative_components(value: str) -> tuple[str, ...]:
     return parts
 
 
-def _checked_path(layout: _Layout, relative: str, *, regular: bool) -> Path:
+def _checked_path(
+    layout: _Layout,
+    relative: str,
+    *,
+    regular: bool,
+    expected_nlink: int = 1,
+) -> Path:
     parts = _relative_components(relative)
     current = layout.data_root
     try:
@@ -309,8 +320,8 @@ def _checked_path(layout: _Layout, relative: str, *, regular: bool) -> Path:
             if stat.S_ISLNK(info.st_mode):
                 _fail("bound path contains a symbolic link")
             if final and regular:
-                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-                    _fail("bound path is not a single-link regular file")
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != expected_nlink:
+                    _fail("bound path has an invalid regular-file binding")
             elif not stat.S_ISDIR(info.st_mode):
                 _fail("bound path component is not a directory")
             if info.st_uid != os.geteuid():
@@ -341,8 +352,36 @@ def _source_gate(layout: _Layout, official_split: str) -> tuple[_SourceFacts, st
             _fail("processed source manifest binding differs")
     except (KeyError, TypeError):
         _fail("processed source manifest binding differs")
-    completion = _checked_path(layout, layout.completion_rel, regular=True)
-    if _sha256_file(completion, _MANIFEST_BYTE_LIMIT)[0] != layout.completion_sha256:
+    completion = _checked_path(
+        layout,
+        layout.completion_rel,
+        regular=True,
+        expected_nlink=2,
+    )
+    completion_guard_rel = str(
+        Path(layout.completion_rel).with_name("completion-manifest.guard")
+    )
+    completion_guard = _checked_path(
+        layout,
+        completion_guard_rel,
+        regular=True,
+        expected_nlink=2,
+    )
+    try:
+        completion_info = completion.lstat()
+        guard_info = completion_guard.lstat()
+    except (FileNotFoundError, PermissionError, OSError):
+        _fail("acquisition completion binding differs")
+    if (
+        completion_info.st_dev != guard_info.st_dev
+        or completion_info.st_ino != guard_info.st_ino
+    ):
+        _fail("acquisition completion binding differs")
+    if _sha256_file(
+        completion,
+        _MANIFEST_BYTE_LIMIT,
+        expected_nlink=2,
+    )[0] != layout.completion_sha256:
         _fail("acquisition completion binding differs")
     sha256sums = _checked_path(layout, layout.sha256sums_rel, regular=True)
     if _sha256_file(sha256sums, _MANIFEST_BYTE_LIMIT)[0] != layout.sha256sums_sha256:
