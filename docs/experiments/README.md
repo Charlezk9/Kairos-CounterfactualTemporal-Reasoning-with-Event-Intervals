@@ -25,8 +25,8 @@ TORQUE 和 TimeQA 只作冻结后的迁移评测，不用于训练。训练数�
 
 ### 已观察的迁移评测 source binding（非结果）
 
-- TORQUE 固定 revision `ab27019cc6a317fde3c879900499f02acce8b16d` 的 public dev 为 145 passages/1,483 answer-bearing QA，dev SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`。本地 test 没有 answer field，禁止用于评测。`question_clustering.json` 固定 SHA256 为 `7d20248ab1c08603a22cc1ce4d7419803394040c74146f728970ce9cddb351f9`；consistency 的论文 prose/caption 冲突仍须在 evaluator 实现前显式决定。
-- TimeQA 固定 revision `38b05989070c1168b2bef3d5a2656afeeba763dc` 的 `dataset/human_test.hard.json` 实为 989 条 LF-delimited JSON，exact keys 为 `context, idx, paragraphs, question, targets`，SHA256 `0318963bb2af931143be50ca24402d03c075c4b5a4898fda9bf4d5b2f0c6c188`。
+- TORQUE 固定 revision `ab27019cc6a317fde3c879900499f02acce8b16d` 的 public dev 为 145 passages/1,483 answer-bearing QA，dev SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`。本地 test 没有 answer field，禁止用于评测。per-question 采用 NFC+casefold+whitespace collapse 后的 span-set EM/F1，保留 punctuation；323 题 gold 为空集。571 个 contrast group 以 `(passageID, cluster_id)` 唯一化。主 consistency 为组内每题 set EM=1 的 group 百分比；敏感性指标为组内每题 set F1>=0.8 的 group 百分比，两者必须同时报告。
+- TimeQA 固定 revision `38b05989070c1168b2bef3d5a2656afeeba763dc` 的 `dataset/human_test.hard.json` 实为 989 条 LF-delimited JSON，exact keys 为 `context, idx, paragraphs, question, targets`，SHA256 `0318963bb2af931143be50ca24402d03c075c4b5a4898fda9bf4d5b2f0c6c188`。采用 fixed upstream normalizer（lowercase、删除 ASCII punctuation/English articles、whitespace collapse）、normalized EM 和 token F1，每题分别对多个 gold 取最大值；159 题的唯一 gold 为空字符串，必须保留。
 
 这些是正式预测前的 source/schema 证据，不得解释为模型结果，也未改变冻结的评测 split。
 

@@ -125,3 +125,10 @@
 - TORQUE 28 members/22,163,721 bytes 与 TimeQA 40 members/454,095,594 bytes 通过 held-FD safety inspection/extraction。只读 schema 聚合确认 TORQUE dev 145 passages/1,483 answer-bearing QA、test 无 answer；TimeQA hard 为 989 条 exact-key JSONL。
 - StrategyQA archive 使用通用策略禁止的 ZIP data descriptor，因此保留 staged archive、不解压、不放宽 guard。2Wiki corrected literal URL 一次 GET 在连接阶段 curl 28、无 response，未重试或回退。
 - 四个 raw revision 均写入 canonical 0600 acquisition manifest；本阶段不产生模型 run 或论文效果指标。
+
+## 2026-07-23 — TORQUE/TimeQA transfer-evaluation contract
+
+- `e89bbfd...` 新增固定 revision/SHA 的只读适配器、TORQUE span-set 指标、两种 contrast consistency 口径，以及 TimeQA 官方 normalizer/EM/F1 的语义复刻；合成测试与完整回归分别为 12/12、400/400。
+- 首次 clean production smoke 在任何结果返回前 fail closed，揭示 TimeQA-Hard 有合法空字符串 gold。聚合只读确认共 159 条，随后将“target 列表非空但 target 可空”加入合成契约。
+- 修复提交 `8b57ffe...` 的 focused 13/13、full 401/401 通过。clean production read-only smoke 验证 TORQUE 1,483 QA/571 local groups 与 TimeQA-Hard 989 unique records；未创建预测、metric artifact、run ID 或 GPU 任务。
+- TORQUE 主 consistency 固定为组内每题 set EM=1；F1>=0.8 作为显式 sensitivity 同时输出。详细证据唯一来源为 `checkpoints/phase-01-transfer-eval-contract.md`。

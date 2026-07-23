@@ -181,3 +181,11 @@
 - 结果：TORQUE/TimeQA fixed-commit TAR.GZ 通过既有 held-FD archive inspection/extraction 并完成无内容 schema 聚合；StrategyQA 官方 ZIP 因 data descriptor 被通用保守策略阻塞且未解压；2Wiki 在连接阶段 curl 28 且无 HTTP response，不重试。
 - 评测边界：TORQUE 只允许 answer-bearing public dev（145 passages/1,483 QA），test 本地条目没有 answer；TimeQA-Hard 固定为 989 条 LF-delimited JSON。它们当前只是 source/schema evidence，不是 adapter、metric 或模型结果。
 - 证据：唯一详细来源为 `checkpoints/phase-01-manual-source-acquisition.md` 与 raw revision 内 canonical acquisition manifests。
+
+## D-015：TORQUE/TimeQA transfer metric contract
+
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED`；不是模型评测或论文结果。
+- TORQUE：只读 public dev，预测与 gold 都按 NFC+casefold+whitespace collapse 后作为 span set；保留 punctuation。per-question 报 set EM/F1，空集对空集两者均为 1。contrast group 的唯一键为 `(passageID, cluster_id)`。
+- 规格冲突处置：论文 prose 的“组内每题 exact”定为主指标 `cluster_exact_consistency`；Table 4 caption 风格的“组内每题 F1>=0.8”定为敏感性指标 `cluster_f1_80_consistency`。两者必须同时输出，禁止混名或只报告较优者。
+- TimeQA：语义复刻固定 upstream `utils.py` 的 lowercase、ASCII punctuation 删除、article 删除、whitespace collapse、EM/token-F1 和多 gold 分别取最大值。989 条 hard 记录中 159 条的唯一 target 是空字符串；这是合法 gold，不能丢弃或改写。
+- 证据和非结果边界：实现/测试/clean read-only smoke 的唯一详细来源为 `checkpoints/phase-01-transfer-eval-contract.md`。正式评测仍需先冻结 prediction JSONL/manifest；TORQUE test 和 upstream code execution 仍禁止。
