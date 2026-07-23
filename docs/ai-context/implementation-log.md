@@ -132,3 +132,9 @@
 - 首次 clean production smoke 在任何结果返回前 fail closed，揭示 TimeQA-Hard 有合法空字符串 gold。聚合只读确认共 159 条，随后将“target 列表非空但 target 可空”加入合成契约。
 - 修复提交 `8b57ffe...` 的 focused 13/13、full 401/401 通过。clean production read-only smoke 验证 TORQUE 1,483 QA/571 local groups 与 TimeQA-Hard 989 unique records；未创建预测、metric artifact、run ID 或 GPU 任务。
 - TORQUE 主 consistency 固定为组内每题 set EM=1；F1>=0.8 作为显式 sensitivity 同时输出。详细证据唯一来源为 `checkpoints/phase-01-transfer-eval-contract.md`。
+
+## 2026-07-23 — Prediction artifact contract
+
+- `f12efa0...` 实现 model-agnostic run spec、stable run ID、canonical config/prediction JSONL、manifest-last/no-replace 发布、两次 clean Git gate 和 fixed-source offline replay。
+- focused 12/12、full 413/413（13.163s）通过；提交后的真实隔离 Git gate 在 exact HEAD 上通过。测试覆盖 coverage/type、篡改、rehashed reorder、权限、hardlink/symlink 和 partial publication。
+- 未调用 production publisher、未创建 `/data0/.../artifacts`、未登记 formal run 或模型指标。详细合同唯一来源为 `checkpoints/phase-01-prediction-artifacts.md`。

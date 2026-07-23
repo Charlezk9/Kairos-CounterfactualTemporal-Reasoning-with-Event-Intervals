@@ -189,3 +189,10 @@
 - 规格冲突处置：论文 prose 的“组内每题 exact”定为主指标 `cluster_exact_consistency`；Table 4 caption 风格的“组内每题 F1>=0.8”定为敏感性指标 `cluster_f1_80_consistency`。两者必须同时输出，禁止混名或只报告较优者。
 - TimeQA：语义复刻固定 upstream `utils.py` 的 lowercase、ASCII punctuation 删除、article 删除、whitespace collapse、EM/token-F1 和多 gold 分别取最大值。989 条 hard 记录中 159 条的唯一 target 是空字符串；这是合法 gold，不能丢弃或改写。
 - 证据和非结果边界：实现/测试/clean read-only smoke 的唯一详细来源为 `checkpoints/phase-01-transfer-eval-contract.md`。正式评测仍需先冻结 prediction JSONL/manifest；TORQUE test 和 upstream code execution 仍禁止。
+
+## D-016：Model-agnostic prediction artifact contract
+
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED`；production publisher 未调用。
+- 决定：正式预测只能以固定 source order 的完整 JSONL 发布，且同时绑定 run ID、dataset revision/SHA、adapter/metric schema、method/model revision、canonical config、clean commit、seed、UTC 时间和资源声明。TORQUE 值为 string array，TimeQA 值为 string。
+- 发布/验证：0700 新 run 目录，0600 config/predictions/manifest；exclusive no-replace、manifest-last、创建前和 manifest 前 clean Git gate。offline verifier 重放 fixed adapter、record coverage/order、canonical bytes、SHA/size/count、权限/link 和 exact schemas。
+- 边界：该层不运行模型、不聚合指标、不自动写 registry；partial/既有 run 永不覆盖或修复。唯一详细来源为 `checkpoints/phase-01-prediction-artifacts.md`。

@@ -22,7 +22,7 @@
 
 ## CLI 与 manifest
 
-计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。
+计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、clean Git 双门禁、manifest-last/no-replace 和 offline replay；commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`。它不是完整 CLI/evaluation runner。
 
 正式实验只能从 clean commit 启动；dirty-tree smoke test 标为 `development-only`，不能进入论文结果。
 
@@ -59,25 +59,19 @@ implementation is authorized. The unique status and disposition are in
 
 ## TORQUE source status
 
-TORQUE metadata discovery remains `METADATA_ONLY / DOCUMENTS_READ`; its A/B/C
-snapshot/acquisition plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. No snapshot,
-data/evaluator access or implementation is authorized. The unique plan,
-conflict and disposition are in
-`../ai-context/checkpoints/phase-01-torque-discovery.md`.
+TORQUE fixed-commit source was later manually acquired under D-014. Public dev
+is bound to its fixed SHA and has a verified read-only adapter/metric contract;
+test has no answer and remains prohibited. The effective contract and resolved
+main/sensitivity consistency definitions are in
+`../ai-context/checkpoints/phase-01-transfer-eval-contract.md`.
 
 ## TimeQA source status
 
-TimeQA has metadata-only README/LICENSE and arXiv landing evidence; an ar5iv
-route was rejected and direct PDF reading is
-`BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`. No snapshot, hard
-evaluation-file bytes, PDF-body evidence or implementation is authorized. The
-unique status is in
-`../ai-context/checkpoints/phase-01-timeqa-discovery.md`.
-
-The TimeQA A/B/C snapshot/acquisition plan is independently
-`BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; its candidate and all transfer/helper
-fields remain proposed and unexecuted. Detailed stage boundaries and audit
-semantics are only in the same checkpoint.
+TimeQA fixed-commit source was later manually acquired under D-014.
+`human_test.hard` is bound to its fixed SHA and has a verified read-only
+adapter plus upstream-equivalent normalizer/EM/F1 contract, including 159
+legitimate empty-string gold records. The effective contract is in
+`../ai-context/checkpoints/phase-01-transfer-eval-contract.md`.
 
 ## GSM8K source adapter test matrix
 

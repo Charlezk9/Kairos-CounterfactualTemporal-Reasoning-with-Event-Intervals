@@ -4,17 +4,18 @@
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 8b57ffeb007dfb6e51d218c85f53011cce364f6e
-- last_verified_commit: 8b57ffeb007dfb6e51d218c85f53011cce364f6e
-- last_completed_checkpoint: checkpoints/phase-01-transfer-eval-contract.md
+- git_head: f12efa05459daa982b4a5583abf22d48e38b9a1a
+- last_verified_commit: f12efa05459daa982b4a5583abf22d48e38b9a1a
+- last_completed_checkpoint: checkpoints/phase-01-prediction-artifacts.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED` because the official ZIP uses data descriptors. 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE` after one corrected-URL attempt. TORQUE/TimeQA adapters and metrics are verified, but no prediction-manifest contract or model predictions exist.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED` because the official ZIP uses data descriptors. 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE` after one corrected-URL attempt. Transfer adapters/metrics and the prediction artifact contract are verified, but Kairos/model baselines and an evaluation runner do not yet exist; no formal predictions exist.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 冻结并实现 model-agnostic prediction JSONL/manifest contract（严格 record ID、dataset revision、clean execution commit、method/config hash、完整 prediction key coverage 和文件 SHA256），测试只用 synthetic fixtures。完成并提交前不得运行正式模型评测；不得使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
+- next_safe_action: 按论文公式和 `docs/implementation/README.md` 实现 Kairos tensor core（event masked pooling → interval projection → pair geometry/relation logits → masked graph pooling → candidate scoring）及最小 baseline/output interface，先只用 synthetic tensors/text 做 CPU 测试。不得加载 7B 模型、运行正式评测、使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
 - required_reading:
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`
+  - `checkpoints/phase-01-prediction-artifacts.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

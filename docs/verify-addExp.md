@@ -132,7 +132,7 @@ fixed adapters 与 metric contract 已在 `e89bbfd...` 实现，并由 `8b57ffe.
 - TORQUE：1,483 题、145 passages、571 个 `(passageID, cluster_id)` contrast groups、323 个空 gold set，answer cardinality 0--16。主 consistency 是组内每题 set EM=1；F1>=0.8 口径作为 sensitivity 同时报告。
 - TimeQA-Hard：989 unique records、33,679 paragraphs、1,046 targets；target cardinality 1/2/3 为 940/41/8，其中 159 题的唯一 gold 为空字符串，按官方 empty/empty EM/F1 语义保留。
 
-这些仍是 `DEVELOPMENT_VERIFIED ADAPTER/METRIC CONTRACT`，不是模型结果。尚无 prediction artifact 或 run ID；正式评测前还必须提交 model-agnostic prediction JSONL/manifest contract。
+这些仍是 `DEVELOPMENT_VERIFIED ADAPTER/METRIC CONTRACT`，不是模型结果。model-agnostic prediction JSONL/manifest contract 已在 `f12efa0...` 通过 12/12 focused、413/413 full 和真实 clean-Git gate；production publisher 尚未调用，因此仍无 prediction artifact 或 run ID。
 
 ## 10. 统计检验与实验结论
 
@@ -158,4 +158,4 @@ fixed adapters 与 metric contract 已在 `e89bbfd...` 实现，并由 `8b57ffe.
 
 ## 14. Run、Commit 与工件追踪
 
-当前无正式模型 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。新增 source records 为 `ACQ-STRATEGYQA-20260723`、`ACQ-TORQUE-20260723`、`ACQ-TIMEQA-20260723` 与 `ACQ-2WIKI-20260723`，状态和 manifest SHA 见 registry。transfer contract 的开发记录为 `DEV-P01-TRANSFER-EVAL-20260723`，有效 commit `8b57ffeb007dfb6e51d218c85f53011cce364f6e`，不含 prediction artifact。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
+当前无正式模型 run。数据获取记录 `ACQ-GSM8K-20260722` 对应 provenance `482af857249b03d89c986dce96c9d38fc11cfd70` 和 archive SHA256 `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a`；processed artifact `PROC-P01-GSM8K-20260722` 对应 execution commit `3e34c9c6da06a0364b84ef97492331e59a764a45` 和 manifest SHA256 `48f1df79303cf41efc986c762744c0550cecb07689abaf77a4ebde202b6ee4fe`。Construction artifact `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` 对应 `3944bb56d5c16a11482de39c5f0295936b6ac035`，split 哈希见第 6 节。新增 source records 为 `ACQ-STRATEGYQA-20260723`、`ACQ-TORQUE-20260723`、`ACQ-TIMEQA-20260723` 与 `ACQ-2WIKI-20260723`，状态和 manifest SHA 见 registry。transfer contract 的开发记录为 `DEV-P01-TRANSFER-EVAL-20260723`，有效 commit `8b57ffeb007dfb6e51d218c85f53011cce364f6e`；prediction contract 为 `DEV-P01-PREDICTION-ARTIFACTS-20260723`，commit `f12efa05459daa982b4a5583abf22d48e38b9a1a`。两者均不含 prediction artifact。Bootstrap commit 为 `989634284e58b733e0bca2520fd0e7caad930e4c`；后续所有表格必须引用 registry 中的 run ID 和 SHA256。
