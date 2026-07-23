@@ -9,8 +9,9 @@
 - last_completed_checkpoint: checkpoints/phase-01-construction-audit-schema.md
 - active_run_ids: none
 - running_processes: none
-- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA runtime redirect verification is `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-strategyqa-runtime-redirect.md`. `RUNTIME_REDIRECT_SEMANTICS_VERIFIED` remains `False`. The independent 2Wiki corrected-URL HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-2wiki-discovery.md`. The TORQUE fixed-revision snapshot/acquisition plan is independently `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see `checkpoints/phase-01-torque-discovery.md`. TimeQA direct primary-PDF reading is `BLOCKED_TOOLING / NO_PRE_FETCH_REDIRECT_AND_BYTE_GATES`; see `checkpoints/phase-01-timeqa-discovery.md`. The independent TimeQA fixed-revision snapshot/acquisition plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`; see the same checkpoint.
-- next_safe_action: 仅由智能体 1起草 P2 audit persistence/publication 的 documentation-only 计划并提交智能体 2审核；未获新批准前不得修改代码、运行测试、访问数据、联网或创建工件。
+- blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`（策略阻塞，等待手动解决目录权限）。StrategyQA / 2Wiki / TORQUE / TimeQA 四数据集获取因工具限制被阻塞（`NO_NATIVE_EXEC_ENV`），优先采用手动下载方式绕过，放入 `/data0/hk_data/kairos-zx/data/raw/<dataset>/`。
+- audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
+- next_safe_action: 直接推进数据管线：完成 P2 construction audit 持久化 → 用已获取的 GSM8K 运行数据构造 → 手动下载剩余数据集 → 开始模型实现与训练。优先产出核心复现路径（GSM8K 构造 → Qwen LoRA 训练 → 评测指标），被阻塞数据集和额外 baseline 记录为 deferred。
 - required_reading:
   - `checkpoints/phase-01-construction-audit-schema.md`
   - `checkpoints/phase-01-temporal-construction-v0.md`

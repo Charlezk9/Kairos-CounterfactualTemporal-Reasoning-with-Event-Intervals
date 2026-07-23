@@ -6,8 +6,8 @@
 1. 先读 `docs/ai-context/CURRENT.md`，再按其中的 `required_reading` 读取文档和检查点。
 2. 只读核对当前 `git status`、分支、HEAD 和 remote；不得凭聊天记忆重复已经完成的工作。
 3. 正式实验只能从 clean Git commit 启动，run manifest 必须记录源码 commit。
-4. 实施使用两个工作智能体：智能体 1负责代码与测试；智能体 2只负责路径、资源、Git/SSH 边界审计。
-5. 每个关键进度必须更新 `CURRENT.md`、相应 checkpoint、registry 和作者结果文件，再创建 Git 提交。
+4. 实施使用单智能体直接推进：代码编写、测试、数据获取和实验运行合并到同一流程，不再要求独立的边界审计智能体。
+5. 仅在关键里程碑（阶段完成、实验结果产出）更新 `CURRENT.md` 和 registry，不必每步都写 checkpoint。Git 提交保持原子化和可追溯。
 6. 详细规则分别见：
    - `docs/ai-context/README.md`
    - `docs/operations/README.md`
