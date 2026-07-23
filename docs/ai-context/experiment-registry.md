@@ -18,6 +18,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-STRATEGYQA-ACQUIRE-20260723` | 2026-07-23 | fixed StrategyQA transfer/stage helper; offline synthetic verification only | committed as `978ba4d` | targeted 79/79; full 337/337; second staged audit approved | none |
 | `DEV-P01-TEMPORAL-CONSTRUCTION-20260723` | 2026-07-23 | D-011 in-memory explicit-marker construction; synthetic verification only | committed as `24ce15d` | Agent 1 targeted 12/12 on the final reinforced snapshot; full 349/349 in 13.533s, exit 0; development verification passed | none |
 | `DEV-P01-CONSTRUCTION-AUDIT-20260723` | 2026-07-23 | D-012 in-memory typed construction audit; synthetic verification only | commit `633618b6dc81503b7c5794380e8fa524f37c4c4c`, parent `2b7e3f03726fd1abf59fa18867593458f38e5b34`; source/test blobs `1bb1b167f3af5424b8fe199b2c9057c51638957f` / `3bfa86de8deb0b15ececad698808583acfe7aa45` | final fresh targeted 24/24 in 0.193s, exit 0; one full run 373/373 in 13.020s, exit 0; post-audit approved; ordinary push confirmed HEAD=origin=upstream | none |
+| `DEV-P01-AUDIT-PERSISTENCE-20260723` | 2026-07-23 | D-013 immutable construction-audit JSONL/manifest publication and offline replay; synthetic verification only | clean commit `63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5` | focused 8/8; full 381/381 in 13.234s, exit 0; GPU disabled and two CPU threads | none |
 
 这些条目不是正式 run，不产生可进入论文的数值；正式模型实验仍为空。
 

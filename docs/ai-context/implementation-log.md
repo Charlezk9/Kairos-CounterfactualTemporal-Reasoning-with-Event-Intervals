@@ -104,3 +104,10 @@
 - 最终 fresh targeted 为 24/24、0.193s、exit 0；唯一一次 full suite 为 373/373、13.020s、exit 0，full temp `/data0/hk_data/kairos-zx/.tmp/d012-full.r2tb5NGaAd` 已清理。智能体 2事后裁决为 `POST_AUDIT_APPROVED`。
 - 精确九路径实现快照已以普通 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 提交，parent 为 `2b7e3f03726fd1abf59fa18867593458f38e5b34`；普通 push 后 local HEAD、origin 与 upstream 一致。
 - 当前状态为 `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`。下一步仅由智能体 1起草 P2 persistence/publication 的 documentation-only 计划供智能体 2审核；本项没有 formal run、production data read、network、model/GPU、artifact、paper metric 或 `VERIFIED` 实验 effect claim。
+
+## 2026-07-23 — D-013 construction audit persistence v1
+
+- 按最新项目指令切换为单智能体直接推进，安全路径、资源、clean-commit 和 pre-commit 门禁不变。
+- 新增固定 GSM8K source binding 的 immutable JSONL/manifest publisher、offline verifier 和 observer；实现 commit 为 `63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5`，已普通推送。
+- focused 8/8 与 clean-commit full 381/381（13.234s）通过；GPU 禁用、CPU 线程 2、cache/temp 均位于 `/data0/hk_data/kairos-zx`。
+- 本里程碑没有创建 production audit、run ID 或论文数值。下一步实现 fixed production driver，再从 clean commit 运行 train/test 构造并登记实际 funnel。

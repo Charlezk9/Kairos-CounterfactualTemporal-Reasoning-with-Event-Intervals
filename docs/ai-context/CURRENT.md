@@ -4,15 +4,16 @@
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 633618b6dc81503b7c5794380e8fa524f37c4c4c
-- last_verified_commit: 633618b6dc81503b7c5794380e8fa524f37c4c4c
-- last_completed_checkpoint: checkpoints/phase-01-construction-audit-schema.md
+- git_head: 63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5
+- last_verified_commit: 63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5
+- last_completed_checkpoint: checkpoints/phase-01-construction-audit-persistence.md
 - active_run_ids: none
 - running_processes: none
 - blockers: MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`（策略阻塞，等待手动解决目录权限）。StrategyQA / 2Wiki / TORQUE / TimeQA 四数据集获取因工具限制被阻塞（`NO_NATIVE_EXEC_ENV`），优先采用手动下载方式绕过，放入 `/data0/hk_data/kairos-zx/data/raw/<dataset>/`。
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 直接推进数据管线：完成 P2 construction audit 持久化 → 用已获取的 GSM8K 运行数据构造 → 手动下载剩余数据集 → 开始模型实现与训练。优先产出核心复现路径（GSM8K 构造 → Qwen LoRA 训练 → 评测指标），被阻塞数据集和额外 baseline 记录为 deferred。
+- next_safe_action: 实现固定 GSM8K construction driver：只读取已验证的 processed example train/test，逐条调用 D-011 与 D-012，再交给已提交的 P2 publisher；使用 synthetic tests 验证后原子提交。随后只能从 clean commit 运行一次 train/test production construction，并如实登记 funnel（包括可能的 0 retained）。
 - required_reading:
+  - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`
   - `checkpoints/phase-01-temporal-construction-v0.md`
   - `checkpoints/phase-01-data-core.md`

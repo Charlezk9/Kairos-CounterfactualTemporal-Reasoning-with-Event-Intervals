@@ -125,3 +125,13 @@ D-011 的局部实现已以 commit `24ce15d40bd038d61bd6581ed2bc260072468c12` �
 `kairos.construction_audit` 将一个 pre-construction `TemporalExample` 和已经计算的 D-011 `ConstructionResult` 映射为 frozen typed audit record。稳定 audit ID 只绑定 source identity；独立 fingerprint 覆盖 caller order、完整 construction evidence、final roles 和诊断。显式 serializer/parser 保持 exact nested schema、深冻结诊断并 fail closed 校验 D-011 crosslinks。
 
 P1 已以 commit `633618b6dc81503b7c5794380e8fa524f37c4c4c` 完成，状态为 `COMPLETE / DEVELOPMENT_VERIFICATION_PASSED`。P1 不实现 JSONL、manifest、writer/verifier、CLI 或不可变发布；稳定契约、限额、精确 blobs、开发测试和后续 P2 门禁的唯一来源是 `../ai-context/checkpoints/phase-01-construction-audit-schema.md`。
+
+## Construction audit persistence v1
+
+`kairos.construction_audit_persistence` 在 commit
+`63737a3b0da741a5e4ee08ff32c2fd4b8dde7bc5` 实现 P2。它只接受已经构造的
+typed audit stream，绑定固定 GSM8K processed source，执行 canonical JSONL、
+manifest-last/no-replace publication，并通过 source lockstep replay 验证 order、
+identity、terminal 与 funnel。它不调用 D-011，不选择 subset，也不复用会覆盖目标的
+`io.write_examples()`。生产 driver 尚未实现；完整合同和验证证据见
+`../ai-context/checkpoints/phase-01-construction-audit-persistence.md`。

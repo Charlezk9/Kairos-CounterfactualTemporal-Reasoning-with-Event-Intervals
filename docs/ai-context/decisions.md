@@ -163,3 +163,13 @@
 - 安全边界：P1 只提供显式 typed serialize/parse 和 in-memory 校验，不使用 `asdict`，不记录 repr，不读写 JSONL/manifest，不增加 CLI、registry、result 或工件。持久化 writer/verifier、batch order/uniqueness、no-replace 与 manifest-last 必须作为 P2 另行冻结。
 - 唯一详细来源：16 个顶层字段及顺序、所有 nested exact schemas、ID/fingerprint 公式、diagnostic 深拷贝与上限、crosslink、测试和实施门禁只见 `checkpoints/phase-01-construction-audit-schema.md`。
 - 实施门禁：当前只批准文档冻结。智能体 1可下一步起草精确两文件实施计划；智能体 2新批准前不得编码或运行测试。
+
+## D-013：Construction audit persistence v1
+
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED`。
+- 决定：P2 只持久化调用方已经产生的 D-012 typed records；不在 writer 内调用 D-011，也不把 persistence 与 temporal subset 选择混合。固定 source 为 `PROC-P01-GSM8K-20260722`，按 official train/test 物理顺序 lockstep 重放。
+- 发布：每个 split 使用全新 0700 目录、0600 canonical JSONL、exclusive temp + fsync + hardlink no-replace，manifest 最后发布；已有或 partial target 不覆盖、不清理、不修复。执行 commit 在创建前、manifest 前和完整验证后均须与 clean HEAD 一致。
+- 证据：manifest 绑定 source/acquisition/SHA256SUMS/LICENSE，记录输出 SHA/bytes/count、三类 unique identity、七个 terminal count 和完整 funnel；离线 verifier 逐条重建 D-012 并核对 source linkage。
+- 数据边界：audit 包含完整 source text/question/answer 与构造诊断，属于 data-bearing 工件，仅保存在 `/data0` 的私有目录，不进入 Git、日志或作者报告逐样本内容。
+- 已知预期：GSM8K adapter 当前令 `text == question` 且 answer type 为 numeric。冻结 D-011 可能因此得到 0 retained；生产结果必须如实登记，不得查看 test funnel 后修改 marker/updater 以制造正结果。
+- 唯一详细来源：`checkpoints/phase-01-construction-audit-persistence.md`。
