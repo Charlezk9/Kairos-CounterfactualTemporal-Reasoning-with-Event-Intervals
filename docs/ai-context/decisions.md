@@ -173,3 +173,11 @@
 - 数据边界：audit 包含完整 source text/question/answer 与构造诊断，属于 data-bearing 工件，仅保存在 `/data0` 的私有目录，不进入 Git、日志或作者报告逐样本内容。
 - 已知预期：GSM8K adapter 当前令 `text == question` 且 answer type 为 numeric。冻结 D-011 可能因此得到 0 retained；生产结果必须如实登记，不得查看 test funnel 后修改 marker/updater 以制造正结果。
 - 唯一详细来源：`checkpoints/phase-01-construction-audit-persistence.md`。
+
+## D-014：手动官方 source acquisition disposition
+
+- 状态：`PARTIAL / TWO_SOURCES_EXTRACTED`。
+- 决定：按用户最新指令，以固定官方 URL/revision 手动获取 StrategyQA、TORQUE、TimeQA，并对 2Wiki corrected literal URL 作一次 bounded GET；仍保留路径、资源、HTTPS、no-upstream-execution 和不回退镜像边界。
+- 结果：TORQUE/TimeQA fixed-commit TAR.GZ 通过既有 held-FD archive inspection/extraction 并完成无内容 schema 聚合；StrategyQA 官方 ZIP 因 data descriptor 被通用保守策略阻塞且未解压；2Wiki 在连接阶段 curl 28 且无 HTTP response，不重试。
+- 评测边界：TORQUE 只允许 answer-bearing public dev（145 passages/1,483 QA），test 本地条目没有 answer；TimeQA-Hard 固定为 989 条 LF-delimited JSON。它们当前只是 source/schema evidence，不是 adapter、metric 或模型结果。
+- 证据：唯一详细来源为 `checkpoints/phase-01-manual-source-acquisition.md` 与 raw revision 内 canonical acquisition manifests。

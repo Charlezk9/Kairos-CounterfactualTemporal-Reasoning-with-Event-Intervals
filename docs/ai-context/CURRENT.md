@@ -4,15 +4,16 @@
 - active_phase: phase-01-data-pipeline
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 3944bb56d5c16a11482de39c5f0295936b6ac035
+- git_head: 7eca38ec94586678d571cb14f9f2e2297335e433
 - last_verified_commit: 3944bb56d5c16a11482de39c5f0295936b6ac035
-- last_completed_checkpoint: checkpoints/phase-01-gsm8k-construction-v0.md
+- last_completed_checkpoint: checkpoints/phase-01-manual-source-acquisition.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K construction v0 is `VERIFIED / ZERO_RETAINED`; LoRA training on this artifact is blocked until a separately frozen train-led v1 and two-human audit exist. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`（不得静默放宽）。StrategyQA / 2Wiki / TORQUE / TimeQA acquisition remains incomplete; manual official-source download is the preferred independent path.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED` because the official ZIP uses data descriptors. 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE` after one corrected-URL attempt. TORQUE and TimeQA are `EXTRACTED_SCHEMA_OBSERVED` and ready for fixed adapter work, not yet evaluation.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 仅基于论文规范与 GSM8K train-side 设计证据冻结 construction v1 和 200 条分层人工审计准备方案；不得根据已查看的 test funnel 调参，也不得在 0-retained v0 上启动 LoRA。与此同时可按固定官方 revision 手动获取 StrategyQA、2Wiki、TORQUE、TimeQA，先做资源门禁并只写 `/data0/hk_data/kairos-zx/data/raw/<dataset>/<revision>`。
+- next_safe_action: 实现 TORQUE public-dev 与 TimeQA-Hard 的 fixed read-only adapters、normalizer 和 metric contract，测试只用 synthetic fixtures；先冻结 TORQUE consistency 冲突的主/敏感性口径。不得运行模型评测、使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
 - required_reading:
+  - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

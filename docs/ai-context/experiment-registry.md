@@ -28,6 +28,10 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | ID | Status | Source revision | Provenance commit | Archive SHA256 | Integrity evidence | Artifacts |
 |---|---|---|---|---|---|---|
 | `ACQ-GSM8K-20260722` | `COMPLETE` | `3101c7d5072418e28b9008a6636bde82a006892c` | `482af857` | `19ab616f7ad67a18250e57eba3b57b8ff9b1d365055fd59839613424c24afb6a` | offline verify exit 0; SHA256SUMS 15/15; 7,473 train / 1,319 test | `/data0/hk_data/kairos-zx/data/raw/gsm8k/` |
+| `ACQ-STRATEGYQA-20260723` | `STAGED_ARCHIVE_POLICY_BLOCKED` | `official-20210107` | `7eca38e` | `4911d85eb6721a93bed7645419df77e721808b32b9785dee14ad80e6249e0a90` | HTTP 200 and byte/SHA binding passed; official ZIP uses forbidden data descriptors; not extracted; manifest SHA `464a14091f047ccdd95d6036464176baa101f8cfc3c468ddac2a0d5964f47c0e` | `/data0/hk_data/kairos-zx/data/raw/strategyqa/official-20210107` |
+| `ACQ-TORQUE-20260723` | `EXTRACTED_SCHEMA_OBSERVED` | `ab27019cc6a317fde3c879900499f02acce8b16d` | `7eca38e` | `7284c675f0cf21ddb1272c31919d4453d2fb53a426e88b46ad6a9a0fd9030cd0` | archive safety passed 28 members/22,163,721 bytes; dev 145 passages/1,483 QA; manifest SHA `e01f87df92daf0378ac126b83c3d596a01a04f281dc35567b305d720f70386e3` | `/data0/hk_data/kairos-zx/data/raw/torque/ab27019cc6a317fde3c879900499f02acce8b16d` |
+| `ACQ-TIMEQA-20260723` | `EXTRACTED_SCHEMA_OBSERVED` | `38b05989070c1168b2bef3d5a2656afeeba763dc` | `7eca38e` | `f0df52a31e9d4bb0d5b7577d9e0131740bd017d2aad1e9b4bee7756bfecdfd07` | archive safety passed 40 members/454,095,594 bytes; hard JSONL 989 records; manifest SHA `8212a7826b0fadf6b0454f79c52bc6b3440d487af860c53456891efbec2e50a3` | `/data0/hk_data/kairos-zx/data/raw/timeqa/38b05989070c1168b2bef3d5a2656afeeba763dc` |
+| `ACQ-2WIKI-20260723` | `TRANSFER_FAILED / NO_HTTP_RESPONSE` | `13800e5be57df1b4040b9b1588c6c811779e69e9` | `7eca38e` | none | corrected literal URL curl 28 at connect timeout; zero header bytes; no retry/fallback/mirror; manifest SHA `2013e6e465901c59c32719293e123e43ba4bfbaf0ac68bb003fe87248fd210db` | `/data0/hk_data/kairos-zx/data/raw/2wiki/13800e5be57df1b4040b9b1588c6c811779e69e9` |
 
 Acquisition records track source provenance and file integrity only. They are not model runs and do not contain paper metrics.
 
@@ -56,6 +60,9 @@ as a source availability result, HTTP observation or paper experiment.
 
 Planning-gate entries are not acquisition records or model runs. In particular,
 the StrategyQA gate has no active run ID and registers no formal run.
+They are retained as historical dispositions. The later user-authorized manual
+source actions are recorded in the acquisition table above and in D-014; those
+records supersede the old `NO_NATIVE_EXEC_ENV` planning state without erasing it.
 
 ## Processed data artifacts
 

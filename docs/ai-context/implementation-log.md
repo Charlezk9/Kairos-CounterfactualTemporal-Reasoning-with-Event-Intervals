@@ -118,3 +118,10 @@
 - `3944bb56...` 严格绑定双链接 completion pair、修正 64-hex digest 并加入回归；focused 10/10、clean full 388/388，production source gate 通过。
 - 从 clean `3944bb56...` 各执行一次 train/test，随后独立 offline replay 均为 `STRUCTURALLY_VERIFIED`。train 7,473 → temporal 1,845 → extracted/reliable 370 → valid CF/retained 0；test 1,319 → 361 → 79 → 0。
 - 工件 ID 为 `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723`。零 retained 是冻结 alias-safety/numeric-update 约束的负数据结果，不是模型指标；不得在查看 test funnel 后静默调整 v0。
+
+## 2026-07-23 — Manual official-source acquisition
+
+- clean `7eca38e...` 上资源门禁通过后并行下载 StrategyQA official GCS ZIP、TORQUE fixed-commit TAR.GZ 和 TimeQA fixed-commit TAR.GZ；均 HTTP 200，archive bytes/SHA/magic 固定，未执行上游代码。
+- TORQUE 28 members/22,163,721 bytes 与 TimeQA 40 members/454,095,594 bytes 通过 held-FD safety inspection/extraction。只读 schema 聚合确认 TORQUE dev 145 passages/1,483 answer-bearing QA、test 无 answer；TimeQA hard 为 989 条 exact-key JSONL。
+- StrategyQA archive 使用通用策略禁止的 ZIP data descriptor，因此保留 staged archive、不解压、不放宽 guard。2Wiki corrected literal URL 一次 GET 在连接阶段 curl 28、无 response，未重试或回退。
+- 四个 raw revision 均写入 canonical 0600 acquisition manifest；本阶段不产生模型 run 或论文效果指标。
