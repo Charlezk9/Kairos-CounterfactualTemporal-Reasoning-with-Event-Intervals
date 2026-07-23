@@ -4,14 +4,14 @@
 - active_phase: phase-01-data-pipeline-remediation
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: db6efe20a6317edac47343d1c713e9f4ec51263b
-- last_verified_commit: db6efe20a6317edac47343d1c713e9f4ec51263b
-- last_completed_checkpoint: checkpoints/phase-03-paired-bootstrap.md
+- git_head: e09a40fa9e192bb92971be61e795cbfabcb3117d
+- last_verified_commit: e09a40fa9e192bb92971be61e795cbfabcb3117d
+- last_completed_checkpoint: checkpoints/phase-03-torque-cot-verifier-baseline.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA strict format fails on 986/989 Direct and 969/989 CoT; D-019 defers post-hoc recovery because no predeclared object-unwrapping rule fits.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`: context/question segmentation alone cannot fix it because the frozen updater returns `UNKNOWN` for every numeric answer. A relation-only counterfactual supervision artifact or independently auditable numeric answer regeneration contract is required before training. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并推送 paired-bootstrap checkpoint；随后冻结 GSM8K construction v1 的 train-only context/question segmentation 规则，先以 synthetic tests 和 train-only aggregate diagnostics 实现与验证，在规则 clean commit 前不得读取 test funnel，不修改/覆盖 v0 工件，也不得在 retained=0 的数据上训练。若 train v1 产生可审计 retained pair，再准备 200 条人工审计；不得实现 test-tuned TimeQA recovery、使用 TORQUE test 或执行上游代码。
+- next_safe_action: 提交并推送 CoT+Verifier negative-result checkpoint；随后冻结 GSM8K relation-only supervision v1：保留 original numeric answer supervision，只对可证明的 original/inverted marker relation施加 relation/counterfactual-relation loss，counterfactual answer 必须显式 masked/unavailable，不能复制 original 或伪装成 CF accuracy。先做 synthetic tests 与 train-only aggregate，规则 clean commit 前不读取 test funnel、不覆盖 v0 工件、不训练；同时记录该设计与论文“reliable updated answer”要求的偏差。
 - required_reading:
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`
@@ -23,6 +23,7 @@
   - `checkpoints/phase-03-timeqa-direct-baseline.md`
   - `checkpoints/phase-03-timeqa-cot-baseline.md`
   - `checkpoints/phase-03-paired-bootstrap.md`
+  - `checkpoints/phase-03-torque-cot-verifier-baseline.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

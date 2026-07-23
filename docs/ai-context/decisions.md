@@ -230,3 +230,11 @@
 - 推断：95% CI 使用 percentile linear interpolation；双侧 bootstrap sign p-value 使用 add-one correction；Holm 在每个 dataset comparison 的全部报告指标族内校正。该 p-value 是预先标明的 bootstrap sign 近似，不冒充 permutation test。
 - 工件：固定 manifest-last/no-replace 目录绑定两侧 prediction/metrics SHA、aggregation clean commit/time、seed 和 resamples；发布前后及 offline verifier 都从 fixed source、逐样本预测重算。唯一详细证据为 `checkpoints/phase-03-paired-bootstrap.md`。
 - 解释：TORQUE CoT 的题级下降得到统计支持，cluster 差异不显著。TimeQA strict 的 +0.506 pp 虽在该 bootstrap 下非零，但由约五条 CoT strict exact 与两方法 97.98%/99.70% parse failure 主导，只能解释 prompt/parser 格式交互，不能表述为 temporal reasoning 提升。D-019 不变。
+
+## D-021：TORQUE CoT+Verifier 固定选择基线
+
+- 状态：`IMPLEMENTED / PRODUCTION VERIFIED / NEGATIVE RESULT`。
+- 候选与 prompt：只比较已冻结 Direct index 0 与 CoT index 1 的 span-set 候选；prompt 只含 passage、question 和两个候选，不序列化 gold。normalized set 相同则不调用模型并选择 Direct。
+- 生成与失败：同一 Qwen revision、greedy、seed 13、batch 8、`max_new_tokens=32`。输出必须为唯一 terminal JSON integer 0/1；parse failure 固定回退 Direct。输入 run ID 与 manifest SHA、候选顺序、等价和 fallback 策略全部写入 config，结果后不放宽 parser。
+- 结果：980 次 verifier 调用仅 218 个 strict index parsed，762 个回退；EM/F1 14.228/14.681，均显著低于 Direct。该结果说明此固定 verifier 未提供增益，保留为负 Baseline，不据此调 prompt。
+- 证据：唯一完整资源、工件、SHA、选择计数、指标与 paired inference 见 `checkpoints/phase-03-torque-cot-verifier-baseline.md`。

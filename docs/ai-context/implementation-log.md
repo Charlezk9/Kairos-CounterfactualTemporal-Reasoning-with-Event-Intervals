@@ -187,3 +187,10 @@
 - TORQUE 以 571 个 contrast groups 重采样。CoT-Direct 的 question EM/F1 为 -3.034/-3.292 pp，95% CI 分别 `[-4.411,-1.709]` / `[-4.674,-1.954]`，Holm p 均 0.000800；两项 cluster 差异 -0.350 pp，CI 跨零且 Holm p=1。
 - TimeQA 以 989 records 重采样。strict EM/F1 差均 +0.506 pp，CI `[0.101,1.011]`、Holm p=0.030397；该差异只代表约五条 strict exact 和严重格式失败下的 parser interaction，不支持推理能力 claim。
 - 两个 manifest-last 工件均通过另一 fresh CPU/offline process 重算，SHA 与首次发布一致；完整身份、数值和限制见 `checkpoints/phase-03-paired-bootstrap.md` 与 registry。
+
+## 2026-07-23 — TORQUE CoT+Verifier formal baseline
+
+- `e09a40f...` 实现 gold-free Direct/CoT candidate verifier、严格 terminal JSON index、候选等价 skip 和 parse-error Direct fallback；focused 6/6、full 477/477（14.508s）通过。
+- clean commit 上 preflight 确认 503/1,483 等价无需调用，余下 980 条为 193--514 input tokens。仅用 physical GPU 4 前台运行 166.261s，峰值 16,113,932,800 bytes，结束后 GPU 释放。
+- 218 个 index parsed、762 个回退；正式 EM/F1 14.228/14.681，cluster 两口径均 1.401。prediction/metrics fresh offline replay 通过。
+- 对 Direct 的 group bootstrap 显示 EM/F1 -1.416/-1.389 pp，CI 均低于零、Holm p=0.000800；cluster 差异不显著。负结果和严格格式限制均保留，完整证据见对应 checkpoint/registry。
