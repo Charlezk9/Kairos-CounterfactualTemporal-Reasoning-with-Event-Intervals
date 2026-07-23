@@ -75,6 +75,20 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T142222Z-cot-verifier-torque-dev-s13-5edec173ee35`; aggregation commit `e09a40fa9e192bb92971be61e795cbfabcb3117d`; completed `2026-07-23T14:25:17Z`; metrics SHA256 `a3577a84fa3d0de0099fc68ce144cf108f3095f91ef396a9cb1e6f660286c430`; metrics manifest SHA256 `9e84a5ac4ef77979e4ba699f78ef3579209b4ad3534a451fbaf278941e243e85`
 - verification: fresh prediction/metrics replay passed. The registered paired comparison below shows significant negative question-level differences from Direct; the result remains untuned.
 
+### `20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`
+
+- status: `VERIFIED / STOCHASTIC SINGLE RUN / NO SUPPORTED DIFFERENCE / PAIRED COMPARISON AVAILABLE`
+- method: 8-sample CoT Self-Consistency; temperature 0.7, top-p 0.9, top-k 0, batch 8, `max_new_tokens=512`; invalid samples excluded; normalized-set plurality with earliest-valid tie-break and all-invalid sentinel
+- dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
+- model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
+- execution: clean commit `b2f889b02893d99751ee9aabacdb3038a3456e1e`, seed 13, physical GPU 4, `2026-07-23T15:28:08Z`--`2026-07-23T16:31:05Z`, exit 0, 3,778.678 s, peak GPU bytes 19,608,652,288
+- parse/token evidence: 11,864 samples total, 494 invalid samples excluded; 1,482 questions with a valid vote / 1 all-invalid sentinel; input tokens 155--336; 1,714,292 generated tokens total
+- replayed metrics: question set EM `15.374241402562374`; question set F1 `15.569469864817137`; cluster exact consistency `1.926444833625219`; cluster F1>=0.8 consistency `1.926444833625219` (all percentages)
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`
+- SHA256: config `f3846fed035d01f128ef46bb925ccba93237d704b6bbcd54285b6ac93cbd9788`; predictions `f7faf46cefbd39cab33a13ae24e36111a38869a4e973b8f0257ff9746324c646`; generation evidence `5bde295df8e89bc210da14a44549d6af54e11772cdd937b7251158b89142da60`; manifest `be449eeb3b2ebf954c3d8510122fb06111659fb28c2a9c86907f1061718e727f`
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`; aggregation commit `b2f889b02893d99751ee9aabacdb3038a3456e1e`; completed `2026-07-23T16:32:13Z`; metrics SHA256 `22ec0d7628613195f94bec788a5599bdfed7c1891250faf0cfbb7be54f42f27b`; metrics manifest SHA256 `7857e01aff7af1bd70afe316694b5b524839ba562680b230bf792d33688095ec`
+- verification: a fresh CPU/offline process recomputed every vote from the eight-sample envelope and another process independently reaggregated metrics. The paired comparison below finds no supported difference from Direct. An earlier batch-1 attempt was interrupted before artifact creation for throughput preflight and is not a formal run.
+
 ## Formal statistical comparisons
 
 ### `paired-torque-dev-cot-vs-direct-43410b587f33`
@@ -104,6 +118,15 @@
 - artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-cot-verifier-vs-direct-0089d1d05c23`; aggregation commit/time `e09a40fa9e192bb92971be61e795cbfabcb3117d` / `2026-07-23T14:26:00Z`; statistics SHA256 `fd2ae14c89ba876c0e95c4d417896d669dc4336bc4858948c5c86ff567f2cf44`; manifest SHA256 `19f411f6378ccb3e6ab793fa0a5a437737cff1cd3c4dff973e3d84202a7a0b6d`
 - verification: a separate fresh CPU/offline process reproduced all values and both hashes. Extra verifier inference did not improve the frozen candidate baseline and no parser/prompt retuning followed.
 
+### `paired-torque-dev-self-consistency-vs-direct-24cdd74c9d32`
+
+- status: `VERIFIED / PAIRED GROUP BOOTSTRAP / NO SUPPORTED DIFFERENCE`
+- contrast: Self-Consistency minus Direct, same Qwen revision and model seed 13; 1,483 questions in 571 `(passage_id, cluster_id)` bootstrap units
+- inference: 10,000 resamples, bootstrap seed 20260723, percentile 95% CI, two-sided bootstrap sign p-value with add-one correction, Holm family of four metrics
+- results: question EM difference `-0.26972353337828636`, CI `[-1.3869648422398804, 0.8849708229847362]`, raw/Holm p `0.6825317468253175` / `1.0`; question F1 difference `-0.5003799676759897`, CI `[-1.631558074345781, 0.686950651460567]`, raw/Holm p `0.395960403959604` / `1.0`; both cluster differences `0.35026269702276713`, CI `[-0.3502626970227671, 1.0507880910683012]`, raw/Holm p `0.44275572442755723` / `1.0`
+- artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-self-consistency-vs-direct-24cdd74c9d32`; aggregation commit/time `b2f889b02893d99751ee9aabacdb3038a3456e1e` / `2026-07-23T16:32:49Z`; statistics SHA256 `8918c83b7a68e1c82e0c21d0eebac0eb3d3d43b220c439ef0095c54cc940baa8`; manifest SHA256 `d1712be7a616c5b32083037fbf7087536db1f3f053a7a1ef7693e302269f0019`
+- verification: a fresh CPU/offline process replayed all 10,000 resamples and reproduced both hashes. No interval excludes zero, so the single-seed result supports neither benefit nor harm relative to Direct.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
@@ -130,6 +153,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-RELATION-ONLY-20260723` | 2026-07-23 | strict in-memory GSM8K original/inverse relation supervision with explicitly unavailable CF answer; synthetic only | clean commit `17137bbf6e666381c148d40b7249032ab1d3a0b6` | focused 8/8 in 0.007s; final full 485/485 in 14.542s; no production source read | none |
 | `DEV-P01-RELATION-ARTIFACTS-20260723` | 2026-07-23 | fixed official-train relation-supervision publisher and full source-lockstep verifier | clean commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`; atime fix `3fbe53fe9aa4faec65b8c948857869dc85574e7f` | artifact focused 8/8; combined 27/27; final full 494/494 in 14.788s | production artifact registered below |
 | `DEV-P01-RELATION-HUMAN-AUDIT-20260723` | 2026-07-23 | deterministic train-only stratified 200-pair packet and blank A/B reviewer templates | clean commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb` | focused 7/7; combined 23/23; full 501/501 in 15.366s | production packet registered below |
+| `DEV-P03-TORQUE-SELF-CONSISTENCY-20260723` | 2026-07-23 | fixed 8-sample CoT aggregation, private evidence envelope and offline vote replay | implementation `f6a43f36fc6d48014ca02b7d06dbaf297338b829`; execution commit `b2f889b02893d99751ee9aabacdb3038a3456e1e` | focused 8/8; full 509/509; batch-4/8 smoke passed; production prediction, metrics and paired statistics passed fresh replay | production artifacts registered above |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

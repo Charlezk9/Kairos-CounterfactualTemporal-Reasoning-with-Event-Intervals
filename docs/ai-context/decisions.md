@@ -255,3 +255,11 @@
 - 盲审：A/B 两个 reviewer slot 的模板完全相同且所有人工字段为 null；reviewer 彼此隔离。检查 event span、original relation、CF relation、grammar、non-target preservation，`overall_valid` 必须是前五项逻辑与。模板不可原地覆盖，完成副本必须先锁定哈希再互看。
 - 判定：primary agreement 为 200 条 `overall_valid` 的 Cohen's kappa，阈值 0.80；分歧经作者共识后 validity threshold 为 95%。任一不达标则修订规则并使用新样本重审。AI 不得填写、推断或替代人工标签。
 - 门禁：人工表未完成，因此 kappa/validity 均为 unavailable，GSM8K LoRA 仍禁止。实现 commit、五文件 SHA、资源和 replay 见 `checkpoints/phase-01-relation-human-audit-packet.md`。
+
+## D-024：TORQUE Self-Consistency 固定采样与投票
+
+- 状态：`IMPLEMENTED / PRODUCTION VERIFIED / NO SUPPORTED DIFFERENCE`。
+- 采样：每题固定 8 个既有 CoT prompt samples，temperature 0.7、top-p 0.9、top-k 0、`max_new_tokens=512`、seed 13；同一 Qwen 与 TORQUE revision，不注入 gold。最终 batch 8 只是资源执行设置，不改变方法。
+- 聚合：每个 sample 继续服从 strict terminal JSON string-array parser；无效 sample 不投票。对 normalized exact span set 作 plurality，平票取最早 valid sample；8 个全无效才输出固定 sentinel。原始 sample envelope 只保存在私有 evidence，offline verifier 必须逐题重算投票。
+- 结果：题级 EM/F1 为 15.374/15.569，相对 Direct 为 -0.270/-0.500 pp；cluster 两口径为 1.926，相对 Direct +0.350 pp。四项 571-group paired bootstrap CI 均跨零、Holm p 均为 1，因此只能报告 single-seed 下无可支持差异，不能宣称改进。
+- 边界：第一次 batch-1 尝试在 artifact 创建前因吞吐预检主动中断，登记为 `INTERRUPTED_PREFLIGHT / NO ARTIFACT`；结果后不修改投票、parser 或采样参数。唯一完整证据见 `checkpoints/phase-03-torque-self-consistency-baseline.md`。

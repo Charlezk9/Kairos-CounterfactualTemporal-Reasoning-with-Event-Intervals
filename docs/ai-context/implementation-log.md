@@ -215,3 +215,10 @@
 - `6f56fcb...` 实现 train-only Hamilton proportional stratification、seed-bound SHA256 selection/presentation、两份全 null reviewer templates、instructions 和 immutable full replay；focused 7/7、combined 23/23、full 501/501 通过。
 - clean commit、155 GiB `/data0` free、229 GiB memory available、GPU disabled 下发布 200/370 条：after/follows 259→140，before/precedes 111→60。
 - fresh replay 复现 items/reviewer-A/reviewer-B/instructions/manifest SHA；模板没有人工判断，包状态为 `HUMAN REVIEW PENDING`，不能计算 kappa/validity或解锁训练。
+
+## 2026-07-23 — TORQUE Self-Consistency formal baseline
+
+- `f6a43f3...` 实现固定 8-sample CoT sampling、strict sample aggregation、确定性 plurality/tie-break、全无效 sentinel 和 raw-envelope vote replay；最终 batch-8 execution commit 为 `b2f889b...`。focused 8/8、full 509/509 通过。
+- 初始 batch-1 尝试因明显低 GPU 利用率在 artifact 创建前主动中断并释放 GPU，状态为 `INTERRUPTED_PREFLIGHT / NO ARTIFACT`；batch-4/8 smoke 均不保留工件。正式运行从 clean commit 用 physical GPU 4 前台执行 3,778.678s，发布 1,483 条、11,864 samples、1,714,292 generated tokens。
+- 494 个 sample parse failures 被排除；1,482 题仍有 valid vote，仅 1 题八次全失败。prediction 与 metrics 经独立 CPU/offline replay，EM/F1 15.374/15.569，cluster 两口径 1.926。
+- 对 Direct 的 571-group bootstrap 显示 EM/F1 -0.270/-0.500 pp、cluster +0.350 pp，四项 CI 均跨零且 Holm p=1.0。保留为无可支持增益的 single-seed negative result；完整工件、SHA 与资源证据见对应 checkpoint/registry。

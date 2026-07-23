@@ -4,14 +4,14 @@
 - active_phase: phase-03-prompt-baselines (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb
-- last_verified_commit: 6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb
-- last_completed_checkpoint: checkpoints/phase-01-relation-human-audit-packet.md
+- git_head: b2f889b02893d99751ee9aabacdb3038a3456e1e
+- last_verified_commit: b2f889b02893d99751ee9aabacdb3038a3456e1e
+- last_completed_checkpoint: checkpoints/phase-03-torque-self-consistency-baseline.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Self-Consistency, Kairos and matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency and TimeQA Direct/CoT plus paired intervals are verified, but Kairos and matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 在不消费未通过人工审计的 GSM8K train artifact 前提下，实现冻结的 TORQUE Self-Consistency baseline：8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13、评测禁止 gold injection；先完成 synthetic aggregation/tie-break/prediction-artifact tests 与 token/resource preflight，再从 clean commit 决定 formal run。
+- next_safe_action: 在不消费未通过人工审计的 GSM8K train artifact 前提下，冻结并实现 TORQUE LLM-Graph structured prompt baseline：只从 passage/question 生成事件与关系图后给出 strict span-set answer，禁止 gold/candidate injection；先完成 synthetic prompt/parser/evidence tests、全套测试与 token/resource preflight，再从 clean commit 决定 formal run。
 - required_reading:
   - `checkpoints/phase-01-relation-human-audit-packet.md`
   - `checkpoints/phase-01-relation-only-train-artifact.md`
@@ -27,6 +27,7 @@
   - `checkpoints/phase-03-timeqa-cot-baseline.md`
   - `checkpoints/phase-03-paired-bootstrap.md`
   - `checkpoints/phase-03-torque-cot-verifier-baseline.md`
+  - `checkpoints/phase-03-torque-self-consistency-baseline.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`
