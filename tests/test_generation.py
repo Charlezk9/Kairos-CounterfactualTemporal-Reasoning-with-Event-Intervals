@@ -88,9 +88,11 @@ class FakeModel:
         self.suffix_starts = suffix_starts
         self.invalid_shape = invalid_shape
         self.calls = 0
+        self.last_kwargs = None
 
     def generate(self, input_ids, attention_mask, **kwargs):
         self.calls += 1
+        self.last_kwargs = kwargs
         if self.invalid_shape:
             return torch.zeros(input_ids.shape[0] + 1, input_ids.shape[1])
         suffix = torch.zeros(input_ids.shape[0], 2, dtype=torch.long)
@@ -157,6 +159,10 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(result.input_token_max, 3)
         self.assertEqual(result.generated_token_total, 4)
         self.assertEqual(model.calls, 1)
+        self.assertIs(model.last_kwargs["do_sample"], False)
+        self.assertIsNone(model.last_kwargs["temperature"])
+        self.assertIsNone(model.last_kwargs["top_p"])
+        self.assertIsNone(model.last_kwargs["top_k"])
         self.assertEqual(tokenizer.padding_side, "left")
 
     def test_timeqa_parsed_string(self):
