@@ -9,6 +9,7 @@ import re
 from typing import Any, Mapping, Sequence
 
 import torch
+from torch import Tensor
 
 from . import generation
 from .prediction_artifacts import (
