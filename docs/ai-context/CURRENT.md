@@ -4,14 +4,14 @@
 - active_phase: phase-03-model-and-baselines
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 61e96bc58cd13bb4f5dc997ee678b86e81d9044a
-- last_verified_commit: 61e96bc58cd13bb4f5dc997ee678b86e81d9044a
-- last_completed_checkpoint: checkpoints/phase-03-metrics-artifacts.md
+- git_head: 21b4eea6d0ba344454c06a56b8e1318fe16ddca5
+- last_verified_commit: 21b4eea6d0ba344454c06a56b8e1318fe16ddca5
+- last_completed_checkpoint: checkpoints/phase-03-torque-cot-baseline.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct is verified, but CoT/Kairos/matched-supervision comparisons and comparative confidence intervals do not yet exist.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED` and cannot train LoRA. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`. StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT are verified, but Kairos/matched-supervision runs and paired comparative intervals do not yet exist. TimeQA-Hard has no model predictions yet.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并推送 metrics checkpoint 后，运行 `nvidia-smi`、`free -h`、`df -h`；只有 `/data0` >=120 GiB 且 physical GPU 4空闲时，从新 clean commit 启动 TORQUE public-dev CoT greedy full evaluation（seed 13、batch 8、max_new_tokens 512），随后发布 prediction 与 metrics 工件。不得使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
+- next_safe_action: 提交并推送 TORQUE CoT checkpoint；随后重新运行资源门禁，并在空闲单卡上从 clean commit 启动 TimeQA-Hard Direct greedy full evaluation（seed 13、batch 1、max_new_tokens 128，完整 32,768 context、不截断），完成 prediction/metrics 双重重放。不得并行启动 CoT、使用 TORQUE test、执行上游代码或在 GSM8K zero-retained v0 上训练。
 - required_reading:
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`
@@ -19,6 +19,7 @@
   - `checkpoints/phase-03-kairos-tensor-core.md`
   - `checkpoints/phase-03-torque-direct-baseline.md`
   - `checkpoints/phase-03-metrics-artifacts.md`
+  - `checkpoints/phase-03-torque-cot-baseline.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

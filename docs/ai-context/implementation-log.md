@@ -159,3 +159,10 @@
 - focused 8/8、full 465/465（13.916s）通过；测试覆盖 no-replace、双 Git gate、中途 prediction 变化、rehashed metric 篡改、权限、hardlink 和额外文件。
 - 首次 production 调用因手工输入的 expected commit SHA 错误在首次 Git gate 处 fail closed，目标目录未创建；使用实际 clean HEAD `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 重试后发布成功。
 - Direct metrics SHA `c508305a...`、manifest SHA `1187e24d...`；fresh CPU/offline replay 完全一致。结果升级为 `VERIFIED / DETERMINISTIC SINGLE RUN / NO COMPARATIVE CI`。
+
+## 2026-07-23 — TORQUE CoT formal baseline
+
+- clean `21b4eea...` 上通过资源门禁后，仅使用 physical GPU 4 运行 TORQUE public dev 全量 CoT greedy（seed 13、batch 8、`max_new_tokens=512`）。1,483 条用时 1,167.092s，峰值 GPU bytes 15,833,449,984；结束后 GPU 4 回到 11 MiB/0%。
+- 全量 prediction artifact 发布成功：1,452 parsed、31 parse errors、输入 155--336 tokens、总生成 214,717 tokens。fresh CPU/offline prediction replay 通过。
+- prediction-bound metrics 发布并由另一 fresh 进程重放：set EM/F1 12.610/12.778，两个 cluster consistency 均 1.226（百分数）。完整 SHA 见 registry/checkpoint。
+- CoT 相对 Direct 的描述差为 EM -3.034 pp、F1 -3.292 pp；这是保留的负结果，不修改 prompt 或生成预算。paired bootstrap 未完成前不作显著性判断。

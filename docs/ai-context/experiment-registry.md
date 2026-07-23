@@ -18,6 +18,20 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`; aggregation commit `61e96bc58cd13bb4f5dc997ee678b86e81d9044a`; completed `2026-07-23T10:05:44Z`; metrics SHA256 `c508305a934eceac7defacd9c1d288562e6ab4dc3591d34b6c0bc9961a6e659a`; metrics manifest SHA256 `1187e24dba51e8a48bfb0bdbbba4c7596c3231553685ddd06a7ace19f4cceae9`
 - verification: fixed-source/order/schema/permission/link/hash replay passed in an independent CPU/offline process; immutable metrics publication reverified the prediction artifact before manifest and a fresh process independently reproduced all metrics. This validates the descriptive single-run values, not a cross-method confidence interval or significance claim.
 
+### `20260723T100959Z-cot-torque-dev-s13-05e077299faf`
+
+- status: `VERIFIED / DETERMINISTIC SINGLE RUN / NEGATIVE RESULT / NO COMPARATIVE CI`
+- method: deterministic greedy CoT; batch 8; `max_new_tokens=512`; no sampling
+- dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
+- model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
+- execution: clean commit `21b4eea6d0ba344454c06a56b8e1318fe16ddca5`, seed 13, physical GPU 4, `2026-07-23T10:09:59Z`--`2026-07-23T10:29:33Z`, exit 0, 1,167.092 s, peak GPU bytes 15,833,449,984
+- parse/token evidence: 1,452 parsed / 31 sentinel parse errors; input tokens 155--336; 214,717 generated tokens total
+- replayed metrics: question set EM `12.60957518543493`; question set F1 `12.777831294351861`; cluster exact consistency `1.2259194395796849`; cluster F1>=0.8 consistency `1.2259194395796849` (all percentages)
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260723T100959Z-cot-torque-dev-s13-05e077299faf`
+- SHA256: config `05e077299faf65ee75d6a3be0879ed16c9911b9bf9b5b1f9498482bc2bb71b66`; predictions `900a3872e39e9201ec3686ed7a1e6971f8c7ee93b5576f2b6120af9d2375a563`; generation evidence `9fa093f93025a138b1ecf1340633a7f3c73a4c925f9b6d7ffa5f92a446c9b3c4`; manifest `bbb32677f1903f9e736f25748036dea6d63eea39496139a693123e2d38f41fe5`
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T100959Z-cot-torque-dev-s13-05e077299faf`; aggregation commit `21b4eea6d0ba344454c06a56b8e1318fe16ddca5`; completed `2026-07-23T10:30:16Z`; metrics SHA256 `7c14f0d43a56cc87155c362df01a1700c76b4ee1f151ef4188abbb1a0499c6a2`; metrics manifest SHA256 `f8af11f7e1919c1cc5e51a94cce556130a2024529f9304d5becf8c07393ae7a7`
+- verification: independent CPU/offline prediction replay and a separate metrics replay both passed. CoT is 3.034 percentage points lower in EM and 3.292 points lower in F1 than Direct; this negative result is retained without prompt retuning. Significance is not claimed before paired bootstrap.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
