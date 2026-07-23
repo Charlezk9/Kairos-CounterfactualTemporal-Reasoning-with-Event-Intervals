@@ -155,6 +155,9 @@ relation-only pair。它从同一显式 marker 规则重放 original relation �
 counterfactual relation，保留 original numeric answer，但将 CF answer 固定标记为
 `unavailable-relation-only`，且序列化 schema 不提供 CF answer 字段。任何训练调用方
 必须 mask CF answer loss；该接口不能用于报告 CF accuracy/update/consistency。
-当前未实现 publisher、未读取 production data、未创建 train/test 工件。完整合同和
-论文偏差见 `../ai-context/checkpoints/phase-01-relation-only-supervision-v1.md` 与
-D-022。
+`kairos.relation_supervision_artifacts` 已在 `5f0b31e...` 实现 fixed train-only
+publisher/offline verifier：绑定 processed source、全 7,473 条 lockstep 重放、canonical
+retained-only JSONL、manifest-last/no-replace 和 exact namespace。production train
+工件保留 370 pairs 并通过 fresh replay；CLI 不接受 split/path，production layout 不含
+test。完整合同、哈希和论文偏差见
+`../ai-context/checkpoints/phase-01-relation-only-train-artifact.md` 与 D-022。

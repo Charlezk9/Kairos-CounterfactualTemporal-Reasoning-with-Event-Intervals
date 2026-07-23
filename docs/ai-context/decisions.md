@@ -241,9 +241,9 @@
 
 ## D-022：GSM8K relation-only supervision v1
 
-- 状态：`IMPLEMENTED / DEVELOPMENT VERIFIED / PARTIAL PAPER DEVIATION`。
+- 状态：`IMPLEMENTED / TRAIN ARTIFACT VERIFIED / PARTIAL PAPER DEVIATION`。
 - 触发原因：construction v0 的 production replay 已证明所有 GSM8K numeric answer update 均为 `UNKNOWN`，因此完整 original/CF pair 为零。复制 original answer、凭 marker 猜测 numeric CF answer 或把 relation label 冒充 answer supervision 都不可接受。
 - 决定：v1 只保留 original numeric answer，并为可确定重放的显式 marker pair 保存 original relation 及其 inverse relation。counterfactual answer 固定为 `unavailable-relation-only` 且 schema 不含 counterfactual answer 字段；使用者必须 mask CF answer loss。
 - 适用边界：该记录可支持 original-answer、relation 与 counterfactual-relation loss，不能支持 CF answer accuracy、update、stability 或 consistency。它是独立重实现中的部分监督桥接，不满足论文所称 reliable updated answer，也不恢复作者未公开的 subset IDs、prompt 或 updater。
-- 防泄漏门禁：实现与测试只用 synthetic fixture；在规则 clean commit 前不读取 production train/test。下一步只允许先冻结并实现 train-only immutable publisher/verifier；test split、训练和正式指标仍禁止。
-- 证据：实现 commit `17137bbf6e666381c148d40b7249032ab1d3a0b6`；精确 schema、测试和限制见 `checkpoints/phase-01-relation-only-supervision-v1.md`。
+- 防泄漏门禁：schema/publisher 均在 clean commit 前只用 synthetic fixture；随后只读取并发布 official train，CLI 与 production layout 不提供 test split。train 7,473 条中得到 370 个 pair；test、训练和正式模型指标仍禁止，直至两人 200 条人工审计完成。
+- 证据：schema commit `17137bbf6e666381c148d40b7249032ab1d3a0b6`，publisher/execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`；精确 schema 与 production 工件证据分别见 `checkpoints/phase-01-relation-only-supervision-v1.md`、`checkpoints/phase-01-relation-only-train-artifact.md`。

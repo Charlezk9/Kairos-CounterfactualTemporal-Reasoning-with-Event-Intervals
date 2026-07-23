@@ -4,15 +4,16 @@
 - active_phase: phase-01-data-pipeline-remediation
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 17137bbf6e666381c148d40b7249032ab1d3a0b6
-- last_verified_commit: 17137bbf6e666381c148d40b7249032ab1d3a0b6
-- last_completed_checkpoint: checkpoints/phase-01-relation-only-supervision-v1.md
+- git_head: 5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578
+- last_verified_commit: 5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578
+- last_completed_checkpoint: checkpoints/phase-01-relation-only-train-artifact.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 is development-verified but deliberately has no CF answer and therefore cannot support full CF-answer training or accuracy. Its train-only immutable publisher/verifier and production train aggregate do not yet exist. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 official-train artifact is verified at 370 pairs but deliberately has no CF answer. Two independent human reviewers have not completed the frozen 200-pair audit, so GSM8K LoRA training remains blocked and the artifact cannot support CF-answer metrics. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier and TimeQA Direct/CoT plus paired intervals are verified, but Kairos/matched-supervision formal runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 为 `gsm8k-relation-only-pair-v1` 实现 fixed train-only immutable JSONL/manifest publisher 与 source-lockstep offline verifier；先只用 synthetic tests，从 clean commit 冻结持久化规则。之后仅对 official train 做一次 production aggregate 并登记 marker/relation yield；不读取或发布 official test、不覆盖 v0、不训练，CF answer loss 必须保持 masked。
+- next_safe_action: 冻结并实现 relation-only official-train 的确定性 200-pair 分层人工审计包与两份 blinded reviewer 表单；只从已验证 train 工件取样，记录抽样 seed/strata/manifest/hash，不读取 test、不自动填写人工标签、不训练。待两位作者独立完成后再计算 Cohen's kappa 与有效率。
 - required_reading:
+  - `checkpoints/phase-01-relation-only-train-artifact.md`
   - `checkpoints/phase-01-relation-only-supervision-v1.md`
   - `checkpoints/phase-01-manual-source-acquisition.md`
   - `checkpoints/phase-01-transfer-eval-contract.md`

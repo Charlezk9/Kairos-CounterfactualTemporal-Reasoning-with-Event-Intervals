@@ -201,3 +201,11 @@
 - `17137bb...` 新增 exact in-memory pair schema、稳定身份、deterministic extraction/rewrite replay 与显式 `unavailable-relation-only` CF answer 状态；schema 不含 counterfactual answer 字段。
 - synthetic focused 8/8、最终 full 485/485（14.542s）通过。此前一次 full run 的旧 persistence fingerprint 测试出现瞬时失败，isolated replay 与最终 fresh full 均通过，已在 checkpoint 留痕。
 - 未读取 production train/test，未发布 JSONL/manifest、未训练或产生指标。下一步先实现 train-only immutable publisher/offline verifier。
+
+## 2026-07-23 — GSM8K relation-only official-train artifact
+
+- 旧 source stability gate 将 read-updated atime 误判为内容变化；`3fbe53f...` 改为绑定 identity/content metadata 并排除 atime，focused 11/11、full 486/486 通过。
+- `5f0b31e...` 新增 fixed train-only immutable publisher/verifier；artifact-focused 8/8、combined 27/27、full 494/494 通过。CLI/production layout 无 test split 或路径参数。
+- 资源门禁为 `/data0` 155 GiB free、memory 229 GiB available；未触碰 GPUs 1/2/3/6 的既有 VLLM，GPU 显式禁用、CPU 2 线程。
+- clean commit 上一次发布与 fresh offline replay均通过：7,473 → no marker 5,628 / extraction rejected 1,475 / rewrite rejected 0 / retained 370。JSONL/manifest SHA 为 `525e3b09...` / `4e22ff13...`。
+- 工件只含 original answer 和 original/inverted relations，CF answer unavailable/masked；没有 test 工件、训练或模型指标。下一步准备 200-pair 两人盲审包。
