@@ -2,11 +2,11 @@
 
 ## Artifact layout
 
-大型工件保存在 `/data0/hk_data/kairos-zx/artifacts/<run-id>`。预测阶段的冻结最小集合为 `config.json`、`predictions.jsonl` 和最后发布的 `manifest.json`；聚合指标、checkpoint 和日志在后续阶段以 manifest 关联，不得改写这三个文件。仓库仅跟踪工件路径、revision、样本数和 SHA256。
+大型工件保存在 `/data0/hk_data/kairos-zx/artifacts/<run-id>`。预测阶段的冻结 v2 集合为 `config.json`、`predictions.jsonl`、`generation-evidence.jsonl` 和最后发布的 `manifest.json`；聚合指标、checkpoint 和日志在后续阶段以 manifest 关联，不得改写这四个文件。仓库仅跟踪工件路径、revision、样本数和 SHA256。
 
 run ID 使用稳定格式：`<UTC timestamp>-<method>-<dataset>-s<seed>-<short-config-hash>`。不得覆盖既有 run；重跑创建新 ID，并在 registry 中关联原因。
 
-实现 `kairos.prediction_artifacts` 固定支持 `torque-dev` 和 `timeqa-hard`，要求完整 record-ID coverage 和 source order，并在发布前/manifest 前检查 clean exact HEAD。目录为 0700、文件为 0600、publication no-replace；offline verifier 重放 source adapter 和所有 SHA/schema。实现 commit `f12efa05459daa982b4a5583abf22d48e38b9a1a` 仅通过 synthetic development verification，尚未创建 production artifact。
+实现 `kairos.prediction_artifacts` 固定支持 `torque-dev` 和 `timeqa-hard`，要求完整 record-ID coverage 和 source order，并在发布前/manifest 前检查 clean exact HEAD。目录为 0700、文件为 0600、publication no-replace；offline verifier 重放 source adapter 和所有 SHA/schema。v1 底层始于 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，v2 raw-generation evidence contract 在首次 production publication 前由 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结。首个 production artifact 是 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`；其状态与 SHA 见 experiment registry。
 
 ## Result states
 

@@ -144,3 +144,11 @@
 - `c178d15...` 实现 event/answer span mean pool、positive interval、论文 8 维 geometry、五类 relation graph、masked graph pool、graph-aware candidate scorer、三项 loss，以及无 interval 的 Pair-MLP same-supervision baseline。
 - focused 14/14、full 427/427（13.087s）通过，包含 full forward/loss/backward；GPU 隐藏、CPU 2 线程，未加载 Qwen 或 production data。
 - 该提交只覆盖可训练 tensor core。backbone/token alignment/prompt/candidate/evaluation runner 仍待实现，工程默认和非结果边界见 `checkpoints/phase-03-kairos-tensor-core.md`。
+
+## 2026-07-23 — Transfer prompts, greedy generation and first formal baseline
+
+- `994dfb8...` 固定 Direct/CoT prompt、terminal `FINAL_ANSWER` JSON parser、candidate dedup，以及 Qwen chat-template literal-content 和字符到 token offset 对齐。
+- `f45c9e8...` 增加固定本地 Qwen revision 的 resource-bounded greedy generation，并将 raw response、parse status、input/output token counts 写入 prediction artifact v2；`eae442b...` 显式清除 greedy 模式下的 inactive sampling controls。最终 focused generation 7/7、full 457/457（13.355s）。
+- 无权重 token preflight 确认 TORQUE Direct/CoT 最大 323/336 input tokens；TimeQA Direct/CoT 最大 24,584/24,597，均在 32,768 context 内。TimeQA 有 253 条超过 8,192、79 条超过 16,384，后续不得使用较短默认 context 静默截断。
+- clean `eae442b...` 上完成首个正式运行 `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`。TORQUE public dev 1,483 题全部发布，1,441 parsed、42 parse errors；独立 CPU/offline replay 通过并得到 set EM/F1 15.644/16.070、两种 cluster consistency 均 1.576（百分数）。
+- prediction/raw-evidence 工件和所有 SHA 已登记。由于 machine-readable metrics artifact 尚未发布，本结果暂为 `PRELIMINARY / PREDICTIONS VERIFIED`，不能进入作者建议。

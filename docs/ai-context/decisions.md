@@ -204,3 +204,11 @@
 - 独立默认：mean span/graph pooling；directed non-self pairs；relation 顺序 `precedes/follows/overlaps/contains/during`；unknown/padding=`-100`；`softplus+1e-6` duration；shared size 256；Pair-MLP `[h_i,h_j,h_i-h_j,h_i*h_j]`/hidden 256。它们均非恢复出的作者配置。
 - Pair-MLP 公平性：复用相同 event/candidate representations、pair mask、五类 label、graph pool、candidate scorer 和 losses，仅用 MLP pair features 替代 interval geometry。
 - 边界：backbone、LoRA、event extraction/token alignment、candidate generation/prompt parsing 和 runner 不在本决定内。唯一详细来源为 `checkpoints/phase-03-kairos-tensor-core.md`。
+
+## D-018：Transfer prompt、greedy generation 与 evidence contract
+
+- 状态：`IMPLEMENTED / FIRST FORMAL RUN COMPLETE`。
+- Prompt：Direct 与 CoT 共享固定 task instruction 和 strict terminal `FINAL_ANSWER: <JSON>`；TORQUE 只接受 string array，TimeQA 只接受 string。Prompt 不包含 gold，terminal parse 失败使用固定 sentinel 计错并保留 raw evidence，禁止人工修复输出。
+- Generation：固定本地 `Qwen/Qwen2.5-7B-Instruct` revision `a09a35458c702b33eeacc393d103063234e8bc28`，greedy、无 sampling；Direct/CoT 分别最多生成 128/512 tokens。模型 context 为 32,768，输入上限分别保留对应生成预算。任何正式运行均须 clean exact commit、固定 seed/physical GPU、完整 source order 和全部 prediction rows。
+- Artifact v2：正式目录 exact 包含 `config.json`、`predictions.jsonl`、`generation-evidence.jsonl` 和最后发布的 `manifest.json`。Evidence 记录 raw response、parse status 与 token counts；它是 data-bearing 私有工件，不回显、不进入 Git。旧 v1 development contract 被 v2 在首次 production publication 前替代。
+- 当前证据：首个正式 TORQUE Direct run 的完整身份、指标与 SHA 唯一登记在 `checkpoints/phase-03-torque-direct-baseline.md` 和 experiment registry。Machine-readable metrics artifact 完成前结果保持 `PRELIMINARY`。
