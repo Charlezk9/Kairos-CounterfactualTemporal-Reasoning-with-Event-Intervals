@@ -73,3 +73,23 @@ blocked.
 1. **Line 2 and Line 6**: grammar disagreements — verify whether the counterfactual rewrites are truly ungrammatical or acceptable variations.
 2. **Lines 81, 99, 119, 198**: AI-B flagged counterfactual-relation validity issues that AI-A did not. These require human judgment on whether the temporal relations are genuinely illogical or semantically acceptable.
 3. **event_spans_valid**: both agents agree 200/200, suggesting span annotations are reliable.
+
+## User resolution of the six AI disagreements
+
+On 2026-07-25, the user reviewed all six divergent fields in source order.
+The locked decisions are stored in `user-disagreement-resolutions.jsonl`; they
+do not modify either AI output and are not a formal Reviewer A/B submission.
+The resolution file SHA256 is
+`77087c1e9a077f3b37ed068d92539df27d1c30c442831b85b0df15b47f0c0c48`.
+
+| Line | Field | Resolved value |
+|---:|---|---|
+| 2 | `rewrite_grammatical` | `false` |
+| 6 | `rewrite_grammatical` | `false` |
+| 81 | `counterfactual_relation_valid` | `false` |
+| 99 | `counterfactual_relation_valid` | `false` |
+| 119 | `counterfactual_relation_valid` | `true` |
+| 198 | `counterfactual_relation_valid` | `true` |
+
+These are user checks of AI disagreements only. The independent human audit
+required by D-035 remains pending.
