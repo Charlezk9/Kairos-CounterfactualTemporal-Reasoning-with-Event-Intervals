@@ -2,16 +2,16 @@
 
 - updated_at: 2026-07-25 CST
 - active_phase: audit-gated-development-training
-- phase_status: PRIVATE_INTAKE_VERIFIED_D038_IMPLEMENTATION_PENDING
+- phase_status: D038_PASSED_DEVELOPMENT_PARTITION_PENDING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 726f924e0c7385b925187240ddd3f2a7564e6526
-- last_verified_commit: 726f924e0c7385b925187240ddd3f2a7564e6526
-- last_completed_checkpoint: checkpoints/phase-01-private-audit-intake.md
+- git_head: 06eff003309cb67e0b71167043e4a41b04351856
+- last_verified_commit: 06eff003309cb67e0b71167043e4a41b04351856
+- last_completed_checkpoint: checkpoints/phase-01-development-audit-result.md
 - active_run_ids: none
 - running_processes: none
-- blockers: Independent plan audit and private A/B intake are complete only for `USER_ATTESTED / DEVELOPMENT ONLY / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; two-human independence provenance remains absent. D-038 result, audit-bound 330/36 partition, candidates, run-input manifests, runner and checkpoints are absent. Relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
+- blockers: D-038 is `PASSED_DEVELOPMENT` only; two-human independence provenance remains absent, so paper eligibility is blocked. Audit-bound 330/36 partition, candidates, run-input manifests, runner and checkpoints are absent. Relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并普通推送 private intake checkpoint 与 branch-tip raw A/B 删除；从同步 clean commit 使用 synthetic fixtures 实现、测试和新鲜进程验证 D-038 `agreement-projection` development publisher。模型输出/GPU/训练不得提前。
+- next_safe_action: 提交并普通推送 D-038 checkpoint/registry/status；从同步 clean commit 实现 immutable audit-bound 366-record rebuild 与 train330/internal-dev36 partition publisher/verifier，只允许330个train IDs进入后续 optimizer plan。模型输出/GPU/训练不得提前。
 - required_reading:
   - `checkpoints/formal-training-execution-plan.md`
   - `checkpoints/formal-training-plan-audit.md`

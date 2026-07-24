@@ -310,3 +310,11 @@
 - 用户声明本地人工审计与最终196 valid/4 invalid标签完全一致，因此条件 human κ=1.0、validity=98%。允许目录搜索未发现 raw formal-A/B文件，`src/ab-reviewer-web/results/`只有README；正式 artifact状态仍 pending。
 - 按用户授权从370条 verified relation-only source按原顺序复制并排除4个已知无效 pair，得到366条 development-only训练数据。数据/manifest SHA为 `4b5fec2b...` / `f24a8e8e...`；namespace/mode/canonical/hash/source-order/filter/count和状态均重放通过。
 - 工件明确 `d035_training_gate_passed=false`、formal/paper eligible=false、CF answer unavailable/masked；可用于探索性训练，但指标必须 PRELIMINARY。
+
+## 2026-07-25 — User-attested development audit publication
+
+- 独立严格审计经四轮复核批准 `USER_ATTESTED / DEVELOPMENT ONLY / INTERNAL-DEV / NOT PAPER-ELIGIBLE` 计划；两名独立人类 provenance 缺失时不允许正式 human-audit 或论文指标表述。
+- raw A/B 与 sidecar 已复制到 mode-0700/0600 private intake并逐文件重放；随后用普通提交从 branch tip 删除，既有 remote history不重写。intake metadata SHA为 `a518d507...`。
+- clean `06eff003...` 实现 D-038 additive agreement projection与 immutable publisher；任一 overall分歧硬失败，不向 D-035 伪装 authors adjudication。focused 9/9、full 569/569（18.773s）通过，GPU隐藏、CPU两线程。
+- 单次发布与新鲜进程重放通过：196/200 valid，observed/expected 1.0/0.9608，conditional κ=1.0，validity=0.98，Wilson 95% `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。
+- 结果固定 `human_independence_verified=false`、`paper_metric_eligible=false`。下一步只构造 train330/internal-dev36 开发分区，不产生论文结论。

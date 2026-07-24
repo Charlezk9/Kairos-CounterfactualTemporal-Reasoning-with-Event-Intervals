@@ -210,6 +210,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P03-TORQUE-RULE-GRAPH-20260724` | 2026-07-24 | D-032 gold-blind explicit-rule candidate reranker plus D-033 provenance-bound paired statistics | contract `13dbbd9c258ffc75ca2659ef74dd02e5d0e6c960`; implementation/execution `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866`; statistics `fdc4f92132a4c2a72256297a4abddd05210dd265` | rule focused 9/9; statistics focused 8/8; final full 551/551; formal prediction/metrics/statistics and fresh full replay passed | production artifacts registered above |
 | `DEV-P03-TRAINING-MATERIALIZATION-20260724` | 2026-07-24 | D-034 exact candidate/gold/source binding, on-demand original/CF token/target materialization and immutable training-plan publisher; synthetic only | contract `db1ea5084efb54cf4e57f2e10f096d469d60e22d`; implementation `9a58155ed4cb608e5b5dbc7b2a5b804002a2571e` | focused 9/9 in 0.360s; full 560/560 in 17.727s; GPU hidden/two CPU threads; plan replay/tamper/partial tests passed; temp roots cleaned | none |
 | `DEV-P01-RELATION-AUDIT-RESULT-20260724` | 2026-07-24 | D-035 strict completed-review/adjudication parser and Cohen's-kappa/validity gate; synthetic only | contract `fbf7de2bff1d680d4d650d503637631adce73843`; implementation `832e755fbdee9dcff5977142ad0cf7ba29b60399` | focused 5/5 in 0.382s; full 565/565 in 17.876s; GPU hidden/two CPU threads; pass/boundary/undefined/low-kappa/low-validity/schema/order/hash/immutability cases passed | none; no production submissions read |
+| `DEV-P01-USER-ATTESTED-AUDIT-20260725` | 2026-07-25 | D-038 zero-disagreement algorithmic projection and immutable development-only result replay | implementation/execution `06eff003309cb67e0b71167043e4a41b04351856` | focused 9/9; full 569/569 in 18.773s; fresh-process production replay passed; 196/200 valid, conditional kappa 1.0, validity 0.98, Wilson 95% `[0.949713,0.992196]`; not paper-eligible | manifest `c501f37697e5254a274075e0a5d017472b960240b436e5a5acdd65c4d1c4afe7`; private artifact registered below |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 
@@ -272,7 +273,21 @@ records supersede the old `NO_NATIVE_EXEC_ENV` planning state without erasing it
 |---|---|---|---|---|---|
 | `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723` | `PACKET VERIFIED / HUMAN REVIEW PENDING` | `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`, 370 train pairs, JSONL/manifest `525e3b09...` / `4e22ff13...` | seed 20260723; after/follows 259→140, before/precedes 111→60; A/B fields all null | items `0f37bc96...`; A `3a2618b9...`; B `390e7cb5...`; instructions `8ee14494...`; manifest `da5d7fb0...`; fresh replay passed | `/data0/hk_data/kairos-zx/data/processed/gsm8k/3101c7d5072418e28b9008a6636bde82a006892c/human-audit-v1/explicit-marker-relation-only-v1/train` |
 
-Packet verification proves deterministic sampling and integrity only. Cohen's kappa, adjudicated validity and training permission remain unavailable until two human submissions are completed and hash-locked.
+Packet verification proves deterministic sampling and integrity only. Formal
+two-human Cohen's kappa, authors-adjudicated validity and paper-training
+permission remain unavailable; the separate result below grants only the
+explicitly downgraded development path.
+
+## User-attested development audit result
+
+| ID | Status | Inputs | Aggregate result | Artifact binding | Path |
+|---|---|---|---|---|---|
+| `AUDIT-DEV-P01-GSM8K-USER-ATTESTED-20260725` | `PASSED_DEVELOPMENT / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE` | packet/items `da5d7fb0...` / `0f37bc96...`; A/B `99b95522...` / `96c9c535...`; private intake metadata `a518d507...` | N=200; 196 valid/4 invalid; observed/expected agreement 1.0/0.9608; conditional kappa 1.0; validity 0.98; Wilson 95% `[0.949713,0.992196]` | projection/result/manifest `ae8bc796...` / `df7310e8...` / `c501f376...`; execution `06eff003...`; fresh replay passed | `/data0/hk_data/kairos-zx/artifacts/audit-results/gsm8k-relation-user-attested-development-20260725` |
+
+This result is an algorithmic projection of two byte-identical overall-label
+vectors, not authors adjudication. The project has no evidence that two distinct
+humans completed A/B independently. It unlocks only development training and
+cannot supply a human-audit or paper metric claim.
 
 ## AI pre-review diagnostics
 

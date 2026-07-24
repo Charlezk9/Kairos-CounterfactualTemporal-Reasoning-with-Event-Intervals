@@ -140,13 +140,13 @@ Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f
 
 relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no marker / 1,475 extraction rejected / 0 rewrite rejected / 370 retained（4.951%）。370 个 pair/source/original/CF record ID 均唯一；JSONL 为 785,369 bytes，SHA256 `525e3b09c6a6d03942a6bc3e03ebcd1722c3a68f4f224753dbc641f98465c12a`，manifest SHA256 `4e22ff135d97c89ded50a54fc1007f25d9646db67ce112e4637d4e8c8b63674a`，execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`。fresh source-lockstep replay 通过，且没有 test 工件。该工件只支持 original-answer 与 original/inverted-relation supervision；CF answer unavailable/masked，所以这些计数不能进入 CF accuracy/update/consistency 结果。
 
-200 条人工审计准备包已从该 train population 确定性生成：seed 20260723，after/follows 259→140，before/precedes 111→60。items/Reviewer-A/Reviewer-B/instructions/manifest SHA 为 `0f37bc96...` / `3a2618b9...` / `390e7cb5...` / `8ee14494...` / `da5d7fb0...`。两份 reviewer 模板的 event/relation/grammar/non-target/overall 字段全部为 null；因此当前只能报告 `PACKET VERIFIED / HUMAN REVIEW PENDING`，不能报告 Cohen's kappa、有效率或据此训练。两位同伴作者需按包内 instructions 独立填写并锁定完成副本。
+200 条人工审计准备包已从该 train population 确定性生成：seed 20260723，after/follows 259→140，before/precedes 111→60。items/Reviewer-A/Reviewer-B/instructions/manifest SHA 为 `0f37bc96...` / `3a2618b9...` / `390e7cb5...` / `8ee14494...` / `da5d7fb0...`。两份原始模板的 event/relation/grammar/non-target/overall 字段全部为 null，因此 packet 本身仍只是 `PACKET VERIFIED`，不含判断。后续用户确认 A/B 的开发结果由下述 D-038 独立绑定；两位不同人类的独立完成证据仍未提供。
 
-D-035 的结果 evaluator 已开发验证，但尚未接收任何 production submission。真实 κ、adjudicated validity 与 gate status 仍全部 unavailable；作者完成 A/B 独立审阅并锁定 bytes 后，需再由作者完成分歧 adjudication，随后另行冻结 production ingestion/result artifact 才能计算和登记。
+D-035 的 authors-adjudication evaluator 已开发验证，但没有接收可证明为两位独立人类的 production submission。D-038 后续以不同 schema 对零分歧 A/B 做纯算法 agreement projection，只产生 development gate；它不向 D-035 传入伪造 authors adjudication。正式 human κ、authors-adjudicated validity 与 paper gate 仍 unavailable。
 
 按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
 
-Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。用户随后声明本地两份人工审计与该最终标签完全一致；在此声明下，条件 human `p_o=1`、`p_e=0.9608`、κ=1.0。但当前允许目录中不存在两份 raw formal A/B文件，所以该 κ 状态为 `USER-ATTESTED / ARTIFACT PENDING`，不能进入论文。为推进工程，已排除4个已知无效 pair并生成366条 development-only训练副本；数据/manifest SHA为 `4b5fec2b...` / `f24a8e8e...`，CF answer仍 unavailable/masked，任何训练指标必须标 PRELIMINARY。
+Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。366条 development-only副本的数据/manifest SHA仍为 `4b5fec2b...` / `f24a8e8e...`，CF answer unavailable/masked；下一步从审计链重建并冻结 train330/internal-dev36。
 
 ## 7. 已有实验复现结果
 
@@ -154,7 +154,7 @@ Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁�
 
 ## 8. 新增 Baseline 结果
 
-Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT 与 Pair-MLP 仍待人工审计后运行。
+Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT、Pair-MLP 与 Kairos 已获 development-only 审计路径许可，仍待 330/36 partition、共享候选、runner 与实际训练；其内部验证结果不得进入论文。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
@@ -242,9 +242,9 @@ Rule-Graph 已提供不含样本原文的聚合失败画像：42.8% 因 question
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
 | 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE 六个正式 baselines、TimeQA 两个 prompt baselines 与 paired inference 均 VERIFIED；TimeQA 为 strict-format failure-dominated result |
-| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；Rule-Graph VERIFIED exact-score-tie；matched-supervision methods 仍受人工审计门禁阻塞 |
+| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；Rule-Graph VERIFIED exact-score-tie；matched-supervision methods 仅获 development-only 审计许可，runner/training仍未完成 |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
-| 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
+| 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；用户确认的开发审计已重放，但两名独立人类 provenance 仍缺失，不能作为论文人工审计证据 |
 | interval 可解释性不足 | interval/graph 可视化与消融 | PLANNED |
 
 ## 13. 论文修改建议
