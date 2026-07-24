@@ -31,3 +31,10 @@ known_hosts*
 .DS_Store
 *.swp
 *.swo
+
+# Local Vue reviewer build, dependencies, and data-bearing review outputs
+src/ab-reviewer-web/node_modules/
+src/ab-reviewer-web/dist/
+src/ab-reviewer-web/review-data/
+src/ab-reviewer-web/results/*
+!src/ab-reviewer-web/results/README.md
