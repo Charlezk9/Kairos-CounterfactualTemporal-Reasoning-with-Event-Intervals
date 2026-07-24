@@ -296,3 +296,10 @@
 - `832e755...` 实现 `kairos.relation_audit_results`：exact 200 行 canonical JSONL、slot/ID/order/schema/Boolean/overall 校验、agreement-preserving adjudication、2×2 confusion、逐字段 agreement、κ unavailable处理与包含等号的 0.80/0.95 阈值。
 - 提交前自审发现 frozen result 的嵌套 mapping 仍可变，改为深层只读并增加回归断言；hash 与 canonical output 因而不能被返回后的调用方修改。
 - focused 5/5、最终 full 565/565（17.876s）通过，GPU 隐藏、CPU 两线程。测试只有 synthetic filled bytes；production packet/templates 未读取，正式 κ/validity/result artifact/训练许可均不存在。
+
+## 2026-07-24 — Two independent AI pre-reviews
+
+- 用户要求两个智能体分别独立填写并由用户检查准确率；`023490e...` 先冻结 D-036，将输出隔离为 `AI-A/AI-B`，禁止冒充 human Reviewer、进入 D-035 或解锁训练。
+- 两个智能体只读同一 200-item immutable packet，分别只写独立 JSONL并报告未读取对方或 production templates。主智能体在两者完成后才读取，机械验证 exact 200 行、source order/ID、canonical schema、Boolean与overall AND。
+- AI-A/AI-B SHA为 `efaf43bb...` / `a579fd69...`；overall true 115/174。逐字段 agreement：event spans 139、original relation 197、CF relation 196、grammar 185、non-target 200、overall 137。
+- AI-only diagnostic observed/expected agreement为0.685/0.5555，κ=0.2913386；event-span 61项分歧为主。负面一致性结果原样保留，等待用户核查，不作自动 adjudication或人类门禁结论。

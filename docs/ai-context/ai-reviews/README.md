@@ -18,3 +18,17 @@ Sample text is not copied into Git. The agents must not read each other's file.
 `summary.json` is produced only after both files are complete. It records input
 and output hashes plus aggregate agreement/counts; it is diagnostic AI
 agreement, not human Cohen's kappa or a D-035 result artifact.
+
+## Completed diagnostic
+
+- AI-A SHA256: `efaf43bb0439218b8584f8459d83dce1f6873d1fd86e945a518f8b9ae8916b9b`
+- AI-B SHA256: `a579fd69768927f37f40b8f8c2c0823cf3944bc5d0ce58fe23e15f4a3640e524`
+- summary SHA256: `fb058e64cb634a60a6ac56ff002ed45153b4e53c6107a360e4b8d0fcb203a5a4`
+- overall agreement: 137/200 (68.5%)
+- diagnostic AI-only kappa: `0.2913385826771655`
+- largest disagreement: event-span validity, 61/200 records
+
+The low agreement is retained as a negative reliability diagnostic. It must
+not be rounded up, adjudicated by another agent, or used to pass the human
+review gate. A human should inspect both files, especially the event-span and
+grammar disagreements, before designing the actual independent human review.

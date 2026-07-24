@@ -381,7 +381,8 @@
 
 ## D-036：双智能体独立 AI 预审与人类门禁隔离
 
-- 状态：`FROZEN FOR EXECUTION / AI PRE-REVIEW ONLY`。用户于 2026-07-24 明确要求两个智能体独立填写审阅结果并由用户核查准确率。为避免把模型判断伪装成人类盲审，本次输出固定标记为 `AI-A` 与 `AI-B` 预审，不写入或复制 production Reviewer A/B templates，不进入 D-035 evaluator，不计算或报告为 human Cohen's kappa，不解锁训练。
+- 状态：`COMPLETE / AI PRE-REVIEW ONLY / HUMAN REVIEW PENDING`；合同提交 `023490ee2fb821399961aa9fbbb97082d76c5c3a`。用户于 2026-07-24 明确要求两个智能体独立填写审阅结果并由用户核查准确率。为避免把模型判断伪装成人类盲审，本次输出固定标记为 `AI-A` 与 `AI-B` 预审，不写入或复制 production Reviewer A/B templates，不进入 D-035 evaluator，不计算或报告为 human Cohen's kappa，不解锁训练。
 - 独立性：两个智能体从同一 immutable `audit-items.jsonl` 与 `review-instructions.md` 独立判断，不读取、比较或修改对方输出；分别只写 `docs/ai-context/ai-reviews/reviewer-ai-a.jsonl` 与 `reviewer-ai-b.jsonl`。主智能体只在两者都完成后做 schema/order/overall/hash和聚合检查，不修改单项判断。
 - 输出：exact 200 行、source order、canonical UTF-8 JSONL，schema固定 `gsm8k-relation-ai-pre-review-v1`，slot固定 `AI-A` 或 `AI-B`。字段为既有五项 Boolean、其逻辑与 `overall_valid`、nullable bounded notes、audit item ID、slot与schema；不得包含 question、answer、event text、pair ID或其他样本文本。
 - Git 与使用边界：结果及只含 aggregate counts/hashes 的 summary可进入 Git，供用户逐项核查；production packet保持不可变。即使两个 AI 完全一致，本项目仍保持 `HUMAN REVIEW PENDING`，只有两位人类作者完成原合同后才可计算正式门禁。
+- 执行结果：两个隔离智能体均报告未读取对方文件或 production templates。AI-A/AI-B 输出 SHA256 为 `efaf43bb...` / `a579fd69...`；机械重放确认各 200 行、source ID/order、canonical schema、Boolean types与overall AND。AI-A/B overall true为 115/174；overall agreement 137/200，AI-only diagnostic κ=0.2913。event-span判断有61项分歧，是最大不确定性。该低一致性必须保留并由用户检查，不能由主智能体自动裁决或解释为审计通过。

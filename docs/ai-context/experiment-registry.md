@@ -272,3 +272,9 @@ records supersede the old `NO_NATIVE_EXEC_ENV` planning state without erasing it
 | `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723` | `PACKET VERIFIED / HUMAN REVIEW PENDING` | `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`, 370 train pairs, JSONL/manifest `525e3b09...` / `4e22ff13...` | seed 20260723; after/follows 259→140, before/precedes 111→60; A/B fields all null | items `0f37bc96...`; A `3a2618b9...`; B `390e7cb5...`; instructions `8ee14494...`; manifest `da5d7fb0...`; fresh replay passed | `/data0/hk_data/kairos-zx/data/processed/gsm8k/3101c7d5072418e28b9008a6636bde82a006892c/human-audit-v1/explicit-marker-relation-only-v1/train` |
 
 Packet verification proves deterministic sampling and integrity only. Cohen's kappa, adjudicated validity and training permission remain unavailable until two human submissions are completed and hash-locked.
+
+## AI pre-review diagnostics
+
+| ID | Status | Input | Outputs | Diagnostic | Use boundary |
+|---|---|---|---|---|---|
+| `AI-PRE-REVIEW-P01-GSM8K-200-20260724` | `COMPLETE / HUMAN REVIEW PENDING` | packet items/instructions SHA `0f37bc96...` / `8ee14494...`, 200 items | AI-A `efaf43bb...`; AI-B `a579fd69...`; summary `fb058e64...`; canonical schema/order replay passed | overall agreement 137/200; AI-only κ `0.2913385826771655`; event-span disagreements 61 | user accuracy check only; not D-035 input, human κ, adjudication or training authorization |

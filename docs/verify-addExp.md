@@ -144,6 +144,8 @@ relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no
 
 D-035 的结果 evaluator 已开发验证，但尚未接收任何 production submission。真实 κ、adjudicated validity 与 gate status 仍全部 unavailable；作者完成 A/B 独立审阅并锁定 bytes 后，需再由作者完成分歧 adjudication，随后另行冻结 production ingestion/result artifact 才能计算和登记。
 
+按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
+
 ## 7. 已有实验复现结果
 
 待运行。每行同时给出 `REPORTED`、重实现值、95% CI、差异、判定、run ID 和 commit。
