@@ -243,3 +243,11 @@
 - clean `08d847b...` 上每次请求前通过资源门禁；`/data0` 约 145 GiB free。四个官方 Dropbox 对象/route 均在 20--30 秒连接阶段 curl 28、HTTP 000、0 header/body bytes。
 - 固定 unofficial HF mirror `xanhho/2WikiMultihopQA@6ef4eb1...` 随后报 OS `Network is unreachable`，没有 repository metadata 或数据文件。五个私有 stage 只保存空 header 与 mode-0600 无样本 attempt manifest，未发布 formal raw、未删除旧失败工件。
 - 2Wiki 状态升级为 `DEFERRED_NETWORK / SOURCE_UNVERIFIED`，不是永久不可用结论。TORQUE reviewer-response 关键路径继续，下一步为无 network/model/GPU/production data 的 synthetic resumable trainer。
+
+## 2026-07-24 — Resumable synthetic training execution
+
+- `9cb192e...` 以 D-028 冻结两组 AdamW、effective batch 32、BF16、scheduler、RNG、optimizer-boundary progress 与 manifest-last/no-replace checkpoint 合同；明确不授权 production 数据、7B、PEFT、GPU 或正式训练。
+- `7772f7c...` 实现 `kairos.training_execution`。Kairos 与 Pair-MLP 均通过 CPU BF16 uninterrupted 与 one-step interrupted/save/fresh-object restore/resume 的逐项等价验证。
+- 首轮等价测试发现 interval mask 在 autocast 下把已量化 BF16 坐标提升回 FP32；mask 改为投影坐标 dtype 后保持精确端点恒等式，FP32 行为不变。
+- focused 20/20（1.830s）、full 528/528（18.175s）通过；GPU 隐藏、CPU 两线程，测试 checkpoint 已清理，没有 production 数据/模型读取、正式工件或指标。
+- 当前执行层只消费调用方已物化的 deterministic batches；未实现 sampler/data/candidate/CLI/PEFT/7B/GPU，且 checkpoint 未绑定 frozen backbone revision 或 production data manifest，因此不得用于正式训练。

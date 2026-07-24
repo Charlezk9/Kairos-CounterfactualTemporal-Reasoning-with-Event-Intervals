@@ -293,7 +293,7 @@
 
 ## D-028：Synthetic-only 可恢复训练执行合同
 
-- 状态：`FROZEN / APPROVED TO IMPLEMENT`；冻结父提交为 `7dd2110da1f239e63fc6292a9e216c341b9ee286`。本决定不授权 production 数据、7B 权重、PEFT 注入、GPU 或正式训练。
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED / SYNTHETIC ONLY`；冻结父提交为 `7dd2110da1f239e63fc6292a9e216c341b9ee286`，实现 commit 为 `7772f7c0b83557c423456de62a3fd733781e3499`。本决定不授权 production 数据、7B 权重、PEFT 注入、GPU 或正式训练。
 - 优化器：只允许两组 AdamW。`QwenCoreTrainingAdapter.backbone` 中 trainable 且名称含独立 LoRA component `lora_` 的参数进入 `lora` 组，LR `2e-5`；`core` 的全部 trainable 参数进入 `temporal_heads` 组，LR `2e-4`。任何重叠、遗漏、空组或其他 trainable backbone 参数均 fail closed。两组 weight decay `0.01`，betas `(0.9,0.999)`、eps `1e-8` 为独立默认。
 - Batch/AMP：effective batch 固定 32；micro batch 只允许 1/2/4/8/16/32，gradient accumulation 必须精确为 `32/micro_batch`。loss 在 backward 前除以 accumulation steps，只能在 accumulation boundary 做 clip `1.0`、optimizer step、scheduler step和 checkpoint。AMP dtype 固定 BF16；CPU synthetic test 使用 CPU autocast，不使用 GradScaler；未来 CUDA BF16 也固定 scaler disabled。
 - Scheduler/steps：linear warmup-decay v1，warmup 为 `floor(total_optimizer_steps*0.05)`；总 optimizer steps 必须预先冻结且为正。每次 optimizer step 后调用一次 scheduler step。最多 3 epochs；checkpoint progress 精确记录 epoch、next micro-batch cursor、optimizer steps和 samples seen。
@@ -301,3 +301,5 @@
 - Artifact：v1 checkpoint 为 mode-0700 新目录下的 mode-0600 canonical `config.json`、受限对象 `state.pt` 和最后发布的 canonical `manifest.json`。所有创建使用 no-replace、文件/目录 fsync；partial/既有目录不覆盖、不清理。manifest 绑定 execution commit、config/state SHA256/bytes、progress 与 exact filenames。加载先校验路径位于 `/data0/hk_data/kairos-zx`、无 symlink、namespace/mode/link、canonical JSON、hash/size、restricted `torch.load(weights_only=True)`、模型/optimizer/scheduler/RNG schema；任一失败不得改变 live state。
 - 等价验收：只用 CPU synthetic Qwen-like backbone、Kairos/Pair-MLP 和 synthetic `TrainingBatch`，比较 uninterrupted 与 optimizer-boundary interrupted/save/new-process-style restore/resume 的 trainable tensors、optimizer tensors/scalars、scheduler、progress、RNG next draw和 loss trajectory。focused 与 full tests 均须通过；工件只在 `/data0/hk_data/kairos-zx/.tmp` 测试根创建并由测试自身清理。
 - 实现边界：新增 `kairos.training_execution` 及对应测试；不新增读取 production 数据的 CLI，不接触 candidate materialization，不创建正式 checkpoint/run/registry metric，也不改变 D-023 人工门禁。实现差异和验证结果在完成后写入单一 Phase 03 checkpoint。
+- 验证结果：focused training-execution/modeling 20/20、最终 full 528/528 通过；Kairos 与 Pair-MLP 的 CPU BF16 uninterrupted 与 interrupted/resumed 路径在 trainable/optimizer/scheduler/progress/loss/gradient/RNG 上逐项相等。首轮发现并修复 mask dtype 将 BF16 interval coordinates 错误提升回 FP32 的既有 autocast 缺陷；FP32 语义不变。
+- 未完成边界：当前 API 消费调用方已物化的 deterministic batch sequence，不实现 sampler/epoch/data/candidate/CLI/PEFT/7B/GPU。v1 synthetic checkpoint 尚未绑定 frozen backbone revision 与 production data manifest，因此不得用作 formal checkpoint；唯一详细证据见 `checkpoints/phase-03-resumable-training-execution.md`。

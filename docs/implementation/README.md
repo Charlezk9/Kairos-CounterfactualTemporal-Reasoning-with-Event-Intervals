@@ -46,6 +46,21 @@ inject PEFT or load Qwen. Exact implementation and remaining runner/checkpoint
 boundaries are recorded only in
 `../ai-context/checkpoints/phase-03-qwen-core-training-adapter.md`.
 
+### Resumable synthetic training execution status
+
+Commit `7772f7c0b83557c423456de62a3fd733781e3499` implements the frozen
+D-028 synthetic execution contract: strict two-group AdamW, effective-batch
+gradient accumulation, BF16 autocast, linear warmup/decay, optimizer-boundary
+progress, RNG capture/restore and private manifest-last/no-replace checkpoints.
+Both Kairos and Pair-MLP match uninterrupted execution after an interrupted,
+fresh-object resume in CPU synthetic tests; focused 20/20 and full 528/528 pass.
+
+This layer still consumes an already materialized deterministic batch sequence.
+It does not inject PEFT, bind a frozen backbone revision or production data
+manifest, load the 7B model, use a GPU or authorize formal training. The exact
+contract, BF16 interval correction and remaining boundary are recorded only in
+`../ai-context/checkpoints/phase-03-resumable-training-execution.md`.
+
 ## CLI 与 manifest
 
 计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation，但尚无统一 CLI 或训练 runner。
@@ -78,10 +93,14 @@ status and recovery requirements are in
 
 ## 2Wiki source status
 
-2Wiki metadata discovery remains `METADATA_ONLY / HEAD_NOT_ATTEMPTED`; its
-exact HEAD plan is `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`. No acquisition or
-implementation is authorized. The unique status and disposition are in
-`../ai-context/checkpoints/phase-01-2wiki-discovery.md`.
+2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. A bounded recovery on clean
+commit `08d847b...` tried the corrected official April 2021 Dropbox object via
+two hosts, two older official objects and pinned unofficial Hugging Face mirror
+`6ef4eb1...`; all official routes returned no HTTP response and the mirror
+failed with OS `Network is unreachable`. No dataset byte was accepted and no
+formal raw tree was created. The current evidence and retry boundary are in
+`../ai-context/checkpoints/phase-01-2wiki-source-recovery.md`; the earlier
+metadata-only history remains in `phase-01-2wiki-discovery.md`.
 
 ## TORQUE source status
 
