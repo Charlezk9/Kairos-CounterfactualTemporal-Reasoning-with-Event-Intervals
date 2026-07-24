@@ -1,0 +1,90 @@
+{
+  "input_sha256": "0f37bc96928e16c26ecd5669c3148d97048b87745fc601e4343781f689a39113",
+  "output_a_sha256": "0bd7271f4fed23326ab116b5ebceafab0051a86158cb7b5df8723ec2ebf64bd6",
+  "output_b_sha256": "918d4519242b7d8d0494c27d50765fee01baf959268b079cad3a5b24a5255227",
+  "line_count_a": 200,
+  "line_count_b": 200,
+  "schema_version": "gsm8k-relation-ai-pre-review-v1",
+  "field_counts": {
+    "event_spans_valid": {
+      "ai_a_true": 200,
+      "ai_a_false": 0,
+      "ai_b_true": 200,
+      "ai_b_false": 0
+    },
+    "original_relation_valid": {
+      "ai_a_true": 200,
+      "ai_a_false": 0,
+      "ai_b_true": 200,
+      "ai_b_false": 0
+    },
+    "counterfactual_relation_valid": {
+      "ai_a_true": 200,
+      "ai_a_false": 0,
+      "ai_b_true": 196,
+      "ai_b_false": 4
+    },
+    "rewrite_grammatical": {
+      "ai_a_true": 199,
+      "ai_a_false": 1,
+      "ai_b_true": 199,
+      "ai_b_false": 1
+    },
+    "non_target_content_preserved": {
+      "ai_a_true": 200,
+      "ai_a_false": 0,
+      "ai_b_true": 200,
+      "ai_b_false": 0
+    },
+    "overall_valid": {
+      "ai_a_true": 199,
+      "ai_a_false": 1,
+      "ai_b_true": 195,
+      "ai_b_false": 5
+    }
+  },
+  "agreement": {
+    "event_spans_valid": {
+      "agree": 200,
+      "disagree": 0,
+      "agree_rate": 100.0
+    },
+    "original_relation_valid": {
+      "agree": 200,
+      "disagree": 0,
+      "agree_rate": 100.0
+    },
+    "counterfactual_relation_valid": {
+      "agree": 196,
+      "disagree": 4,
+      "agree_rate": 98.0
+    },
+    "rewrite_grammatical": {
+      "agree": 198,
+      "disagree": 2,
+      "agree_rate": 99.0
+    },
+    "non_target_content_preserved": {
+      "agree": 200,
+      "disagree": 0,
+      "agree_rate": 100.0
+    },
+    "overall_valid": {
+      "agree": 194,
+      "disagree": 6,
+      "agree_rate": 97.0
+    }
+  },
+  "overall_confusion": {
+    "both_true": 194,
+    "both_false": 0,
+    "a_true_b_false": 5,
+    "a_false_b_true": 1
+  },
+  "observed_agreement": 0.97,
+  "expected_agreement": 0.9703,
+  "ai_only_cohens_kappa": -0.0084,
+  "overall_disagreement_count": 6,
+  "status": "HUMAN_REVIEW_PENDING",
+  "notes": "Two independent Claude Code sub-agents completed AI pre-review. These results do NOT replace formal human Reviewer A/B, do NOT enter D-035 evaluator, and do NOT unlock training."
+}
