@@ -103,6 +103,21 @@
 - metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`; aggregation commit `99209b4445df3a25fe678e3223cceac2c84e0041`; completed `2026-07-23T17:23:37Z`; metrics SHA256 `6ce16c3a1d6af5a5a68acdbd86a751e2d73c6e6d7bc8acf6867c96c90bcfd6b1`; metrics manifest SHA256 `cbe181d4e864753a4156a22c09d1801d6b8997d83b3f24e83bdddb8d92e2092c`
 - verification: independent source-bound graph replay and metrics replay passed. Aggregate-only errors were graph-line position 336, non-exact event span 293, final answer invalid 72, answer unbound 56, invalid graph JSON 38, graph keys 14, relation 5, event ID 1 and duplicate key 1. No raw value was printed; the result was not parser-tuned.
 
+### `20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946`
+
+- status: `VERIFIED / DETERMINISTIC CPU SINGLE RUN / EXACT SCORE TIE / PAIRED COMPARISON AVAILABLE`
+- method: gold-blind deterministic Rule-Graph over fixed Direct, CoT and eight raw Self-Consistency candidates; conservative explicit before/after graph; positive-support selection, otherwise exact Direct fallback; no model call or answer construction
+- upstream manifests: Direct `318136467a25a6b3d70ef6c0a30a24698a125cc338eae3fadb6278324be833b3`; CoT `bbb32677f1903f9e736f25748036dea6d63eea39496139a693123e2d38f41fe5`; Self-Consistency `be449eeb3b2ebf954c3d8510122fb06111659fb28c2a9c86907f1061718e727f`
+- dataset: TORQUE public dev, revision `ab27019cc6a317fde3c879900499f02acce8b16d`, source SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`, 1,483 questions / 571 contrast groups
+- model identity: `deterministic-rule-graph`, revision `explicit-before-after-constraint-v1`
+- execution: clean commit `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866`, seed 13, CPU threads 2, no GPU, `2026-07-24T06:47:39Z`--`2026-07-24T06:47:59Z`, exit 0; rule run/publication 6.50 s, maximum RSS 418,940 KiB
+- selection/fallback: Direct 1,475, CoT 5, SC samples 0/4/7 one each; fallback 1,465 = cue count 634 + no positive support 465 + unsupported semantics 273 + ambiguous anchor class 74 + anchor absent 19
+- replayed metrics: question set EM `15.64396493594066`; question set F1 `16.069849832493126`; cluster exact consistency `1.5761821366024518`; cluster F1>=0.8 consistency `1.5761821366024518` (all percentages; exact Direct tie)
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946`
+- SHA256: config `45fe8931e9462df5a6893c449c0489ff5d919c63bd2c04e2212ec8225ef8ef4f`; predictions `c46527bf093d59ca785ceda3deebcc7430db9407b36246bd0d7bd0e14aeede2c`; rule evidence `c2d55beedd33881b9001b8a43fd99a5495b08ca0162751cb0cb718351bd1a88e`; manifest `ff2eb5038675cc6cc135c834e948f0b6d48d3ca24979194fbcaedafbe4a34830`
+- metrics artifact: `/data0/hk_data/kairos-zx/artifacts/derived-metrics/20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946`; aggregation commit/time `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866` / `2026-07-24T06:48:37Z`; metrics SHA256 `f4d4d1a4023a10a04c113c98c86a9df8f090207ee03684085a0e2712bb3700b3`; manifest SHA256 `5ec53db717b48a8a1d7b3c2242e76fcbcacb67505994d043523ab71327ec2a70`
+- verification: fresh offline replay verified all three upstream artifacts and raw SC envelopes, source order, every graph trace/prediction, zero-token evidence, metrics and hashes. Eight predictions differ from Direct, but every changed record has zero metric delta.
+
 ## Formal statistical comparisons
 
 ### `paired-torque-dev-cot-vs-direct-43410b587f33`
@@ -150,6 +165,15 @@
 - artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-llm-graph-vs-direct-a623ea036fa7`; aggregation commit/time `99209b4445df3a25fe678e3223cceac2c84e0041` / `2026-07-23T17:24:06Z`; statistics SHA256 `234e2d7b8436e11b22807f50b0891f7792acd74d45cfefab4e0a2ba97b4441f4`; manifest SHA256 `691b3259f4a2c6f622484e31507ae5361cdfef834dd8366a51b8e2b504d560e3`
 - verification: fresh CPU/offline replay reproduced every value and both hashes. The result is a negative finding for this strict serialization contract, not for temporal graph reasoning in general.
 
+### `paired-torque-dev-rule-graph-vs-direct-cebd6cfa4ed5`
+
+- status: `VERIFIED / PAIRED GROUP BOOTSTRAP / EXACT ZERO DIFFERENCE`
+- contrast: provenance-bound Rule-Graph minus its exact Direct upstream, seed 13; 1,483 questions in 571 `(passage_id, cluster_id)` bootstrap units. D-033 permits only this fixed derived-method identity; it is not a general cross-model exception.
+- inference: 10,000 resamples, bootstrap seed 20260723, percentile 95% CI, two-sided bootstrap sign p-value with add-one correction, Holm family of four metrics
+- results: question EM, question F1, cluster exact and cluster F1>=0.8 differences all `0.0`; all four CIs `[0.0, 0.0]`; all raw/Holm p values `1.0`
+- artifact: `/data0/hk_data/kairos-zx/artifacts/derived-statistics/paired-torque-dev-rule-graph-vs-direct-cebd6cfa4ed5`; aggregation commit/time `fdc4f92132a4c2a72256297a4abddd05210dd265` / `2026-07-24T06:56:21Z`; statistics SHA256 `ea5a5f8013b6aad3231ecfd51adafda863b6c281c62c9b7013e73a69c0cfcee4`; manifest SHA256 `3e26f09b111be9f5db702891e3d2c30a8f746d984b3063d8fd61a3de5be7296c`
+- verification: publication and a separate fresh process replayed both prediction/metrics inputs, all 571-group samples and both hashes. The degenerate interval is correct because all eight changed predictions preserve their per-record scores.
+
 D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点；完成的 production conversion 作为数据工件单独登记，不伪装成模型实验或论文指标。
 
 ## Development-only verification
@@ -183,6 +207,7 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P03-CHECKPOINT-BINDING-20260724` | 2026-07-24 | v2 fixed Qwen revision/checksum, data revision/manifest and core-type checkpoint identity with expected-binding-before-state-read resume | clean commit `1d80f5d4196a5a89cb1b465f162c5822c07534cb` | focused 8/8 in 1.735s; full 530/530 in 17.316s; GPU hidden/two CPU threads; all fixtures removed | none |
 | `DEV-P03-PEFT-INJECTION-20260724` | 2026-07-24 | project-local PEFT 0.14.0 injection, LoRA-only validation, real tiny-Qwen/checkpoint tests and fixed-model one-step synthetic GPU smoke | clean commit `c68c77a2eceba9c34f93ac99bd5893807c02cecb` | focused 9/9 + 9/9; full 533/533 in 16.746s; physical GPU 4 batch-32 one-step peak 15,920,307,712 allocated bytes; GPU released | no formal artifact; install manifest `/data0/hk_data/kairos-zx/.tmp/peft-0.14.0-install-FUETh37X/install-manifest.json` SHA `0b76d845...` |
 | `DEV-P03-TRAINING-PLAN-20260724` | 2026-07-24 | D-031 source/candidate/gold manifest binding, stateless three-epoch SHA256 sampler, explicit tail repeats, micro-batch identities and exact resume cursor; synthetic only | contract `d592e5cb549c52a0b9c96f42d55f69265d0bb6bc`; implementation `8de516d8b9c3fdb1804b5a7143f55c8cc29fc19a` | focused 7/7 in 0.904s; full 540/540 in 17.853s; GPU hidden/two CPU threads; manifest tamper, target/mask identity and cursor tests passed | none |
+| `DEV-P03-TORQUE-RULE-GRAPH-20260724` | 2026-07-24 | D-032 gold-blind explicit-rule candidate reranker plus D-033 provenance-bound paired statistics | contract `13dbbd9c258ffc75ca2659ef74dd02e5d0e6c960`; implementation/execution `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866`; statistics `fdc4f92132a4c2a72256297a4abddd05210dd265` | rule focused 9/9; statistics focused 8/8; final full 551/551; formal prediction/metrics/statistics and fresh full replay passed | production artifacts registered above |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

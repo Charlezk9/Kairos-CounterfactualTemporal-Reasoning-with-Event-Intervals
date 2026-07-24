@@ -85,6 +85,25 @@ identity evidence is in
 deterministic manifest/cursor evidence is in
 `../ai-context/checkpoints/phase-03-deterministic-training-plan.md`.
 
+### Rule-Graph structured baseline status
+
+Commit `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866` implements the D-032
+gold-blind `kairos.rule_graph` baseline. It replays fixed Direct, CoT and eight
+raw Self-Consistency candidates, parses only conservative explicit
+`before/after` clauses, keeps exact occurrence nodes separate, scores existing
+candidate sets against the derived graph and otherwise falls back to Direct.
+Every rule decision is retained in a bounded canonical trace and can be replayed
+without a model or GPU. Formal TORQUE dev prediction and metrics artifacts pass
+fresh replay.
+
+Commit `fdc4f92132a4c2a72256297a4abddd05210dd265` implements D-033's narrow
+paired-statistics eligibility for this derived method. The candidate config must
+bind the exact reference Direct run and prediction manifest; all unrelated
+different-model comparisons remain rejected. The formal Rule-Graph run changes
+8/1,483 predictions but has exactly the same four metrics as Direct. Full
+implementation, artifact hashes, fallback counts and inference are recorded in
+`../ai-context/checkpoints/phase-03-torque-rule-graph-baseline.md`.
+
 ## CLI 与 manifest
 
 计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation，但尚无统一 CLI 或训练 runner。

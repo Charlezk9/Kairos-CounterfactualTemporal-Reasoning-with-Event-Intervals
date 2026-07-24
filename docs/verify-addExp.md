@@ -1,14 +1,14 @@
 # Kairos 补充实验技术与结果报告
 
 > 状态：PHASE 01/03 RUNNING
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency 与 LLM-Graph 正式结果；Kairos 与匹配监督 Baseline 尚未形成正式结果。
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency、LLM-Graph 与 Rule-Graph 正式结果；Kairos 与匹配监督 Baseline 尚未形成正式结果。
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01 data remediation 与 Phase 03 baseline evaluation 并行；GSM8K source/example conversion、construction v0 replay 和五类 baseline 已完成
+- 当前阶段：Phase 01 data remediation 与 Phase 03 baseline evaluation 并行；GSM8K source/example conversion、construction v0 replay 和六类 baseline 已完成
 - 复现性质：independent reimplementation
-- 已完成实验：TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph，TimeQA-Hard Direct/CoT，以及各自对 Direct 的配对 bootstrap/Holm 校正
-- 当前结论：尚不能验证论文 Kairos 核心效果；当前 TORQUE CoT、CoT+Verifier 与 strict LLM-Graph 均低于 Direct，Self-Consistency 与 Direct 无可支持差异，TimeQA 结果被严格格式失败主导；GSM8K 保守 v0 为 0 retained，不能直接用于完整 CF-answer 训练
+- 已完成实验：TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph/Rule-Graph，TimeQA-Hard Direct/CoT，以及各 candidate 对 Direct 的配对 bootstrap/Holm 校正
+- 当前结论：尚不能验证论文 Kairos 核心效果；当前 TORQUE CoT、CoT+Verifier 与 strict LLM-Graph 均低于 Direct，Self-Consistency 与 Direct 无可支持差异，Rule-Graph 与 Direct 四项得分精确相同，TimeQA 结果被严格格式失败主导；GSM8K 保守 v0 为 0 retained，不能直接用于完整 CF-answer 训练
 
 ## 2. 复现范围、版本与 Git commit
 
@@ -108,6 +108,8 @@ TORQUE Self-Consistency 在 `b2f889b...` 冻结为每题 8 个 CoT samples、tem
 
 TORQUE LLM-Graph 在 `99209b4...` 冻结为 gold-free one-pass structured prompt：倒数第二个 non-empty line 是 strict temporal graph JSON，最后一行是 strict answer array；节点须绑定 passage exact spans，五类边须绑定已有节点，答案须引用 graph event。focused 6/6、full 515/515 后完成正式运行，source-bound verifier 逐条重解析。该严格 primary 不在看过 dev 输出后 repair 或放宽。
 
+TORQUE Rule-Graph 在 `dcc96b7...` 实现为 gold-blind deterministic reranker：固定消费已验证的 Direct、CoT 与八个 raw Self-Consistency candidates，只为单一标准 `before/after` 问题从 passage 的显式 clause 建立 occurrence-level before graph；只有候选集获得正 support 才替换 Direct，否则保守回退。每题 canonical trace 可在无模型、无 GPU 条件下重放。D-033 的 `fdc4f92...` 只为 config 精确绑定该 Direct 上游的 Rule-Graph 开放 paired-statistics 资格，其他跨模型比较继续拒绝。rule focused 9/9、statistics focused 8/8、最终 full 551/551 通过。
+
 ## 5. 实验设计与超参数
 
 冻结设计见 `docs/experiments/README.md`。任何偏离必须记录决定、时间和影响。
@@ -142,11 +144,11 @@ relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no
 
 ## 8. 新增 Baseline 结果
 
-Direct、CoT、CoT+Verifier、Self-Consistency 与 structured LLM-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；这些结果保留且未据此调 prompt/parser。TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT、Pair-MLP、Rule-Graph/Constraint-Rerank 仍待运行。
+Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT 与 Pair-MLP 仍待人工审计后运行。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
-TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph 与 TimeQA-Hard Direct/CoT 已完成正式迁移评测。两数据集 fixed official source 已进入本地 staging：
+TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph/Rule-Graph 与 TimeQA-Hard Direct/CoT 已完成正式迁移评测。两数据集 fixed official source 已进入本地 staging：
 
 - TORQUE `ab27019c...`：archive SHA256 `7284c675f0cf21ddb1272c31919d4453d2fb53a426e88b46ad6a9a0fd9030cd0`；public dev 145 passages/1,483 answer-bearing QA，dev SHA256 `7a8dd84c984f28a5284bdfda57b447218e1269cd2eaf05b5e173394fc1522434`。test 无 answer，不使用。
 - TimeQA `38b05989...`：archive SHA256 `f0df52a31e9d4bb0d5b7577d9e0131740bd017d2aad1e9b4bee7756bfecdfd07`；`human_test.hard.json` 为 989 条 JSONL，SHA256 `0318963bb2af931143be50ca24402d03c075c4b5a4898fda9bf4d5b2f0c6c188`。
@@ -158,13 +160,14 @@ fixed adapters 与 metric contract 已在 `e89bbfd...` 实现，并由 `8b57ffe.
 
 Direct 结果如下。指标均为百分数，parse error 使用固定 sentinel 计错；没有从输出中人工恢复答案。
 
-| Status | Method | Dataset/split | N / groups | Seed | Set EM | Set F1 | Cluster exact | Cluster F1>=0.8 | Parse error | Run / commit |
+| Status | Method | Dataset/split | N / groups | Seed | Set EM | Set F1 | Cluster exact | Cluster F1>=0.8 | Parse error / fallback | Run / commit |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
 | `VERIFIED / SINGLE RUN` | Qwen2.5-7B Direct greedy | TORQUE public dev | 1,483 / 571 | 13 | 15.644 | 16.070 | 1.576 | 1.576 | 42/1,483 (2.832%) | `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d` / `eae442b...` |
 | `VERIFIED / SINGLE RUN / NEGATIVE` | Qwen2.5-7B CoT greedy | TORQUE public dev | 1,483 / 571 | 13 | 12.610 | 12.778 | 1.226 | 1.226 | 31/1,483 (2.090%) | `20260723T100959Z-cot-torque-dev-s13-05e077299faf` / `21b4eea...` |
 | `VERIFIED / SINGLE RUN / NEGATIVE` | Qwen2.5-7B CoT+Verifier | TORQUE public dev | 1,483 / 571 | 13 | 14.228 | 14.681 | 1.401 | 1.401 | 762/980 verifier calls (77.755%) | `20260723T142222Z-cot-verifier-torque-dev-s13-5edec173ee35` / `e09a40f...` |
 | `VERIFIED / SINGLE RUN / NO SUPPORTED DIFFERENCE` | Qwen2.5-7B Self-Consistency (8 CoT samples) | TORQUE public dev | 1,483 / 571 | 13 | 15.374 | 15.569 | 1.926 | 1.926 | 494/11,864 samples; 1/1,483 all-invalid | `20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d` / `b2f889b...` |
 | `VERIFIED / SINGLE RUN / NEGATIVE / FORMAT-CONSTRAINED` | Qwen2.5-7B LLM-Graph greedy | TORQUE public dev | 1,483 / 571 | 13 | 1.349 | 1.349 | 0.000 | 0.000 | 816/1,483 (55.024%) | `20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644` / `99209b4...` |
+| `VERIFIED / CPU SINGLE RUN / EXACT SCORE TIE` | Deterministic Rule-Graph/Constraint-Rerank | TORQUE public dev | 1,483 / 571 | 13 | 15.644 | 16.070 | 1.576 | 1.576 | 1,465/1,483 conservative fallback | `20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946` / `dcc96b7...` |
 
 Direct run 固定模型 revision `a09a354...`、数据 SHA `7a8dd84c...`，全量 source-order prediction/raw evidence 与派生 metrics 均通过独立离线 replay。Metrics aggregation commit 为 `61e96bc...`，metrics/manifest SHA 为 `c508305a...` / `1187e24d...`。当前 prompt-only 数值建立了外部迁移下界；配对统计分别支持 CoT、CoT+Verifier 与 Self-Consistency 对 Direct 的冻结比较，在 Kairos 和匹配监督 Baseline 完成前，不能据此声称 interval/graph 方法改进。完整 SHA 与资源证据见 registry 和对应 checkpoint。
 
@@ -175,6 +178,8 @@ CoT+Verifier 只接收上述两个冻结候选，不含 gold；503 条等价候�
 Self-Consistency 每题固定 8 个 CoT samples，总生成 1,714,292 tokens；494 个无效 sample 被排除，只有 1 题八次全无效。EM/F1 相对 Direct 为 -0.270/-0.500 pp，95% CI `[-1.387,0.885]` / `[-1.632,0.687]`；cluster 两口径相对 Direct +0.350 pp，CI `[-0.350,1.051]`。四项 Holm p 均为 1.0，因此没有可支持差异。该结果不等于“方法相同”，只表示当前 single-seed 配置没有检出增益或损害。
 
 LLM-Graph 有 667/1,483 条同时通过 strict graph 与 answer contract，但 EM/F1 均仅 1.349，cluster 为 0。相对 Direct 的 EM/F1 为 -14.295/-14.721 pp，95% CI `[-16.155,-12.517]` / `[-16.575,-12.937]`；cluster 差为 -1.576 pp，CI `[-2.627,-0.701]`。主要 parser failure 是 graph line 位置 336 条和 event span 非 passage 原串 293 条，只有 1 条命中生成上限。结果说明严格 one-pass serialization 失败，不应外推为 temporal graph 普遍无效。
+
+Rule-Graph 不生成文本，1,483 条 generation status 全为 `NOT_APPLICABLE`。它选择 Direct 1,475 次、CoT 5 次、SC samples 0/4/7 各 1 次；1,465 题因 cue/语义/anchor/support 门禁保守回退。8 个替换答案均未改变对应题的 EM 或 F1 contribution，因此四项聚合指标与 Direct 精确相同。该结果表明当前 v1 显式规则覆盖和 candidate selection 没有带来增益，不应外推为 constraint reasoning 普遍无效。
 
 TimeQA-Hard strict primary 结果如下：
 
@@ -189,7 +194,7 @@ CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 ex
 
 ## 10. 统计检验与实验结论
 
-当前完成的是同一模型 revision、同一 model seed 下逐样本/组的 prompt-baseline 配对推断，不是三个训练 seed 的模型方差估计。所有差值为表中 candidate minus Direct；固定 10,000 resamples、bootstrap seed 20260723、percentile 95% CI、add-one 双侧 bootstrap sign p-value，并在每个 dataset/comparison 的全部报告指标内做 Holm 校正。
+当前完成的是同一模型 revision 的 prompt-baseline 配对推断，以及 D-033 唯一允许的 provenance-bound Rule-Graph 对其 Direct 上游的配对推断；都不是三个训练 seed 的模型方差估计。所有差值为表中 candidate minus Direct；固定 10,000 resamples、bootstrap seed 20260723、percentile 95% CI、add-one 双侧 bootstrap sign p-value，并在每个 dataset/comparison 的全部报告指标内做 Holm 校正。
 
 | Dataset / unit | Metric | Difference (pp) | 95% CI | Raw p | Holm p | Conclusion |
 |---|---|---:|---:|---:|---:|---|
@@ -209,21 +214,25 @@ CoT 输入最大 24,597 tokens，20 条通过 strict parser，约 5 条得到 ex
 | TORQUE / 571 contrast groups | LLM-Graph question set F1 | -14.721 | [-16.575, -12.937] | 0.000200 | 0.000800 | LLM-Graph lower than Direct |
 | TORQUE / 571 contrast groups | LLM-Graph cluster exact | -1.576 | [-2.627, -0.701] | 0.001200 | 0.002400 | LLM-Graph lower than Direct |
 | TORQUE / 571 contrast groups | LLM-Graph cluster F1>=0.8 | -1.576 | [-2.627, -0.701] | 0.001200 | 0.002400 | LLM-Graph lower than Direct |
+| TORQUE / 571 contrast groups | Rule-Graph question set EM | 0.000 | [0.000, 0.000] | 1.000000 | 1.000000 | exact score tie |
+| TORQUE / 571 contrast groups | Rule-Graph question set F1 | 0.000 | [0.000, 0.000] | 1.000000 | 1.000000 | exact score tie |
+| TORQUE / 571 contrast groups | Rule-Graph cluster exact | 0.000 | [0.000, 0.000] | 1.000000 | 1.000000 | exact score tie |
+| TORQUE / 571 contrast groups | Rule-Graph cluster F1>=0.8 | 0.000 | [0.000, 0.000] | 1.000000 | 1.000000 | exact score tie |
 | TimeQA-Hard / 989 records | Strict normalized EM | +0.506 | [0.101, 1.011] | 0.015198 | 0.030397 | format-interaction only |
 | TimeQA-Hard / 989 records | Strict token F1 | +0.506 | [0.101, 1.011] | 0.015198 | 0.030397 | format-interaction only |
 
-TORQUE 结论是保留的负结果：在当前固定 prompt 下，CoT、CoT+Verifier 和 strict LLM-Graph 都显著降低题级 EM/F1，Self-Consistency 与 Direct 的差异则没有统计支持。Verifier 的 77.8% strict index failure、Self-Consistency 的 494 个无效 samples 与 LLM-Graph 的 816 个 graph/answer failures 都按冻结规则保留，不能在看过 dev 后通过放宽 parser 消除。LLM-Graph 只约束该 one-pass strict serialization 实现。TimeQA 的统计非零不构成能力结论，因为 989 条中约只有 5 条 CoT strict exact，且 Direct/CoT 分别有 986/969 条 parser failure。主要 Kairos-vs-matched-baseline 比较仍需三个训练 seed；在完成前不作论文核心 claim 的显著性判断。
+TORQUE 结论是保留的负结果：在当前固定 prompt 下，CoT、CoT+Verifier 和 strict LLM-Graph 都显著降低题级 EM/F1，Self-Consistency 与 Direct 的差异没有统计支持，Rule-Graph 则在每个报告指标上精确打平 Direct。Verifier 的 77.8% strict index failure、Self-Consistency 的 494 个无效 samples、LLM-Graph 的 816 个 graph/answer failures 与 Rule-Graph 的 1,465 个保守 fallback 都按冻结规则保留，不能在看过 dev 后通过放宽 parser/rule 消除。LLM-Graph 和 Rule-Graph 分别只约束其 one-pass strict serialization 与 conservative explicit-rule v1。TimeQA 的统计非零不构成能力结论，因为 989 条中约只有 5 条 CoT strict exact，且 Direct/CoT 分别有 986/969 条 parser failure。主要 Kairos-vs-matched-baseline 比较仍需三个训练 seed；在完成前不作论文核心 claim 的显著性判断。
 
 ## 11. Interval/Graph 案例与失败分析
 
-待填写成功案例与事件抽取、隐式关系、答案未更新、错误翻转、长上下文混淆等失败类型。
+Rule-Graph 已提供不含样本原文的聚合失败画像：42.8% 因 question cue count、18.4% 因 unsupported semantics、31.4% 因无 positive-supported candidate、5.0% 因 anchor class ambiguity、1.3% 因 anchor absent（百分比以 1,483 题为分母，四舍五入）。仅 8 题替换 Direct 且全部 score-neutral，显示显式局部规则覆盖不足。Kairos interval 的成功案例、隐式关系、答案未更新、错误翻转与长上下文混淆仍待正式训练和逐例分析。
 
 ## 12. 审稿意见与新增证据映射
 
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
-| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE 五个正式 baselines、TimeQA 两个 prompt baselines 与 paired inference 均 VERIFIED；TimeQA 为 strict-format failure-dominated result |
-| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；matched-supervision methods PLANNED |
+| 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE 六个正式 baselines、TimeQA 两个 prompt baselines 与 paired inference 均 VERIFIED；TimeQA 为 strict-format failure-dominated result |
+| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；Rule-Graph VERIFIED exact-score-tie；matched-supervision methods 仍受人工审计门禁阻塞 |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
 | 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；人工审计待完成 |
 | interval 可解释性不足 | interval/graph 可视化与消融 | PLANNED |
@@ -234,7 +243,7 @@ TORQUE 结论是保留的负结果：在当前固定 prompt 下，CoT、CoT+Veri
 
 ## 14. Run、Commit 与工件追踪
 
-首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。第五个为 TORQUE CoT+Verifier `20260723T142222Z-cot-verifier-torque-dev-s13-5edec173ee35`，execution/aggregation commit 均为 `e09a40fa9e192bb92971be61e795cbfabcb3117d`，prediction/evidence/manifest SHA 为 `a0993605...` / `d5a3c7fd...` / `7e84484e...`，metrics/manifest SHA 为 `a3577a84...` / `9e84a5ac...`。第六个为 TORQUE Self-Consistency `20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`，execution/aggregation commit 均为 `b2f889b02893d99751ee9aabacdb3038a3456e1e`；prediction/evidence/manifest SHA 为 `f7faf46c...` / `5bde295d...` / `be449eeb...`，metrics/manifest SHA 为 `22ec0d76...` / `7857e01a...`。第七个为 TORQUE LLM-Graph `20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`，execution/aggregation commit 均为 `99209b4445df3a25fe678e3223cceac2c84e0041`；prediction/evidence/manifest SHA 为 `64a6c2e7...` / `f8a82934...` / `c2573cfb...`，metrics/manifest SHA 为 `6ce16c3a...` / `cbe181d4...`。统计实现 commit 为 `db6efe20a6317edac47343d1c713e9f4ec51263b`；TORQUE CoT comparison SHA 为 `38646b82...` / `d1b08455...`，TimeQA comparison 为 `d1b5c7a9...` / `a44331e9...`，TORQUE verifier comparison 为 `fd2ae14c...` / `19f411f6...`，TORQUE Self-Consistency comparison 为 `8918c83b...` / `d1712be7...`，TORQUE LLM-Graph comparison 为 `234e2d7b...` / `691b3259...`。所有完整值见 registry。数据获取与 processed/construction artifact 的完整追踪也以 registry 为准。
+首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。第五个为 TORQUE CoT+Verifier `20260723T142222Z-cot-verifier-torque-dev-s13-5edec173ee35`，execution/aggregation commit 均为 `e09a40fa9e192bb92971be61e795cbfabcb3117d`，prediction/evidence/manifest SHA 为 `a0993605...` / `d5a3c7fd...` / `7e84484e...`，metrics/manifest SHA 为 `a3577a84...` / `9e84a5ac...`。第六个为 TORQUE Self-Consistency `20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`，execution/aggregation commit 均为 `b2f889b02893d99751ee9aabacdb3038a3456e1e`；prediction/evidence/manifest SHA 为 `f7faf46c...` / `5bde295d...` / `be449eeb...`，metrics/manifest SHA 为 `22ec0d76...` / `7857e01a...`。第七个为 TORQUE LLM-Graph `20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`，execution/aggregation commit 均为 `99209b4445df3a25fe678e3223cceac2c84e0041`；prediction/evidence/manifest SHA 为 `64a6c2e7...` / `f8a82934...` / `c2573cfb...`，metrics/manifest SHA 为 `6ce16c3a...` / `cbe181d4...`。第八个为 CPU-only TORQUE Rule-Graph `20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946`，execution/metrics commit 为 `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866`；prediction/evidence/manifest SHA 为 `c46527bf...` / `c2d55bee...` / `ff2eb503...`，metrics/manifest SHA 为 `f4d4d1a4...` / `5ec53db7...`。通用统计实现 commit 为 `db6efe20a6317edac47343d1c713e9f4ec51263b`，Rule-Graph provenance exception/统计 commit 为 `fdc4f92132a4c2a72256297a4abddd05210dd265`；TORQUE CoT comparison SHA 为 `38646b82...` / `d1b08455...`，TimeQA comparison 为 `d1b5c7a9...` / `a44331e9...`，TORQUE verifier comparison 为 `fd2ae14c...` / `19f411f6...`，TORQUE Self-Consistency comparison 为 `8918c83b...` / `d1712be7...`，TORQUE LLM-Graph comparison 为 `234e2d7b...` / `691b3259...`，TORQUE Rule-Graph comparison 为 `ea5a5f80...` / `3e26f09b...`。所有完整值见 registry。数据获取与 processed/construction artifact 的完整追踪也以 registry 为准。
 
 relation-only train data artifact 为 `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`，execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`，JSONL/manifest SHA 为 `525e3b09...` / `4e22ff13...`；它不是 formal model run 或论文效果数值。
 

@@ -275,3 +275,10 @@
 - planned execution 在 optimizer 调用前验证本 window 的 example/candidate IDs、candidate mask 和 answer targets；只物化当前 window，避免预先携带全部三轮 tensors。cursor 精确记录 consumed real/repeat slots、completed epochs 和 next example，只接受 optimizer boundary。
 - 首轮 focused 在 test collection 因调用了不存在的执行器别名失败，未运行测试逻辑或模型；改用现有 `run_optimizer_steps` 后 focused 7/7（0.904s）、full 540/540（17.853s）通过，最大 RSS 537,360 KiB。GPU 隐藏，未读取 production 数据/模型，无工件或指标。
 - 该实现消除 sampler/manifest/cursor 工程缺口，但候选生成/物化与 formal runner 仍未实现；两人 relation audit 未完成，正式 Kairos/Pair-MLP 训练仍禁止。
+
+## 2026-07-24 — TORQUE Rule-Graph formal baseline
+
+- `13dbbd9...` 冻结 D-032 gold-blind candidate/rule/trace/fallback 合同；`dcc96b7...` 实现 fixed Direct/CoT/8 raw-SC replay、保守 explicit-before graph、候选集打分和完整离线验证。focused 9/9、full 549/549 通过。
+- clean `dcc96b7...` 上以 CPU 两线程、GPU 隐藏前台发布 1,483 条。1,475 条选择 Direct，5 条 CoT，SC samples 0/4/7 各 1 条；1,465 条有保守 fallback。prediction/metrics fresh replay 通过，EM/F1 15.644/16.070、cluster 两项 1.576，与 Direct 精确相同。
+- 通用统计门禁先在工件创建前拒绝不同 model revision。`9a05fd2...` 以 D-033 冻结仅限 provenance-bound Rule-Graph 的窄例外，`fdc4f92...` 实现；focused statistics 8/8、full 551/551 通过，无关跨模型及错误上游 manifest 仍 fail closed。
+- 正式 571-group/10,000-resample comparison 经全新进程重放：四项差值与 95% CI 均为 0、Holm p=1。8 条改写的逐题 metric contribution 都未变化；这是保留的无提升结果，不是 Kairos effect 或 constraint reasoning 的一般结论。

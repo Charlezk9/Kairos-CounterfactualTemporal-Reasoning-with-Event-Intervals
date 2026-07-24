@@ -1,11 +1,17 @@
 # Remaining Reviewer-Response Execution Plan
 
-- status: `FROZEN / READY TO EXECUTE`
+- status: `FROZEN / EXECUTING / PARTIAL`
 - date: 2026-07-24 CST
 - branch: `experiment/reproduction-additional-evaluation`
 - plan_parent_commit: `7bdecae61642c883e739422ee1f17999c7c2c786`
 - execution_mode: single agent
 - production_training: blocked pending human audit
+
+Execution update (2026-07-24): the planned Rule-Graph/Constraint-Rerank item is
+now `VERIFIED / EXACT SCORE TIE`; its unique evidence is
+`phase-03-torque-rule-graph-baseline.md`. This does not close the main
+same-supervision gap: both human review templates remain blank, so Kairos,
+Pair-MLP and Same-data SFT production training are still prohibited.
 
 ## Objective and claim boundary
 
@@ -29,7 +35,7 @@ conflicting PDF/TeX Kairos values remain `REPORTED / UNVERIFIED`.
 | Reviewer concern | Manuscript limitation | Verified current state | Required closure evidence |
 |---|---|---|---|
 | Non-standard temporal subsets | Four unpublished temporal subsets are under-specified | TORQUE and TimeQA sources plus prompt baselines are verified | Trained Kairos and matched baselines on TORQUE; 2Wiki when provenance succeeds |
-| Weak/asymmetric baselines | Kairos is trained while the main comparisons are prompt-only | LLM-Graph is a verified negative run; Pair-MLP is synthetic-only; Same-data SFT absent | Same-data SFT, Pair-MLP and Kairos share data/candidates/metrics and run three seeds; add Rule-Graph/Constraint-Rerank |
+| Weak/asymmetric baselines | Kairos is trained while the main comparisons are prompt-only | LLM-Graph is a verified negative run; Rule-Graph exactly ties Direct; Pair-MLP is synthetic-only; Same-data SFT absent | Same-data SFT, Pair-MLP and Kairos share data/candidates/metrics and run three seeds |
 | Under-specified construction | Subset IDs, full templates and author configuration are unavailable | GSM8K v0 retains zero; relation-only v1 has 370 train pairs and no CF answer | Construction funnel, complete provenance, answer-bearing v2 or explicit claim withdrawal, and human validity evidence |
 | Marker/template artifacts | Rule labels depend on explicit markers | No explicit/implicit or answer-unchanged analysis exists | Frozen explicit/implicit split, paraphrased perturbations and answer-unchanged distractors |
 | Gold candidate advantage | Training adds gold while evaluation reranks generated candidates | Candidate generation exists only for prompt runs | Candidate recall and no-gold-injection sensitivity using the shared pool |
