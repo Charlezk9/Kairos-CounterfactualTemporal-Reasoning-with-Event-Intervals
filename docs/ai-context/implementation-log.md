@@ -236,3 +236,10 @@
 - 仅 valid candidates 进入 backbone；Qwen base decoder 固定 `use_cache=False`、不保留全层 hidden states。LoRA rank/alpha/dropout 与七类 attention/MLP projection targets 被只读冻结/验证，未注入 PEFT 或加载权重。
 - focused 7/7、full 522/522（14.955s）通过，覆盖两个 core 的 full forward/loss/backward、padding/target/CF group、hidden contract、LoRA coverage 与 trainable-state strict round-trip。
 - 本项只用 CPU synthetic tensors，不读取 production data/model，不运行训练或产生指标；持久 checkpoint、optimizer/RNG/resume/runner 仍待实现，人工审计门禁不变。
+
+## 2026-07-24 — Reviewer remediation freeze and 2Wiki source recovery
+
+- `7287cfb...` 将剩余 reviewer-response 计划写入可恢复 checkpoint；`08d847b...` 以 D-027 冻结证据优先级、2Wiki 来源顺序、relation-only claim 与 TimeQA follow-up 边界。
+- clean `08d847b...` 上每次请求前通过资源门禁；`/data0` 约 145 GiB free。四个官方 Dropbox 对象/route 均在 20--30 秒连接阶段 curl 28、HTTP 000、0 header/body bytes。
+- 固定 unofficial HF mirror `xanhho/2WikiMultihopQA@6ef4eb1...` 随后报 OS `Network is unreachable`，没有 repository metadata 或数据文件。五个私有 stage 只保存空 header 与 mode-0600 无样本 attempt manifest，未发布 formal raw、未删除旧失败工件。
+- 2Wiki 状态升级为 `DEFERRED_NETWORK / SOURCE_UNVERIFIED`，不是永久不可用结论。TORQUE reviewer-response 关键路径继续，下一步为无 network/model/GPU/production data 的 synthetic resumable trainer。

@@ -74,6 +74,8 @@ StrategyQA runtime redirect 门禁现为 `BLOCKED_TOOLING / NO_NATIVE_EXEC_ENV`�
 
 2Wiki exact HEAD 计划随后被独立判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`，未执行且没有新的 HEAD 响应、approval、record、数据或实验工件。该非结果状态不验证 availability、redirect、MIME、size 或任何 archive property，也不支持论文 claim。
 
+D-027 随后在 clean `08d847b...` 上冻结并执行多入口恢复：April 2021 corrected object 的 `www.dropbox.com` SCL 与 `dl.dropboxusercontent.com` content route、官方旧 `data_ids.zip` 和原始 `data.zip` 均在 20--30 秒连接阶段 curl 28，HTTP 000、header/body 0 bytes；固定 unofficial HF mirror `xanhho/2WikiMultihopQA@6ef4eb1...` 又以 OS `Network is unreachable` 失败且未取得 repository metadata。五个无样本内容的 mode-0600 attempt manifests 已保留并登记。当前状态为 `DEFERRED_NETWORK / SOURCE_UNVERIFIED`：这说明服务器当时无法访问冻结源，不说明数据永久不可用，也不允许把未验证镜像用于正式实验。详细证据见 `docs/ai-context/checkpoints/phase-01-2wiki-source-recovery.md`。
+
 TORQUE 的早期 discovery checkpoint 当时仅完成固定 README/LICENSE 与 primary paper metadata，状态为 `METADATA_ONLY / DOCUMENTS_READ`；该历史非结果状态本身不产生实验数值。其后 D-014 用户授权的官方 source 获取、adapter/metric freeze 和正式运行已 supersede 当前执行状态，但不抹去早期边界；test gold 仍不从第三方恢复。详细历史证据见 `docs/ai-context/checkpoints/phase-01-torque-discovery.md`，当前证据见第 9 节。
 
 TORQUE A/B/C snapshot/acquisition 计划随后被判定为 `BLOCKED_PLAN / NO_NATIVE_EXEC_ENV`。该计划未执行，未产生 snapshot/acquisition request、approval、record、stage、archive、数据或实验工件；public dev、clustering/schema、evaluator 与 test-annotation absence 均未作本地验证。该状态不是实验结果，不改变或解决既有指标 `SPEC_CONFLICT`。

@@ -4,16 +4,17 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 7287cfb87cdd4cc9f6e0f9d63025d5f2ef188783
-- last_verified_commit: 14f71040e4a490476c3372b1325b763843b360d9
-- last_completed_checkpoint: checkpoints/phase-03-qwen-core-training-adapter.md
+- git_head: 08d847b1e0faf2943ea6af8ea3bc30709348b80d
+- last_verified_commit: 08d847b1e0faf2943ea6af8ea3bc30709348b80d
+- last_completed_checkpoint: checkpoints/phase-01-2wiki-source-recovery.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `TRANSFER_FAILED / NO_HTTP_RESPONSE`. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores and the shared synthetic Qwen adapter are development-verified, but PEFT injection, persistent training runner and formal trained runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`. 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`: four frozen official Dropbox routes/probes returned no HTTP response and the pinned HF mirror failed with OS network unreachable; no dataset byte was accepted. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores and the shared synthetic Qwen adapter are development-verified, but PEFT injection, persistent training runner and formal trained runs do not exist. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: D-027 与 Stage 0 提交后，先执行资源门禁，再按固定顺序对 2Wiki April 2021 官方 SCL 路线作一次新的有界前台恢复尝试；无论成功或失败均保留证据并提交里程碑。随后继续 Stage 2 synthetic-only 可恢复训练执行器，不启动 production 训练。
+- next_safe_action: 执行 `checkpoints/remaining-reviewer-response-plan.md` Stage 2：在不读取 production 数据、7B 权重、GPU 或网络的前提下，冻结并实现 optimizer groups、effective batch/gradient accumulation、scheduler、RNG、manifest-bound no-replace checkpoint/resume；先证明 CPU synthetic uninterrupted 与 interrupted/resumed 等价，不启动 production 训练。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
+  - `checkpoints/phase-01-2wiki-source-recovery.md`
   - `checkpoints/phase-01-relation-human-audit-packet.md`
   - `checkpoints/phase-01-relation-only-train-artifact.md`
   - `checkpoints/phase-01-relation-only-supervision-v1.md`
