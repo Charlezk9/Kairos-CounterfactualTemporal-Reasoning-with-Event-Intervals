@@ -282,3 +282,10 @@
 - clean `dcc96b7...` 上以 CPU 两线程、GPU 隐藏前台发布 1,483 条。1,475 条选择 Direct，5 条 CoT，SC samples 0/4/7 各 1 条；1,465 条有保守 fallback。prediction/metrics fresh replay 通过，EM/F1 15.644/16.070、cluster 两项 1.576，与 Direct 精确相同。
 - 通用统计门禁先在工件创建前拒绝不同 model revision。`9a05fd2...` 以 D-033 冻结仅限 provenance-bound Rule-Graph 的窄例外，`fdc4f92...` 实现；focused statistics 8/8、full 551/551 通过，无关跨模型及错误上游 manifest 仍 fail closed。
 - 正式 571-group/10,000-resample comparison 经全新进程重放：四项差值与 95% CI 均为 0、Holm p=1。8 条改写的逐题 metric contribution 都未变化；这是保留的无提升结果，不是 Kairos effect 或 constraint reasoning 的一般结论。
+
+## 2026-07-24 — Synthetic relation training materialization
+
+- `db1ea50...` 以 D-034 冻结 relation-only 候选去重/gold 注入、source identity、chat/event/candidate token alignment、双向 relation target、单 micro-batch 物化和 immutable training-plan publication 合同；明确 CF answer target unavailable，production audit gate不变。
+- `9a58155...` 实现 `kairos.training_materialization`：typed pair与候选 proposal形成 D-031 corpus binding，fake fast tokenizer只按需物化一个含 repeat slots 的 CPU `TrainingBatch`，original/CF 两组 event/relations 与 original answer target严格对齐。
+- 同提交实现 `kairos.training_plan_artifacts`：allowed `/data0` 私有 root、clean Git双门禁、plan/manifest no-replace+fsync、完整 deterministic reconstruction、hash/bytes/namespace/mode/tamper replay。第二门禁失败保留 plan-only partial，不伪装完成。
+- focused 9/9、full 560/560（17.727s）通过，最大 RSS 537,672 KiB，GPU 隐藏、CPU 两线程；测试临时 plan全部清理。没有 production record/candidate/tokenizer/model读取，没有正式 plan、训练或论文指标。

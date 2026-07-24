@@ -106,15 +106,18 @@ implementation, artifact hashes, fallback counts and inference are recorded in
 
 ### Candidate/token materialization boundary
 
-D-034 freezes the next synthetic-only bridge from a typed
+Commit `9a58155ed4cb608e5b5dbc7b2a5b804002a2571e` implements the D-034
+synthetic-only bridge from a typed
 `RelationOnlyPair` plus ordered generated candidate proposals to D-031 corpus
 bindings and one on-demand `TrainingBatch`. It preserves exact candidate order,
 merges provenance, makes gold injection explicit, aligns original/CF event
 spans through the fixed chat template and emits both directed relation labels.
 Because relation-only v1 has no counterfactual answer, this bridge must never
 invent a CF-answer target. The same decision specifies a private, no-replace,
-manifest-last training-plan publisher, but no production read/publication or
-training is authorized before the two-person audit gate succeeds.
+manifest-last training-plan publisher and full deterministic replay. Focused
+9/9 and full 560/560 tests pass. No production read/publication or training is
+authorized before the two-person audit gate succeeds; detailed evidence is in
+`../ai-context/checkpoints/phase-03-training-materialization.md`.
 
 ## CLI 与 manifest
 
