@@ -173,7 +173,10 @@ class IntervalProjection(nn.Module):
             + self.minimum_duration
         )
         ends = starts + durations
-        mask = event_mask.to(dtype=event_hidden.dtype)
+        # Autocast can project FP32 hidden states to BF16.  Keep the mask in the
+        # coordinate dtype so multiplying it does not promote quantized starts,
+        # durations, and ends back to FP32 and break end == start + duration.
+        mask = event_mask.to(dtype=starts.dtype)
         return starts * mask, durations * mask, ends * mask
 
 
