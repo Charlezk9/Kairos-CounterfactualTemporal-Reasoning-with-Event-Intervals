@@ -279,3 +279,14 @@
 - Backbone：优先调用 `backbone.model`，固定 `use_cache=False`、`output_hidden_states=False`，只接受 exact finite last hidden state；仅 valid candidates 进入 encoder，padded candidates 全零回填后再走共享 span pool。
 - LoRA 默认：rank 16、alpha 32、dropout 0.05、bias none、gradient checkpointing；targets 固定 Qwen attention/MLP 的 `q/k/v/o/gate/up/down_proj` 七类。当前只读验证目标存在且为 Linear，不注入 PEFT，属于独立默认而非作者设置。
 - 边界：trainable-state 仅内存严格 round-trip，不是持久 checkpoint；optimizer/RNG/manifest/resume 和 production runner 均未实现。没有读取 production data/weights，人工审计训练门禁不变。唯一详细证据见 `checkpoints/phase-03-qwen-core-training-adapter.md`。
+
+## D-027：审稿意见闭环、2Wiki 恢复与后续实验边界
+
+- 状态：`FROZEN / EXECUTION AUTHORIZED WITHIN EXISTING GATES`。
+- 证据优先级：剩余关键路径固定为监督有效性、可恢复训练器、Kairos 与 Same-data SFT/Pair-MLP 的同监督正式比较、TORQUE 迁移评测、marker/template 与 interval/failure 分析。2Wiki 恢复并行执行但不阻塞 TORQUE 关键路径。唯一完整计划与 reviewer-to-evidence matrix 见 `checkpoints/remaining-reviewer-response-plan.md`。
+- Claim 边界：当前 370 条 relation-only 数据没有 counterfactual answer，只能支持 original answer、relation 与 CF-relation loss。它不能支持 CF-answer accuracy、update、stability 或 consistency，也不能作为 Same-data SFT 的完整 answer-update 监督。若无法在观察正式测试结果前冻结并通过人工审计的 answer-bearing v2，论文必须撤回或收窄 answer-update 效果 claim。
+- 2Wiki 来源顺序：在查看任何新响应 body 前，固定为作者仓库引用的 April 2021 `data_ids_april7.zip` legacy/SCL 同对象路线，其次作者发布的旧 `data_ids.zip`，再次为原始 `data.zip`。三者是不同 revision 时必须分别登记，禁止静默替代。固定 HF `xanhho/2WikiMultihopQA@6ef4eb1bc94ca4a768bb86809fafe777ad795995` 明示为 unofficial mirror，只能在所有可用 split 对 ID、question、answer、context、supporting facts 与 evidences 做全量 canonical semantic hash 等价后升级；计数、抽样或 schema 相似均不足。失败记录和旧 stage 不覆盖、不删除。
+- 2Wiki 执行：每个请求前执行资源门禁，使用禁用用户配置的固定系统 curl、HTTPS-only、前台有界传输、固定字节上限和允许 host，记录 request identity、redirect/effective URL、HTTP status、bytes、SHA256 与 terminal state但不记录样本内容。成功 body 先进入 `/data0/hk_data/kairos-zx/.tmp` 的新私有 stage；完成安全 archive/schema/license 验证前不发布为 formal raw revision。
+- TimeQA 边界：D-019 strict Direct/CoT primary 与既有预测保持不可变。后续只能以新 method/run ID 执行 gold-blind output-contract follow-up；其 prompt/parser 必须只由合成输入或独立 validation 证据冻结，不读取 `human_test.hard` 的 raw response keys/values来选规则，也不能以 follow-up 覆盖、重命名或修复旧 primary。旧结果继续报告为 format failure。
+- 公平比较：正式主比较固定为 Kairos 对 strongest same-supervision baseline；Same-data SFT、Pair-MLP 与 Kairos 复用数据 revision、candidate pool、parser、metrics 与 seeds 13/42/2026。Prompt-only 结果用于描述设定差异，不表述为完全对称的公平比较。当前 strict LLM-Graph 负结果保留；Rule-Graph/Constraint-Rerank 作为额外 structured baseline，不能删除或替换负结果。
+- 论文处置：PDF/TeX 冲突数值继续为 `REPORTED / UNVERIFIED`。只有 registry 中绑定 clean commit、run ID、dataset revision、seed 和工件哈希且通过离线重放的 `VERIFIED` 数值可进入修改建议；负结果、格式失败和 deferred 必须保留。
