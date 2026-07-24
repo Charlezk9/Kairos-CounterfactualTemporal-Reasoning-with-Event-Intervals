@@ -4,8 +4,8 @@
 - active_phase: audit-gated-development-training
 - phase_status: PLAN_APPROVED_PRIVATE_INTAKE_PENDING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 726f92465033c8d8cf43de31fa65574790bf352f
-- last_verified_commit: 726f92465033c8d8cf43de31fa65574790bf352f
+- git_head: 726f924e0c7385b925187240ddd3f2a7564e6526
+- last_verified_commit: 726f924e0c7385b925187240ddd3f2a7564e6526
 - last_completed_checkpoint: checkpoints/phase-01-ai-assisted-development-training-copy.md
 - active_run_ids: none
 - running_processes: none
