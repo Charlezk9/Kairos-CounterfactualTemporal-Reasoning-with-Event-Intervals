@@ -11,6 +11,7 @@
 - Python：3.10.20
 - PyTorch：2.5.1 + CUDA 12.1
 - Transformers：4.48.3
+- PEFT：0.14.0（仅安装于上述项目环境）
 - 模型：`/data0/hk_data/kairos-zx/models/Qwen2.5-7B-Instruct/a09a35458c702b33eeacc393d103063234e8bc28`
 
 禁止 `conda init`、`pip install --user` 和全局包修改。新增依赖只能进入该环境，版本和理由必须登记。Conda、pip、HF、Torch、Triton、XDG 和临时缓存必须指向 `/data0/hk_data/kairos-zx`。

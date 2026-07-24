@@ -259,3 +259,11 @@
 - 保存前从 live adapter 推导 core；resume 在打开 `state.pt` 前校验 live core 与 expected commit/config/binding，mismatch 不改变 model/optimizer/scheduler/dataloader RNG。
 - focused 8/8（1.735s）、最终 full 530/530（17.316s）通过；GPU 隐藏、CPU 两线程、最大 RSS 499,964 KiB，测试工件清理。环境没有 pytest，故使用仓库既有标准库 unittest，不为测试扩充依赖。
 - binding 只记录调用方给定的 immutable identity；production runner 仍需独立验证实际模型和 data manifest。sampler/batch/candidate/CLI/PEFT/7B/GPU/formal run 仍不存在。
+
+## 2026-07-24 — Project-local PEFT injection and GPU smoke
+
+- 用户授权后，`c37d86a...` 以 D-030 冻结 PEFT 0.14.0、wheel-only/no-deps 安装和注入合同。官方 wheel 为 374,831 bytes、SHA `2f04f3a...`；仅安装到项目环境，核心依赖版本未变，manifest SHA `0b76d845...`，`pip check` 通过。
+- `c68c77a...` 实现 lazy exact-version import、七类 Qwen targets 注入、LoRA-only trainable/配置检查、cache/gradient-checkpointing 门禁及 PEFT wrapper decoder routing。real tiny-Qwen forward/backward、optimizer、state 和 checkpoint/resume 均通过。
+- focused 9/9 + 9/9、full 533/533（16.746s）通过。首次 GPU smoke 在 model load 前因 CUDA memory-stat initialization 次序失败，无模型/工件；资源复核后不改变代码重试。
+- clean `c68c77a...` 上 physical GPU 4 用 fixed local 7B 和 synthetic batch 32 完成 one-step：392 LoRA tensors、loss 1.96875、gradient norm 203.842285、peak allocated/reserved 15,920,307,712 / 15,934,160,896 bytes；进程退出 0，GPU 回到 11 MiB。
+- 本项不读取 production 数据、不保存 checkpoint/预测/指标，不是 formal run 或论文结果。正式训练仍受人工审计和 sampler/manifest/runner 缺失阻塞。

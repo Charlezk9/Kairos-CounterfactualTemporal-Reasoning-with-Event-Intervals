@@ -41,10 +41,15 @@ Commit `14f71040e4a490476c3372b1325b763843b360d9` adds the synthetic-testable
 batch, obtains finite Qwen-compatible last hidden states without retaining every
 layer, pools only valid candidate spans and routes identical representations and
 loss targets to Kairos or Pair-MLP. The frozen LoRA interface records rank 16,
-alpha 32, dropout 0.05 and seven attention/MLP projection suffixes, but does not
-inject PEFT or load Qwen. Exact implementation and remaining runner/checkpoint
-boundaries are recorded only in
-`../ai-context/checkpoints/phase-03-qwen-core-training-adapter.md`.
+alpha 32, dropout 0.05 and seven attention/MLP projection suffixes.
+
+Commit `c68c77a2eceba9c34f93ac99bd5893807c02cecb` adds exact PEFT 0.14.0
+injection, LoRA-only trainable validation and PEFT decoder routing. Real
+tiny-Qwen tests and a fixed-model one-step GPU development smoke pass. The
+original synthetic adapter boundary is recorded in
+`../ai-context/checkpoints/phase-03-qwen-core-training-adapter.md`; dependency,
+test and GPU evidence is in
+`../ai-context/checkpoints/phase-03-peft-injection-smoke.md`.
 
 ### Resumable synthetic training execution status
 
@@ -61,8 +66,9 @@ revision/data-manifest checksum and exact Kairos/Pair-MLP core type. Resume
 rejects an expected-binding mismatch before opening the state file.
 
 This layer still consumes an already materialized deterministic batch sequence.
-It does not independently verify production artifacts, inject PEFT, load the 7B
-model, use a GPU or authorize formal training. The D-028 execution contract and
+It does not independently verify production artifacts or authorize formal
+training. PEFT injection and a synthetic one-step 7B GPU smoke are verified,
+but no production runner/checkpoint/result exists. The D-028 execution contract and
 BF16 correction are recorded in
 `../ai-context/checkpoints/phase-03-resumable-training-execution.md`; the v2
 identity evidence is in

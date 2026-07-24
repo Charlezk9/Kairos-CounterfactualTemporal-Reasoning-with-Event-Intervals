@@ -314,13 +314,16 @@
 - 验收：Kairos/Pair-MLP 保存、verify、resume 均覆盖；model revision、model checksum、dataset revision、data-manifest hash、split/artifact ID 与 core-type 任一篡改或 expected mismatch 都被拒绝；原 D-028 uninterrupted/resumed 等价继续成立；focused/full tests 通过且测试工件清理。
 - PEFT 后续合同：只有在用户明确授权扩充局部依赖并冻结兼容版本后，才可 lazy-import PEFT，使用 D-028 的 rank 16/alpha 32/dropout 0.05、bias none 和七类 Qwen target modules 注入；注入后必须证明 base 参数冻结、trainable 参数仅为 `lora_` 与 temporal core，并重新跑全量测试。没有真实 PEFT 安装验证前，不创建伪适配层、不执行 7B/GPU smoke。
 - 验证结果：v2 config/manifest 双重 binding、保存前 live core 推导及 resume expected binding 已实现；expected mismatch 在打开 `state.pt` 前失败。focused 8/8、最终 full 530/530 通过，测试工件已清理；唯一详细证据见 `checkpoints/phase-03-checkpoint-identity-binding.md`。
+- 历史更新：上述 PEFT blocker 随后由用户授权及 D-030 解决；D-029 的 checkpoint identity 与 production-data 门禁不变。
 
 ## D-030：项目局部 PEFT 依赖与注入执行合同
 
-- 状态：`FROZEN / USER AUTHORIZED TO INSTALL AND IMPLEMENT`；冻结父提交为 `8081855c462ad24c2934d1d82710259adb588c25`。用户明确授权继续核对并在当前数据目录内安装 PEFT；授权不放宽路径、资源、人工审计或正式训练门禁。
+- 状态：`IMPLEMENTED / DEVELOPMENT_VERIFIED / NOT A FORMAL RUN`；冻结父提交为 `8081855c462ad24c2934d1d82710259adb588c25`，合同 commit 为 `c37d86aa6b133125f5d32086ea8554f74c7d86a6`，实现 commit 为 `c68c77a2eceba9c34f93ac99bd5893807c02cecb`。用户明确授权继续核对并在当前数据目录内安装 PEFT；授权不放宽路径、资源、人工审计或正式训练门禁。
 - 版本选择：固定 `peft==0.14.0`。官方 tag/release 与 `setup.py` 标明 Python `>=3.9.0`、Torch `>=1.13.0`、Accelerate `>=0.21.0`、Hugging Face Hub `>=0.25.0`，其余直接依赖无更高下限。当前局部环境为 Python 3.10.20、Torch 2.5.1、Transformers 4.48.3、Accelerate 1.2.1、Hub 0.28.1、Safetensors 0.5.2，安装前 `pip check` 无错误。0.14.0 与固定 Transformers 4.48.3 属同一兼容代际，避免采用面向 Transformers v5 的新 PEFT 版本。
 - 下载与完整性：执行资源门禁后，只允许 `pip download --only-binary=:all: --no-deps peft==0.14.0` 到 `/data0/hk_data/kairos-zx/.tmp` 的新私有 stage。安装前记录 wheel filename、bytes、SHA256，并离线检查 wheel METADATA 的 Name/Version/Requires-Python/Requires-Dist；不得从未固定 Git branch、源码包或非官方镜像安装。
 - 安装边界：只使用 `/data0/hk_data/kairos-zx/.conda/envs/kairos/bin/python -m pip`，从已校验本地 wheel 执行 `--isolated --no-index --no-deps` 安装。缓存和临时目录全部位于 `/data0/hk_data/kairos-zx`；禁止 `--user`、全局环境、依赖解析升级和 shell/Conda 初始化。安装前后包清单必须证明除新增 `peft==0.14.0` 外，Torch/Transformers/Accelerate/Hub/Safetensors 等版本不变；`pip check` 必须通过。
 - 注入合同：实现 lazy-import PEFT 的单一入口，构造 `LoraConfig(task_type=CAUSAL_LM, r=16, lora_alpha=32, lora_dropout=0.05, bias="none", target_modules=D-028 七类 suffix)` 并调用官方 `get_peft_model`。注入前仍执行目标模块全覆盖/Linear 检查；注入后固定 `use_cache=False`、启用 gradient checkpointing，并验证 base 参数冻结、backbone trainable 参数全部且仅为 `lora_`、temporal core 保持 trainable。重复注入或任何遗漏/额外 trainable 参数 fail closed。
 - 验证顺序：先在 synthetic Qwen-like module 上完成注入、forward/backward、optimizer groups、trainable-state round-trip 与 checkpoint/resume 测试，再运行 full suite。代码从 clean commit 推送后，重新执行资源门禁，才可加载固定本地 Qwen snapshot 做一个 micro-batch、单 optimizer-step 的前台 GPU development smoke；不读取 production 数据、不创建正式 run/checkpoint/指标。
 - 停止条件：若 wheel 元数据不符、安装引起既有包版本变化、`pip check`/import/synthetic tests 失败、`/data0` 低于 120 GiB、无合适 GPU 或预计单卡内存超过安全余量，则保留证据并停止，不升级其他依赖、不更换未经冻结版本、不启动正式训练。
+- 安装与验证结果：官方 wheel 374,831 bytes、SHA256 `2f04f3a870c3baf30f15e7dcaa5dd70d3e54cfdd146d3c6c187735d3ae0a0700`；仅新增 `peft==0.14.0`，核心依赖版本逐项未变，import 与 `pip check` 通过。实现覆盖 real tiny-Qwen PEFT forward/backward、optimizer/state/checkpoint；focused 9/9 + 9/9、full 533/533 通过。
+- GPU smoke：clean `c68c77a...` 上使用 physical GPU 4、本地固定 7B、synthetic batch 32 完成一个 optimizer step；392 LoRA tensors，loss 1.96875，peak allocated 15,920,307,712 bytes，退出后 GPU 回到 11 MiB。首次仅因 CUDA 统计初始化次序在 model load 前失败且无工件；最终证据与边界唯一记录于 `checkpoints/phase-03-peft-injection-smoke.md`。

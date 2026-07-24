@@ -80,3 +80,8 @@ candidate-pool materialization and training/evaluation runners remain absent.
 GSM8K production training remains blocked until two human reviewers complete the
 200-pair audit and the registered kappa/validity thresholds pass. This adapter
 does not relax that gate and is not a model result or paper claim.
+
+Historical update: D-028/D-029 subsequently added optimizer/checkpoint/resume,
+and D-030 added exact PEFT 0.14.0 injection plus a synthetic one-step 7B GPU
+smoke. Deterministic data/candidate runners and formal training remain absent;
+see `phase-03-peft-injection-smoke.md` for the current boundary.

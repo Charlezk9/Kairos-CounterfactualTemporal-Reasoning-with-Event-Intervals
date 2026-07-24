@@ -61,3 +61,8 @@ environment contract requires separate user authorization before adding a
 dependency, so no PEFT injection, 7B load or GPU smoke was attempted. D-023
 also remains unchanged: production GSM8K training is blocked until two real
 human submissions satisfy the frozen agreement and validity thresholds.
+
+Historical update: the user later authorized the local dependency and D-030
+completed PEFT injection plus a one-step synthetic 7B GPU smoke. The human and
+production-run gates in this checkpoint remain unchanged; see
+`phase-03-peft-injection-smoke.md`.
