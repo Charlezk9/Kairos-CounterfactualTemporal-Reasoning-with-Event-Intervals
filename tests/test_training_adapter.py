@@ -1,9 +1,11 @@
 from dataclasses import replace
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import torch
 from torch import nn
+from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from kairos.modeling import (
     IGNORE_RELATION_INDEX,
@@ -11,7 +13,7 @@ from kairos.modeling import (
     KairosModel,
     PairMlpBaseline,
 )
-from kairos import training_adapter
+from kairos import training_adapter, training_execution
 
 
 class FakeEncoder(nn.Module):
@@ -37,6 +39,20 @@ class QwenLikeBlock(nn.Module):
         super().__init__()
         for name in training_adapter.LORA_TARGET_MODULES:
             setattr(self, name, nn.Linear(hidden_size, hidden_size))
+
+
+def _tiny_qwen():
+    return Qwen2ForCausalLM(
+        Qwen2Config(
+            vocab_size=64,
+            hidden_size=8,
+            intermediate_size=16,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            num_key_value_heads=2,
+            max_position_embeddings=32,
+        )
+    )
 
 
 def _batch(counterfactual=True):
@@ -178,6 +194,71 @@ class LoraAndStateTests(unittest.TestCase):
         broken.q_proj = nn.GELU()
         with self.assertRaisesRegex(training_adapter.TrainingAdapterError, "not Linear"):
             training_adapter.validate_lora_targets(broken, spec)
+
+    def test_real_peft_injection_forward_backward_and_optimizer_groups(self):
+        spec = training_adapter.LoraSpec()
+        backbone = training_adapter.inject_qwen_lora(_tiny_qwen(), spec)
+        self.assertEqual(training_adapter.PEFT_VERSION, "0.14.0")
+        self.assertFalse(backbone.config.use_cache)
+        self.assertTrue(backbone.is_gradient_checkpointing)
+        trainable = {
+            name: parameter
+            for name, parameter in backbone.named_parameters()
+            if parameter.requires_grad
+        }
+        self.assertEqual(len(trainable), 14)
+        self.assertTrue(all("lora_" in name for name in trainable))
+
+        adapter = training_adapter.QwenCoreTrainingAdapter(
+            backbone,
+            KairosModel(KairosConfig(hidden_size=8, shared_size=4)),
+        )
+        output = adapter(_batch())
+        self.assertTrue(torch.isfinite(output.losses["loss"]))
+        output.losses["loss"].backward()
+        self.assertTrue(
+            all(parameter.grad is not None for parameter in trainable.values())
+        )
+        config = training_execution.TrainingExecutionConfig(
+            seed=13,
+            micro_batch_size=2,
+            gradient_accumulation_steps=16,
+            total_optimizer_steps=1,
+        )
+        optimizer = training_execution.build_optimizer(adapter, config)
+        self.assertEqual(
+            [group["group_name"] for group in optimizer.param_groups],
+            ["lora", "temporal_heads"],
+        )
+        self.assertEqual(
+            len(optimizer.param_groups[0]["params"]), len(trainable)
+        )
+
+        state = training_adapter.trainable_state_dict(adapter)
+        with torch.no_grad():
+            next(iter(trainable.values())).add_(1.0)
+        training_adapter.load_trainable_state_dict(adapter, state)
+        restored = training_adapter.trainable_state_dict(adapter)
+        self.assertTrue(
+            all(torch.equal(state[name], restored[name]) for name in state)
+        )
+        with self.assertRaisesRegex(
+            training_adapter.TrainingAdapterError, "already contains"
+        ):
+            training_adapter.inject_qwen_lora(backbone, spec)
+
+    def test_peft_version_mismatch_fails_before_injection(self):
+        backbone = _tiny_qwen()
+        with patch.object(training_adapter.metadata, "version", return_value="0.15.0"):
+            with self.assertRaisesRegex(
+                training_adapter.TrainingAdapterError, "version differs"
+            ):
+                training_adapter.inject_qwen_lora(
+                    backbone, training_adapter.LoraSpec()
+                )
+        self.assertFalse(
+            any("lora_" in name for name, _parameter in backbone.named_parameters())
+        )
 
     def test_trainable_state_round_trip_is_exact(self):
         adapter = training_adapter.QwenCoreTrainingAdapter(

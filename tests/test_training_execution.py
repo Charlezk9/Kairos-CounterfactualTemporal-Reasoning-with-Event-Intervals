@@ -10,9 +10,16 @@ from unittest.mock import patch
 
 import torch
 from torch import nn
+from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from kairos.modeling import IGNORE_RELATION_INDEX, KairosConfig, KairosModel, PairMlpBaseline
-from kairos.training_adapter import QwenCoreTrainingAdapter, TrainingBatch, trainable_state_dict
+from kairos.training_adapter import (
+    LoraSpec,
+    QwenCoreTrainingAdapter,
+    TrainingBatch,
+    inject_qwen_lora,
+    trainable_state_dict,
+)
 from kairos import training_execution
 
 
@@ -143,6 +150,29 @@ def _bundle(seed=13, core_type=KairosModel):
     config = _config(seed)
     core = core_type(KairosConfig(hidden_size=8, shared_size=4, pair_mlp_hidden_size=6))
     adapter = QwenCoreTrainingAdapter(SyntheticBackbone(), core)
+    optimizer = training_execution.build_optimizer(adapter, config)
+    scheduler = training_execution.build_scheduler(optimizer, config)
+    return config, adapter, optimizer, scheduler, generator
+
+
+def _peft_bundle(seed=13):
+    generator = torch.Generator(device="cpu")
+    training_execution.seed_training(seed, generator)
+    config = _config(seed)
+    backbone = Qwen2ForCausalLM(
+        Qwen2Config(
+            vocab_size=96,
+            hidden_size=8,
+            intermediate_size=16,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            num_key_value_heads=2,
+            max_position_embeddings=32,
+        )
+    )
+    injected = inject_qwen_lora(backbone, LoraSpec())
+    core = KairosModel(KairosConfig(hidden_size=8, shared_size=4))
+    adapter = QwenCoreTrainingAdapter(injected, core)
     optimizer = training_execution.build_optimizer(adapter, config)
     scheduler = training_execution.build_scheduler(optimizer, config)
     return config, adapter, optimizer, scheduler, generator
@@ -412,6 +442,57 @@ class CheckpointTests(TrainingExecutionFixture):
                 generator,
             )
         self.assertFalse(self.root.exists())
+
+    def test_real_peft_state_round_trips_through_checkpoint_resume(self):
+        config, adapter, optimizer, scheduler, generator = _peft_bundle()
+        first = training_execution.run_optimizer_steps(
+            adapter,
+            _batches(16),
+            optimizer,
+            scheduler,
+            config,
+            training_execution.TrainingProgress.initial(),
+            1,
+        )
+        expected_model = trainable_state_dict(adapter)
+        expected_optimizer = copy.deepcopy(optimizer.state_dict())
+        training_execution.save_training_checkpoint(
+            self.root,
+            "peft-kairos-step-000001",
+            COMMIT,
+            config,
+            _binding(),
+            adapter,
+            optimizer,
+            scheduler,
+            first.progress,
+            generator,
+        )
+
+        resumed = _peft_bundle()
+        (
+            resumed_config,
+            resumed_adapter,
+            resumed_optimizer,
+            resumed_scheduler,
+            resumed_generator,
+        ) = resumed
+        progress = training_execution.resume_training_checkpoint(
+            self.root,
+            "peft-kairos-step-000001",
+            COMMIT,
+            _binding(),
+            resumed_config,
+            resumed_adapter,
+            resumed_optimizer,
+            resumed_scheduler,
+            resumed_generator,
+        )
+        self.assertEqual(progress, first.progress)
+        self.assert_nested_equal(
+            expected_model, trainable_state_dict(resumed_adapter)
+        )
+        self.assert_nested_equal(expected_optimizer, resumed_optimizer.state_dict())
 
 
 class InterruptedResumeEquivalenceTests(TrainingExecutionFixture):

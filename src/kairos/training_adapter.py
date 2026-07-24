@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping as MappingABC, Sequence as SequenceABC
 from dataclasses import dataclass
+from importlib import metadata
 from typing import Any, Mapping, Optional
 
 import torch
@@ -29,6 +30,7 @@ LORA_TARGET_MODULES = (
     "up_proj",
     "down_proj",
 )
+PEFT_VERSION = "0.14.0"
 
 
 class TrainingAdapterError(ValueError):
@@ -114,6 +116,117 @@ def validate_lora_targets(module: nn.Module, spec: LoraSpec) -> Mapping[str, int
     if any(count == 0 for count in counts.values()):
         raise TrainingAdapterError("one or more frozen LoRA targets are absent")
     return counts
+
+
+def _lora_parameter(name: str) -> bool:
+    return any(component.startswith("lora_") for component in name.split("."))
+
+
+def _validate_injected_lora(
+    module: nn.Module,
+    spec: LoraSpec,
+    target_counts: Mapping[str, int],
+    task_type: Any,
+) -> None:
+    configurations = getattr(module, "peft_config", None)
+    if not isinstance(configurations, MappingABC) or set(configurations) != {"default"}:
+        raise TrainingAdapterError("injected PEFT configuration is invalid")
+    configuration = configurations["default"]
+    if (
+        getattr(configuration, "task_type", None) != task_type
+        or getattr(configuration, "r", None) != spec.rank
+        or getattr(configuration, "lora_alpha", None) != spec.alpha
+        or getattr(configuration, "lora_dropout", None) != spec.dropout
+        or getattr(configuration, "bias", None) != "none"
+        or set(getattr(configuration, "target_modules", ()))
+        != set(spec.target_modules)
+        or getattr(configuration, "modules_to_save", None) is not None
+        or getattr(configuration, "inference_mode", None) is not False
+    ):
+        raise TrainingAdapterError("injected PEFT configuration differs")
+    trainable = {
+        name: parameter
+        for name, parameter in module.named_parameters()
+        if parameter.requires_grad
+    }
+    if not trainable or any(not _lora_parameter(name) for name in trainable):
+        raise TrainingAdapterError("injected backbone trainable parameters are not LoRA-only")
+    for target, expected in target_counts.items():
+        prefix = f".{target}."
+        lora_a = sum(
+            prefix in f".{name}." and ".lora_A." in f".{name}."
+            for name in trainable
+        )
+        lora_b = sum(
+            prefix in f".{name}." and ".lora_B." in f".{name}."
+            for name in trainable
+        )
+        if lora_a != expected or lora_b != expected:
+            raise TrainingAdapterError("injected LoRA parameter coverage differs")
+    config = getattr(module, "config", None)
+    if getattr(config, "use_cache", None) is not False:
+        raise TrainingAdapterError("injected backbone cache is not disabled")
+    if getattr(module, "is_gradient_checkpointing", None) is not True:
+        raise TrainingAdapterError("gradient checkpointing is not enabled")
+
+
+def inject_qwen_lora(module: nn.Module, spec: LoraSpec) -> nn.Module:
+    """Inject the one frozen PEFT LoRA configuration into a Qwen causal LM."""
+
+    if not isinstance(module, nn.Module) or not isinstance(spec, LoraSpec):
+        raise TrainingAdapterError("PEFT injection inputs are invalid")
+    if any(_lora_parameter(name) for name, _parameter in module.named_parameters()):
+        raise TrainingAdapterError("backbone already contains LoRA parameters")
+    try:
+        installed_version = metadata.version("peft")
+    except metadata.PackageNotFoundError as error:
+        raise TrainingAdapterError("the frozen PEFT dependency is absent") from error
+    if installed_version != PEFT_VERSION:
+        raise TrainingAdapterError("the installed PEFT version differs")
+    target_counts = validate_lora_targets(module, spec)
+    if (
+        not callable(getattr(module, "prepare_inputs_for_generation", None))
+        or not callable(getattr(module, "get_input_embeddings", None))
+        or not callable(getattr(module, "gradient_checkpointing_enable", None))
+        or not callable(getattr(module, "enable_input_require_grads", None))
+        or getattr(getattr(module, "config", None), "use_cache", None) is None
+    ):
+        raise TrainingAdapterError("backbone is not a supported Qwen causal LM")
+    try:
+        from peft import LoraConfig as PeftLoraConfig
+        from peft import TaskType, get_peft_model
+
+        task_type = TaskType.CAUSAL_LM
+        peft_config = PeftLoraConfig(
+            task_type=task_type,
+            r=spec.rank,
+            lora_alpha=spec.alpha,
+            lora_dropout=spec.dropout,
+            bias="none",
+            target_modules=list(spec.target_modules),
+        )
+        injected = get_peft_model(module, peft_config)
+        injected.config.use_cache = False
+        injected.enable_input_require_grads()
+        injected.gradient_checkpointing_enable()
+    except Exception as error:
+        raise TrainingAdapterError("PEFT LoRA injection failed") from error
+    _validate_injected_lora(injected, spec, target_counts, task_type)
+    return injected
+
+
+def _backbone_encoder(module: nn.Module) -> nn.Module:
+    if isinstance(getattr(module, "peft_config", None), MappingABC):
+        tuner = getattr(module, "base_model", None)
+        causal_lm = getattr(tuner, "model", None)
+        encoder = getattr(causal_lm, "model", None)
+        if not isinstance(encoder, nn.Module):
+            raise TrainingAdapterError("PEFT backbone decoder path is invalid")
+        return encoder
+    encoder = getattr(module, "model", module)
+    if not isinstance(encoder, nn.Module):
+        raise TrainingAdapterError("backbone encoder is not an nn.Module")
+    return encoder
 
 
 @dataclass(frozen=True)
@@ -316,9 +429,7 @@ class QwenCoreTrainingAdapter(nn.Module):
         self.hidden_size = hidden_size
 
     def _encode(self, input_ids: Tensor, attention_mask: Tensor) -> Tensor:
-        encoder = getattr(self.backbone, "model", self.backbone)
-        if not callable(encoder):
-            raise TrainingAdapterError("backbone encoder is not callable")
+        encoder = _backbone_encoder(self.backbone)
         try:
             output = encoder(
                 input_ids=input_ids,
@@ -455,11 +566,13 @@ def load_trainable_state_dict(module: nn.Module, state: Mapping[str, Tensor]) ->
 
 __all__ = (
     "LORA_TARGET_MODULES",
+    "PEFT_VERSION",
     "LoraSpec",
     "QwenCoreTrainingAdapter",
     "TrainingAdapterError",
     "TrainingAdapterOutput",
     "TrainingBatch",
+    "inject_qwen_lora",
     "load_trainable_state_dict",
     "trainable_state_dict",
     "validate_lora_targets",
