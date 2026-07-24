@@ -290,3 +290,14 @@
 - TimeQA 边界：D-019 strict Direct/CoT primary 与既有预测保持不可变。后续只能以新 method/run ID 执行 gold-blind output-contract follow-up；其 prompt/parser 必须只由合成输入或独立 validation 证据冻结，不读取 `human_test.hard` 的 raw response keys/values来选规则，也不能以 follow-up 覆盖、重命名或修复旧 primary。旧结果继续报告为 format failure。
 - 公平比较：正式主比较固定为 Kairos 对 strongest same-supervision baseline；Same-data SFT、Pair-MLP 与 Kairos 复用数据 revision、candidate pool、parser、metrics 与 seeds 13/42/2026。Prompt-only 结果用于描述设定差异，不表述为完全对称的公平比较。当前 strict LLM-Graph 负结果保留；Rule-Graph/Constraint-Rerank 作为额外 structured baseline，不能删除或替换负结果。
 - 论文处置：PDF/TeX 冲突数值继续为 `REPORTED / UNVERIFIED`。只有 registry 中绑定 clean commit、run ID、dataset revision、seed 和工件哈希且通过离线重放的 `VERIFIED` 数值可进入修改建议；负结果、格式失败和 deferred 必须保留。
+
+## D-028：Synthetic-only 可恢复训练执行合同
+
+- 状态：`FROZEN / APPROVED TO IMPLEMENT`；冻结父提交为 `7dd2110da1f239e63fc6292a9e216c341b9ee286`。本决定不授权 production 数据、7B 权重、PEFT 注入、GPU 或正式训练。
+- 优化器：只允许两组 AdamW。`QwenCoreTrainingAdapter.backbone` 中 trainable 且名称含独立 LoRA component `lora_` 的参数进入 `lora` 组，LR `2e-5`；`core` 的全部 trainable 参数进入 `temporal_heads` 组，LR `2e-4`。任何重叠、遗漏、空组或其他 trainable backbone 参数均 fail closed。两组 weight decay `0.01`，betas `(0.9,0.999)`、eps `1e-8` 为独立默认。
+- Batch/AMP：effective batch 固定 32；micro batch 只允许 1/2/4/8/16/32，gradient accumulation 必须精确为 `32/micro_batch`。loss 在 backward 前除以 accumulation steps，只能在 accumulation boundary 做 clip `1.0`、optimizer step、scheduler step和 checkpoint。AMP dtype 固定 BF16；CPU synthetic test 使用 CPU autocast，不使用 GradScaler；未来 CUDA BF16 也固定 scaler disabled。
+- Scheduler/steps：linear warmup-decay v1，warmup 为 `floor(total_optimizer_steps*0.05)`；总 optimizer steps 必须预先冻结且为正。每次 optimizer step 后调用一次 scheduler step。最多 3 epochs；checkpoint progress 精确记录 epoch、next micro-batch cursor、optimizer steps和 samples seen。
+- Seeds/order：run seed 只允许 13/42/2026。checkpoint 捕获 Python RNG、Torch CPU RNG、仅在 CUDA 已初始化时的全部 CUDA RNG，以及独立 dataloader `torch.Generator` state。恢复必须在继续取样/forward 前完成；样本顺序由 cursor 与 generator state共同绑定。
+- Artifact：v1 checkpoint 为 mode-0700 新目录下的 mode-0600 canonical `config.json`、受限对象 `state.pt` 和最后发布的 canonical `manifest.json`。所有创建使用 no-replace、文件/目录 fsync；partial/既有目录不覆盖、不清理。manifest 绑定 execution commit、config/state SHA256/bytes、progress 与 exact filenames。加载先校验路径位于 `/data0/hk_data/kairos-zx`、无 symlink、namespace/mode/link、canonical JSON、hash/size、restricted `torch.load(weights_only=True)`、模型/optimizer/scheduler/RNG schema；任一失败不得改变 live state。
+- 等价验收：只用 CPU synthetic Qwen-like backbone、Kairos/Pair-MLP 和 synthetic `TrainingBatch`，比较 uninterrupted 与 optimizer-boundary interrupted/save/new-process-style restore/resume 的 trainable tensors、optimizer tensors/scalars、scheduler、progress、RNG next draw和 loss trajectory。focused 与 full tests 均须通过；工件只在 `/data0/hk_data/kairos-zx/.tmp` 测试根创建并由测试自身清理。
+- 实现边界：新增 `kairos.training_execution` 及对应测试；不新增读取 production 数据的 CLI，不接触 candidate materialization，不创建正式 checkpoint/run/registry metric，也不改变 D-023 人工门禁。实现差异和验证结果在完成后写入单一 Phase 03 checkpoint。
