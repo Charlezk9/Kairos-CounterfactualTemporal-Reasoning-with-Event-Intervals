@@ -56,6 +56,8 @@ TORQUE 和 TimeQA 只作冻结后的迁移评测，不用于训练。训练数�
 
 relation-only v1 因 CF answer 明确 unavailable，不伪造 answer-update 审计项。其固定 train-only 审计包使用 seed 20260723，按 `(template_id, original_relation)` 分层并以 Hamilton largest remainder 抽取 200/370 条；A/B 独立检查 event span、original/CF relation、grammar 与 non-target preservation，`overall_valid` 为五项逻辑与。两份表锁定前不得互看；primary Cohen's kappa 在 `overall_valid` 上计算，分歧经作者共识后计算 validity。当前包已生成但人工字段全为 null，所以阈值尚未评估、训练仍被阻断。唯一工件证据见 `../ai-context/checkpoints/phase-01-relation-human-audit-packet.md`。
 
+2026-07-25 的用户声明称本地人工结果与196 valid/4 invalid的最终核查完全一致，因此条件 κ 为1.0、validity为98%；但允许目录中尚无两份 raw formal A/B bytes。D-037 只允许使用排除4个已知无效 pair后的366条副本做明确标记的 development training。该副本不能产生 formal/paper-eligible 指标，不能替代本节两名人类的可重放审计要求。
+
 ## 复现判定与 PDF 表映射
 
 - 数值复现：原值落入 95% CI 或绝对差不超过 2 个百分点。

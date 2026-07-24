@@ -1,17 +1,17 @@
 # Current State
 
-- updated_at: 2026-07-24 CST
+- updated_at: 2026-07-25 CST
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 023490ee2fb821399961aa9fbbb97082d76c5c3a
-- last_verified_commit: 023490ee2fb821399961aa9fbbb97082d76c5c3a
-- last_completed_checkpoint: checkpoints/phase-01-independent-ai-pre-review.md
+- git_head: 4dba42a2765c8667576d87599269e836755888e8
+- last_verified_commit: 4dba42a2765c8667576d87599269e836755888e8
+- last_completed_checkpoint: checkpoints/phase-01-ai-assisted-development-training-copy.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both human reviewer templates remain entirely null. D-035 is synthetic-development-verified. Two user-requested AI pre-reviews are complete but have only 68.5% overall agreement and diagnostic κ=0.2913, so they explicitly do not replace the human audit. Real human Cohen's kappa/validity remain unavailable; GSM8K LoRA production training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. TORQUE/TimeQA prompt baselines and Rule-Graph are verified. Production candidate generation/provenance, production training-plan publication and formal trained runs remain incomplete.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 has no CF answer. User-resolved audit labels are 196 valid/4 invalid, and the user attests two local human reviews are identical, implying conditional κ=1.0 and validity 98%; however no raw formal-A/B files exist in the allowed workspace, so the value is `USER-ATTESTED / ARTIFACT PENDING` and D-035 remains formally incomplete. A verified 366-pair `AI_ASSISTED_USER_CHECKED_DEVELOPMENT_TRAINING_ONLY` copy is available after excluding the four known-invalid pairs; exploratory training is user-authorized but all metrics must be PRELIMINARY. MuSiQue remains policy-blocked, StrategyQA archive-blocked and 2Wiki network-deferred. Production candidate provenance, formal plan and paper-eligible trained runs remain incomplete.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 用户逐项核查 `docs/ai-context/ai-reviews/reviewer-ai-a.jsonl` 与 `reviewer-ai-b.jsonl` 的准确率，优先检查61项 event-span分歧和15项 grammar分歧；主智能体不得自动裁决或改写。之后仍需两位人类作者按原 instructions 独立完成正式 Reviewer A/B并锁定 bytes，方可进入 D-035 production gate。
+- next_safe_action: 将两份真实本地 human formal-A/formal-B JSONL复制到 `src/ab-reviewer-web/results/`（或提供其允许目录内路径），锁定哈希并用D-035重放κ=1.0与validity=98%；在此之前仅可基于366条副本冻结并运行明确标记的 development/preliminary candidate-plan-training链，不能发布 formal论文指标。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
   - `checkpoints/phase-01-2wiki-source-recovery.md`
@@ -40,6 +40,7 @@
   - `checkpoints/phase-03-training-materialization.md`
   - `checkpoints/phase-01-relation-audit-result-gate.md`
   - `checkpoints/phase-01-independent-ai-pre-review.md`
+  - `checkpoints/phase-01-ai-assisted-development-training-copy.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

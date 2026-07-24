@@ -146,6 +146,8 @@ D-035 的结果 evaluator 已开发验证，但尚未接收任何 production sub
 
 按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
 
+Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。用户随后声明本地两份人工审计与该最终标签完全一致；在此声明下，条件 human `p_o=1`、`p_e=0.9608`、κ=1.0。但当前允许目录中不存在两份 raw formal A/B文件，所以该 κ 状态为 `USER-ATTESTED / ARTIFACT PENDING`，不能进入论文。为推进工程，已排除4个已知无效 pair并生成366条 development-only训练副本；数据/manifest SHA为 `4b5fec2b...` / `f24a8e8e...`，CF answer仍 unavailable/masked，任何训练指标必须标 PRELIMINARY。
+
 ## 7. 已有实验复现结果
 
 待运行。每行同时给出 `REPORTED`、重实现值、95% CI、差异、判定、run ID 和 commit。

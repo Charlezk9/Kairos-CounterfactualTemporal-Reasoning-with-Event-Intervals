@@ -386,3 +386,11 @@
 - 输出：exact 200 行、source order、canonical UTF-8 JSONL，schema固定 `gsm8k-relation-ai-pre-review-v1`，slot固定 `AI-A` 或 `AI-B`。字段为既有五项 Boolean、其逻辑与 `overall_valid`、nullable bounded notes、audit item ID、slot与schema；不得包含 question、answer、event text、pair ID或其他样本文本。
 - Git 与使用边界：结果及只含 aggregate counts/hashes 的 summary可进入 Git，供用户逐项核查；production packet保持不可变。即使两个 AI 完全一致，本项目仍保持 `HUMAN REVIEW PENDING`，只有两位人类作者完成原合同后才可计算正式门禁。
 - 执行结果：两个隔离智能体均报告未读取对方文件或 production templates。AI-A/AI-B 输出 SHA256 为 `efaf43bb...` / `a579fd69...`；机械重放确认各 200 行、source ID/order、canonical schema、Boolean types与overall AND。AI-A/B overall true为 115/174；overall agreement 137/200，AI-only diagnostic κ=0.2913。event-span判断有61项分歧，是最大不确定性。该低一致性必须保留并由用户检查，不能由主智能体自动裁决或解释为审计通过。
+
+## D-037：AI-assisted 用户核查训练副本与正式 human κ 边界
+
+- 状态：`DEVELOPMENT TRAINING COPY VERIFIED / FORMAL HUMAN ARTIFACT PENDING`。用户于 2026-07-25 授权在训练需要审计数据时复制当前数据并在文档注明状态；随后声明本地人工审计与 Claude A/B 共识加六项用户裁决完全一致。该声明允许生成探索性训练副本，但在两份真实 formal-A/formal-B bytes进入允许目录并锁定哈希前，不把聊天声明伪装成可重放 D-035 artifact。
+- 条件统计：最终200项中196项 overall valid、4项 invalid。若两份独立人工表确实逐项完全一致，则 `p_o=1`、`p_e=0.98^2+0.02^2=0.9608`、Cohen's κ=`1.0`，adjudicated validity=`0.98`。这是由用户声明支持的 conditional human result；当前本地 `src/ab-reviewer-web/results/` 只有 README，formal A/B文件和SHA仍缺失。
+- 派生策略：从370条 verified relation-only official-train artifact按原顺序复制，排除用户裁决为无效的 audit lines 2/6/81/99 对应4个 pair，生成366条。不得补 CF answer；`counterfactual_answer_available=false`、CF answer loss继续 masked。
+- 使用状态：工件固定为 `AI_ASSISTED_USER_CHECKED_DEVELOPMENT_TRAINING_ONLY`，用户授权 development training，但 `formal_experiment_eligible=false`、`paper_metric_eligible=false`、`d035_training_gate_passed=false`。只有真实 A/B bytes验证并发布正式结果后，才可升级同一数据策略或启动论文级 formal training。
+- 工件：`training-data.jsonl` 777,256 bytes、SHA256 `4b5fec2bf46b1b86df9639b0e2cea9bc355e77be04247f5f27fcef3cb725f788`；manifest SHA256 `f24a8e8ef2ee3f5abf75938e620b43a8c2dcb52b52459ac000ba97bc87258b5a`。私有目录0700、文件0600、no extra file，已从源顺序和4项 exclusion完整重放。

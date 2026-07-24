@@ -303,3 +303,10 @@
 - 两个智能体只读同一 200-item immutable packet，分别只写独立 JSONL并报告未读取对方或 production templates。主智能体在两者完成后才读取，机械验证 exact 200 行、source order/ID、canonical schema、Boolean与overall AND。
 - AI-A/AI-B SHA为 `efaf43bb...` / `a579fd69...`；overall true 115/174。逐字段 agreement：event spans 139、original relation 197、CF relation 196、grammar 185、non-target 200、overall 137。
 - AI-only diagnostic observed/expected agreement为0.685/0.5555，κ=0.2913386；event-span 61项分歧为主。负面一致性结果原样保留，等待用户核查，不作自动 adjudication或人类门禁结论。
+
+## 2026-07-25 — User-resolved development training copy
+
+- 拉取 `3dbc80e...` 的 Claude Code双智能体预审；两者只有6项 overall分歧。用户逐项裁决：lines 2/6 grammar false，81/99 CF relation false，119/198 CF relation true；resolution SHA `77087c1e...`，已在 `4dba42a...` 推送。
+- 用户声明本地人工审计与最终196 valid/4 invalid标签完全一致，因此条件 human κ=1.0、validity=98%。允许目录搜索未发现 raw formal-A/B文件，`src/ab-reviewer-web/results/`只有README；正式 artifact状态仍 pending。
+- 按用户授权从370条 verified relation-only source按原顺序复制并排除4个已知无效 pair，得到366条 development-only训练数据。数据/manifest SHA为 `4b5fec2b...` / `f24a8e8e...`；namespace/mode/canonical/hash/source-order/filter/count和状态均重放通过。
+- 工件明确 `d035_training_gate_passed=false`、formal/paper eligible=false、CF answer unavailable/masked；可用于探索性训练，但指标必须 PRELIMINARY。
