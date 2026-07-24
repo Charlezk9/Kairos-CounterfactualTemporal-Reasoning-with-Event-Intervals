@@ -416,3 +416,9 @@
 - internal-dev只用final step31，不参与selection/early stop/tuning，所有数值为 `INTERNAL-DEV / NOT PAPER-ELIGIBLE`。Same-data SFT 是主比较必做项；未完成时 reviewer primary claim 固定 `DEFERRED`，Kairos-vs-Pair-MLP仅是secondary。允许指标和official-test未来门禁以唯一计划为准。
 - 任何 train/internal-dev 模型输出前必须提交并绑定 `sft-protocol-v1.json` SHA256 `86c1de0b6c47e9e9275771866bc42b6b39b56c0f3b1430a9cfc1fd35225f0d43` 与 `evaluation-protocol-v1.json` SHA256 `b15074103a7940777dd6e39e0aa2f9831ca9fc344affddc102a8a0c3fc88aee1`。SFT target 用项目 sort-key `canonical_json`，键序固定 `answer,counterfactual_relation,original_relation`；SFT 的 candidate manifest/recall/gold-injection sensitivity 均为 `NOT_APPLICABLE`。精确 normalizer、tie/non-finite、bootstrap和六项 Holm family 只以 evaluation v1 合同为准。
 - GPU选择固定 `CUDA_DEVICE_ORDER=PCI_BUS_ID` 与 full UUID `CUDA_VISIBLE_DEVICES`；门禁绑定UUID/PCI/index/name/memory，Torch CUDA初始化后且模型加载前必须通过 CUDA/NVML 再核对唯一可见设备 UUID/PCI，否则停止。
+
+## D-041：RTX 3090 可达显存门禁修正
+
+- 状态：`FROZEN PRE-OUTPUT AMENDMENT / INDEPENDENT RE-AUDIT APPROVED`。原计划的 selected-GPU free≥24 GiB 在总显存恰为24 GiB的 RTX 3090 上因驱动常驻不可达；2026-07-25 只读观测的完全空闲卡为24,243 MiB，不能满足24 GiB。
+- 新门禁固定 free≥22 GiB、所选 full UUID无 compute process、只运行一个前台任务。既有 clean one-step 7B smoke峰值为15,920,307,712 bytes，因此新门禁仍保留超过7 GiB余量；其他 CPU/RAM/disk/UUID/PCI/model-hash/offline限制完全不变。
+- 本修正在任何 GSM8K candidate/SFT/internal-dev model output前冻结，不改变数据、prompt、parser、metric、seed或训练超参。独立审计批准并提交/推送前不得加载模型。

@@ -1,3 +1,42 @@
+# D-041 Resource Amendment Re-audit — 2026-07-25
+
+## D-041 VERDICT
+
+`APPROVED_AMENDMENT`
+
+The sole change from selected-GPU free memory `>=24 GiB` to `>=22 GiB` is
+approved. It is necessary for a 24,576-MiB RTX 3090 whose observed idle free
+memory is 24,243 MiB, and remains conservative when combined with the unchanged
+full-UUID process and resource gates.
+
+Mechanical basis:
+
+- the new floor is exactly 22 GiB = 22,528 MiB = 23,622,320,128 bytes;
+- the observed idle value exceeds the floor by 1,715 MiB;
+- the retained clean one-step peak is 15,920,307,712 bytes, so the floor-minus-
+  peak margin is 7,702,012,416 bytes, approximately 7.17 GiB;
+- the selected full GPU UUID must have no compute process, only one foreground
+  project task may run, and UUID/PCI identity is checked again through CUDA/NVML
+  after CUDA initialization and before model allocation;
+- CPU, RAM, disk, model-hash, offline/cache, deterministic, no-replace and
+  unknown-process protections are unchanged;
+- D-041 was frozen before any GSM8K candidate, SFT or internal-dev model output
+  and does not alter data, prompt, parser, metric, seed or training settings.
+
+Implementation must interpret `GiB` as binary units and persist free memory in
+both bytes and MiB to avoid unit ambiguity. The 15.9-GB observation is a known
+reference, not permission to skip the stage-specific worst-case projection,
+real-record smoke or immediate resource recheck. If free memory falls below
+22 GiB, any compute process appears on the selected UUID, UUID/PCI differs, or
+the bounded smoke fails/OOMs, stop and retain evidence without selecting another
+GPU automatically, killing a process or weakening the threshold.
+
+This amendment inherits the Round 4 approval scope:
+`USER_ATTESTED / DEVELOPMENT ONLY / INTERNAL-DEV / NOT PAPER-ELIGIBLE`.
+It does not independently authorize model loading before the amended plan,
+D-041, audit and compact state are committed/pushed and the normal clean-HEAD,
+model-file and resource gates pass.
+
 # Round 4 Final Current Re-audit — 2026-07-25
 
 ## CURRENT VERDICT

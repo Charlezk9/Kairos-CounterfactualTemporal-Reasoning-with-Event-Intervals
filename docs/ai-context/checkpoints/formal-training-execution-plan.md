@@ -67,7 +67,11 @@ read-only resource record containing `nvidia-smi`, `free -h`, `df -h`, selected
 physical GPU and free memory, project disk use, worst-case new bytes and the
 decision. Re-hash every model file against `SHA256SUMS`. Stop if `/data0` free is
 below 120 GiB, projected cumulative new project data exceeds 80 GiB, task RAM
-could exceed 64 GiB, or the selected single GPU has less than 24 GiB free. Use
+could exceed 64 GiB, or the selected single GPU has less than 22 GiB free. The
+22-GiB floor is a pre-output amendment for 24-GiB RTX 3090 devices: the prior
+24-GiB floor was physically unattainable after driver allocation, while the
+verified one-step peak was 15,920,307,712 bytes, leaving more than 7 GiB at the
+new floor. The selected UUID must also have no compute process. Use
 one foreground job, at most 16 CPU threads and 8 workers; do not disturb other
 processes.
 
@@ -298,6 +302,9 @@ number enters the paper recommendation section of `verify-addExp.md`.
 7. implement/test D-040 runner and isolated smokes;
 8. train matched seed 13, then remaining seeds; evaluate and report;
 9. separately implement an official held-out protocol before any paper claim.
+
+Resource amendment D-041 was frozen before any candidate/model output. It does
+not change prompts, data, metrics or training hyperparameters.
 
 Stop without deleting or repairing evidence when hashes/facts change, A/B
 disagree, provenance is misrepresented, a verifier fails, an artifact target
