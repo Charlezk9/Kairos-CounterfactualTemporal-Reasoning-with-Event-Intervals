@@ -104,6 +104,18 @@ different-model comparisons remain rejected. The formal Rule-Graph run changes
 implementation, artifact hashes, fallback counts and inference are recorded in
 `../ai-context/checkpoints/phase-03-torque-rule-graph-baseline.md`.
 
+### Candidate/token materialization boundary
+
+D-034 freezes the next synthetic-only bridge from a typed
+`RelationOnlyPair` plus ordered generated candidate proposals to D-031 corpus
+bindings and one on-demand `TrainingBatch`. It preserves exact candidate order,
+merges provenance, makes gold injection explicit, aligns original/CF event
+spans through the fixed chat template and emits both directed relation labels.
+Because relation-only v1 has no counterfactual answer, this bridge must never
+invent a CF-answer target. The same decision specifies a private, no-replace,
+manifest-last training-plan publisher, but no production read/publication or
+training is authorized before the two-person audit gate succeeds.
+
 ## CLI 与 manifest
 
 计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation，但尚无统一 CLI 或训练 runner。
