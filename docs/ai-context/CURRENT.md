@@ -2,16 +2,16 @@
 
 - updated_at: 2026-07-25 CST
 - active_phase: audit-gated-development-training
-- phase_status: PLAN_APPROVED_PENDING_FREEZE_COMMIT
+- phase_status: PLAN_APPROVED_PRIVATE_INTAKE_PENDING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 4d0cfa19ee8ac29f2176ba173d6491a0853ab2e4
-- last_verified_commit: 4d0cfa19ee8ac29f2176ba173d6491a0853ab2e4
+- git_head: 726f92465033c8d8cf43de31fa65574790bf352f
+- last_verified_commit: 726f92465033c8d8cf43de31fa65574790bf352f
 - last_completed_checkpoint: checkpoints/phase-01-ai-assisted-development-training-copy.md
 - active_run_ids: none
 - running_processes: none
 - blockers: Independent plan audit is APPROVED only for `USER_ATTESTED / DEVELOPMENT ONLY / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; two-human independence provenance remains absent. Private intake, D-038 development result, audit-bound 330/36 partition, candidates, run-input manifests, runner and checkpoints are absent. Relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 使用 named staging 提交并普通推送已批准的计划、D-038/D-039/D-040、三个协议、独立审计和本状态；从同步 clean commit 建立 mode-0700/0600 private A/B intake，然后实现 D-038 development artifact。模型输出/GPU/训练不得提前。
+- next_safe_action: 普通推送状态提交；从同步 clean commit 建立 mode-0700/0600 private A/B intake并重放 hashes，然后通过普通提交从 branch tip 删除 raw A/B bytes，之后实现 D-038 development artifact。模型输出/GPU/训练不得提前。
 - required_reading:
   - `checkpoints/formal-training-execution-plan.md`
   - `checkpoints/formal-training-plan-audit.md`
