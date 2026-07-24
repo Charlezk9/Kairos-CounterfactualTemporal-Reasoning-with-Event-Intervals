@@ -20,6 +20,7 @@ import torch
 from torch import Tensor, nn
 
 from .ids import canonical_json
+from .modeling import KairosModel, PairMlpBaseline
 from .training_adapter import (
     QwenCoreTrainingAdapter,
     TrainingAdapterError,
@@ -34,20 +35,31 @@ _CONFIG_NAME = "config.json"
 _STATE_NAME = "state.pt"
 _MANIFEST_NAME = "manifest.json"
 _FINAL_NAMES = frozenset({_CONFIG_NAME, _STATE_NAME, _MANIFEST_NAME})
-_CONFIG_SCHEMA = "training-execution-config-v1"
-_STATE_SCHEMA = "training-checkpoint-state-v1"
-_MANIFEST_SCHEMA = "training-checkpoint-manifest-v1"
+_CONFIG_SCHEMA = "training-execution-config-v2"
+_STATE_SCHEMA = "training-checkpoint-state-v2"
+_MANIFEST_SCHEMA = "training-checkpoint-manifest-v2"
+_BINDING_SCHEMA = "training-artifact-binding-v1"
 _STATUS = "TRAINING_CHECKPOINT_COMPLETE"
 _CONFIG_LIMIT = 1_048_576
 _STATE_LIMIT = 2 * 1024 * 1024 * 1024
 _MANIFEST_LIMIT = 1_048_576
 _HEX40 = re.compile(r"^[0-9a-f]{40}$")
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+_DATASET_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+_SPLIT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_ARTIFACT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _CHECKPOINT_ID = re.compile(
     r"^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
 )
 _SEEDS = frozenset({13, 42, 2026})
 _MICRO_BATCHES = frozenset({1, 2, 4, 8, 16, 32})
 _OPTIMIZER_GROUPS = ("lora", "temporal_heads")
+_MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+_MODEL_REVISION = "a09a35458c702b33eeacc393d103063234e8bc28"
+_MODEL_SHA256SUMS_SHA256 = (
+    "3ee6c9510b7e50bfcd46d6df33cafa3e2019f13a6a09bf1d2f9e80cdfe1164e8"
+)
+_CORE_TYPES = frozenset({"kairos", "pair-mlp"})
 
 
 class TrainingExecutionError(ValueError):
@@ -80,6 +92,67 @@ def _exact_mapping(value: Any, expected: set[str], name: str) -> Mapping[str, An
             f"invalid {name} keys; missing={sorted(missing)}, extra={sorted(extra)}"
         )
     return value
+
+
+@dataclass(frozen=True)
+class TrainingArtifactBinding:
+    """Frozen model, data artifact, and temporal-core checkpoint identity."""
+
+    model_id: str
+    model_revision: str
+    model_sha256sums_sha256: str
+    dataset_id: str
+    dataset_revision: str
+    split: str
+    data_artifact_id: str
+    data_manifest_sha256: str
+    core_type: str
+
+    def __post_init__(self) -> None:
+        if (
+            self.model_id != _MODEL_ID
+            or self.model_revision != _MODEL_REVISION
+            or self.model_sha256sums_sha256 != _MODEL_SHA256SUMS_SHA256
+        ):
+            raise TrainingExecutionError("model artifact binding differs")
+        if not isinstance(self.dataset_id, str) or not _DATASET_ID.fullmatch(
+            self.dataset_id
+        ):
+            raise TrainingExecutionError("dataset ID is invalid")
+        if not isinstance(self.dataset_revision, str) or not _HEX40.fullmatch(
+            self.dataset_revision
+        ):
+            raise TrainingExecutionError("dataset revision is invalid")
+        if not isinstance(self.split, str) or not _SPLIT.fullmatch(self.split):
+            raise TrainingExecutionError("dataset split is invalid")
+        if not isinstance(self.data_artifact_id, str) or not _ARTIFACT_ID.fullmatch(
+            self.data_artifact_id
+        ):
+            raise TrainingExecutionError("data artifact ID is invalid")
+        if not isinstance(self.data_manifest_sha256, str) or not _HEX64.fullmatch(
+            self.data_manifest_sha256
+        ):
+            raise TrainingExecutionError("data manifest SHA256 is invalid")
+        if not isinstance(self.core_type, str) or self.core_type not in _CORE_TYPES:
+            raise TrainingExecutionError("core type is invalid")
+
+    def to_dict(self) -> Mapping[str, Any]:
+        return {
+            "schema_version": _BINDING_SCHEMA,
+            "model": {
+                "model_id": self.model_id,
+                "revision": self.model_revision,
+                "sha256sums_sha256": self.model_sha256sums_sha256,
+            },
+            "data": {
+                "dataset_id": self.dataset_id,
+                "revision": self.dataset_revision,
+                "split": self.split,
+                "artifact_id": self.data_artifact_id,
+                "manifest_sha256": self.data_manifest_sha256,
+            },
+            "core_type": self.core_type,
+        }
 
 
 @dataclass(frozen=True)
@@ -217,6 +290,7 @@ class VerifiedTrainingCheckpoint:
     checkpoint_id: str
     execution_commit: str
     config: TrainingExecutionConfig
+    artifact_binding: TrainingArtifactBinding
     progress: TrainingProgress
     config_sha256: str
     state_sha256: str
@@ -226,6 +300,25 @@ class VerifiedTrainingCheckpoint:
 
 def _lora_name(name: str) -> bool:
     return any(component.startswith("lora_") for component in name.split("."))
+
+
+def _adapter_core_type(adapter: QwenCoreTrainingAdapter) -> str:
+    if not isinstance(adapter, QwenCoreTrainingAdapter):
+        raise TrainingExecutionError("checkpoint requires a Qwen core adapter")
+    if isinstance(adapter.core, KairosModel):
+        return "kairos"
+    if isinstance(adapter.core, PairMlpBaseline):
+        return "pair-mlp"
+    raise TrainingExecutionError("adapter core type is invalid")
+
+
+def _validate_live_binding(
+    adapter: QwenCoreTrainingAdapter, binding: TrainingArtifactBinding
+) -> None:
+    if not isinstance(binding, TrainingArtifactBinding):
+        raise TrainingExecutionError("artifact binding is invalid")
+    if _adapter_core_type(adapter) != binding.core_type:
+        raise TrainingExecutionError("live adapter core type differs from binding")
 
 
 def build_optimizer(
@@ -580,10 +673,22 @@ def _restore_rng(values: Mapping[str, Any], generator: torch.Generator) -> None:
     generator.set_state(values["dataloader"])
 
 
-def _config_bytes(config: TrainingExecutionConfig) -> bytes:
-    if not isinstance(config, TrainingExecutionConfig):
-        raise TrainingExecutionError("checkpoint configuration is invalid")
-    payload = canonical_json(config.to_dict()).encode("utf-8") + b"\n"
+def _config_mapping(
+    config: TrainingExecutionConfig, binding: TrainingArtifactBinding
+) -> Mapping[str, Any]:
+    if not isinstance(config, TrainingExecutionConfig) or not isinstance(
+        binding, TrainingArtifactBinding
+    ):
+        raise TrainingExecutionError("checkpoint configuration or binding is invalid")
+    value = dict(config.to_dict())
+    value["artifact_binding"] = binding.to_dict()
+    return value
+
+
+def _config_bytes(
+    config: TrainingExecutionConfig, binding: TrainingArtifactBinding
+) -> bytes:
+    payload = canonical_json(_config_mapping(config, binding)).encode("utf-8") + b"\n"
     if len(payload) > _CONFIG_LIMIT:
         raise TrainingExecutionError("checkpoint configuration is too large")
     return payload
@@ -623,7 +728,43 @@ def _serialize_state(value: Mapping[str, Any]) -> bytes:
     return payload
 
 
-def _parse_config(payload: bytes) -> TrainingExecutionConfig:
+def _parse_artifact_binding(value: Any) -> TrainingArtifactBinding:
+    value = _exact_mapping(
+        value,
+        {"schema_version", "model", "data", "core_type"},
+        "artifact binding",
+    )
+    model = _exact_mapping(
+        value["model"],
+        {"model_id", "revision", "sha256sums_sha256"},
+        "artifact model binding",
+    )
+    data = _exact_mapping(
+        value["data"],
+        {"dataset_id", "revision", "split", "artifact_id", "manifest_sha256"},
+        "artifact data binding",
+    )
+    if value["schema_version"] != _BINDING_SCHEMA:
+        raise TrainingExecutionError("artifact binding schema differs")
+    binding = TrainingArtifactBinding(
+        model_id=model["model_id"],
+        model_revision=model["revision"],
+        model_sha256sums_sha256=model["sha256sums_sha256"],
+        dataset_id=data["dataset_id"],
+        dataset_revision=data["revision"],
+        split=data["split"],
+        data_artifact_id=data["artifact_id"],
+        data_manifest_sha256=data["manifest_sha256"],
+        core_type=value["core_type"],
+    )
+    if binding.to_dict() != value:
+        raise TrainingExecutionError("artifact binding canonical values differ")
+    return binding
+
+
+def _parse_config(
+    payload: bytes,
+) -> tuple[TrainingExecutionConfig, TrainingArtifactBinding]:
     value = _canonical_object(payload, "checkpoint config")
     value = _exact_mapping(
         value,
@@ -632,7 +773,7 @@ def _parse_config(payload: bytes) -> TrainingExecutionConfig:
             "gradient_accumulation_steps", "effective_batch_size",
             "total_optimizer_steps", "max_epochs", "optimizer", "scheduler",
             "gradient_clip_norm", "amp_dtype", "grad_scaler_enabled",
-            "checkpoint_boundary",
+            "checkpoint_boundary", "artifact_binding",
         },
         "checkpoint config",
     )
@@ -671,6 +812,7 @@ def _parse_config(payload: bytes) -> TrainingExecutionConfig:
         amp_dtype=value["amp_dtype"],
         grad_scaler_enabled=value["grad_scaler_enabled"],
     )
+    binding = _parse_artifact_binding(value["artifact_binding"])
     if (
         value["schema_version"] != _CONFIG_SCHEMA
         or value["effective_batch_size"] != 32
@@ -678,10 +820,11 @@ def _parse_config(payload: bytes) -> TrainingExecutionConfig:
         or scheduler["name"] != "linear-warmup-decay-v1"
         or scheduler["warmup_steps"] != config.warmup_steps
         or value["checkpoint_boundary"] != "optimizer-step-only"
-        or canonical_json(config.to_dict()).encode("utf-8") + b"\n" != payload
+        or canonical_json(_config_mapping(config, binding)).encode("utf-8") + b"\n"
+        != payload
     ):
         raise TrainingExecutionError("checkpoint config fixed values differ")
-    return config
+    return config, binding
 
 
 def _progress_from_mapping(
@@ -862,6 +1005,7 @@ def _manifest(
     execution_commit: str,
     config: bytes,
     state: bytes,
+    binding: TrainingArtifactBinding,
     progress: TrainingProgress,
 ) -> Mapping[str, Any]:
     return {
@@ -869,6 +1013,7 @@ def _manifest(
         "status": _STATUS,
         "checkpoint_id": checkpoint_id,
         "execution_commit": execution_commit,
+        "artifact_binding": binding.to_dict(),
         "files": [_CONFIG_NAME, _STATE_NAME, _MANIFEST_NAME],
         "config": {
             "path": _CONFIG_NAME,
@@ -889,6 +1034,7 @@ def save_training_checkpoint(
     checkpoint_id: str,
     execution_commit: str,
     config: TrainingExecutionConfig,
+    artifact_binding: TrainingArtifactBinding,
     adapter: QwenCoreTrainingAdapter,
     optimizer: torch.optim.Optimizer,
     scheduler: torch.optim.lr_scheduler.LRScheduler,
@@ -906,8 +1052,9 @@ def save_training_checkpoint(
         progress, TrainingProgress
     ):
         raise TrainingExecutionError("checkpoint config or progress is invalid")
+    _validate_live_binding(adapter, artifact_binding)
     progress.validate(config)
-    config_payload = _config_bytes(config)
+    config_payload = _config_bytes(config, artifact_binding)
     state_payload = _serialize_state(
         _state_payload(
             adapter,
@@ -923,6 +1070,7 @@ def save_training_checkpoint(
             execution_commit,
             config_payload,
             state_payload,
+            artifact_binding,
             progress,
         )
     ).encode("utf-8") + b"\n"
@@ -946,13 +1094,31 @@ def save_training_checkpoint(
 
 
 def verify_training_checkpoint(
-    root: Path, checkpoint_id: str
+    root: Path,
+    checkpoint_id: str,
+    *,
+    expected_execution_commit: str | None = None,
+    expected_config: TrainingExecutionConfig | None = None,
+    expected_artifact_binding: TrainingArtifactBinding | None = None,
 ) -> VerifiedTrainingCheckpoint:
     """Verify namespace, canonical metadata, hashes, and restricted state load."""
 
     root = Path(root)
     if not isinstance(checkpoint_id, str) or not _CHECKPOINT_ID.fullmatch(checkpoint_id):
         raise TrainingExecutionError("checkpoint ID is invalid")
+    expected_values = (
+        expected_execution_commit,
+        expected_config,
+        expected_artifact_binding,
+    )
+    if any(value is not None for value in expected_values):
+        if (
+            not isinstance(expected_execution_commit, str)
+            or not _HEX40.fullmatch(expected_execution_commit)
+            or not isinstance(expected_config, TrainingExecutionConfig)
+            or not isinstance(expected_artifact_binding, TrainingArtifactBinding)
+        ):
+            raise TrainingExecutionError("expected checkpoint binding is invalid")
     _prepare_root(root)
     target = root / checkpoint_id
     try:
@@ -969,16 +1135,15 @@ def verify_training_checkpoint(
     if names != _FINAL_NAMES:
         raise TrainingExecutionError("checkpoint namespace is incomplete or contains extras")
     config_payload = _read_file(target / _CONFIG_NAME, _CONFIG_LIMIT, _CONFIG_NAME)
-    state_payload = _read_file(target / _STATE_NAME, _STATE_LIMIT, _STATE_NAME)
     manifest_payload = _read_file(
         target / _MANIFEST_NAME, _MANIFEST_LIMIT, _MANIFEST_NAME
     )
-    config = _parse_config(config_payload)
+    config, artifact_binding = _parse_config(config_payload)
     manifest = _exact_mapping(
         _canonical_object(manifest_payload, "checkpoint manifest"),
         {
             "schema_version", "status", "checkpoint_id", "execution_commit",
-            "files", "config", "state", "progress",
+            "artifact_binding", "files", "config", "state", "progress",
         },
         "checkpoint manifest",
     )
@@ -991,19 +1156,38 @@ def verify_training_checkpoint(
         or manifest["files"] != [_CONFIG_NAME, _STATE_NAME, _MANIFEST_NAME]
     ):
         raise TrainingExecutionError("checkpoint manifest fixed values differ")
-    for key, name, payload in (
-        ("config", _CONFIG_NAME, config_payload),
-        ("state", _STATE_NAME, state_payload),
+    manifest_binding = _parse_artifact_binding(manifest["artifact_binding"])
+    if manifest_binding != artifact_binding:
+        raise TrainingExecutionError("config and manifest artifact bindings differ")
+    config_binding = _exact_mapping(
+        manifest["config"],
+        {"path", "sha256", "byte_size"},
+        "manifest config",
+    )
+    if (
+        config_binding["path"] != _CONFIG_NAME
+        or config_binding["sha256"] != hashlib.sha256(config_payload).hexdigest()
+        or config_binding["byte_size"] != len(config_payload)
     ):
-        binding = _exact_mapping(
-            manifest[key], {"path", "sha256", "byte_size"}, f"manifest {key}"
-        )
-        if (
-            binding["path"] != name
-            or binding["sha256"] != hashlib.sha256(payload).hexdigest()
-            or binding["byte_size"] != len(payload)
-        ):
-            raise TrainingExecutionError(f"checkpoint {key} binding differs")
+        raise TrainingExecutionError("checkpoint config binding differs")
+    if any(value is not None for value in expected_values) and (
+        manifest["execution_commit"] != expected_execution_commit
+        or config != expected_config
+        or artifact_binding != expected_artifact_binding
+    ):
+        raise TrainingExecutionError("resume checkpoint binding differs")
+    state_payload = _read_file(target / _STATE_NAME, _STATE_LIMIT, _STATE_NAME)
+    state_binding = _exact_mapping(
+        manifest["state"],
+        {"path", "sha256", "byte_size"},
+        "manifest state",
+    )
+    if (
+        state_binding["path"] != _STATE_NAME
+        or state_binding["sha256"] != hashlib.sha256(state_payload).hexdigest()
+        or state_binding["byte_size"] != len(state_payload)
+    ):
+        raise TrainingExecutionError("checkpoint state binding differs")
     progress = _progress_from_mapping(manifest["progress"], config)
     state = _load_state_payload(state_payload)
     if state["progress"] != dict(progress.to_dict()):
@@ -1013,6 +1197,7 @@ def verify_training_checkpoint(
         checkpoint_id=checkpoint_id,
         execution_commit=manifest["execution_commit"],
         config=config,
+        artifact_binding=artifact_binding,
         progress=progress,
         config_sha256=hashlib.sha256(config_payload).hexdigest(),
         state_sha256=hashlib.sha256(state_payload).hexdigest(),
@@ -1132,6 +1317,7 @@ def resume_training_checkpoint(
     root: Path,
     checkpoint_id: str,
     expected_execution_commit: str,
+    expected_artifact_binding: TrainingArtifactBinding,
     config: TrainingExecutionConfig,
     adapter: QwenCoreTrainingAdapter,
     optimizer: torch.optim.Optimizer,
@@ -1140,12 +1326,14 @@ def resume_training_checkpoint(
 ) -> TrainingProgress:
     """Verify the complete checkpoint, then atomically restore live training state."""
 
-    verified = verify_training_checkpoint(root, checkpoint_id)
-    if (
-        verified.execution_commit != expected_execution_commit
-        or verified.config != config
-    ):
-        raise TrainingExecutionError("resume checkpoint binding differs")
+    _validate_live_binding(adapter, expected_artifact_binding)
+    verified = verify_training_checkpoint(
+        root,
+        checkpoint_id,
+        expected_execution_commit=expected_execution_commit,
+        expected_config=config,
+        expected_artifact_binding=expected_artifact_binding,
+    )
     state_payload = _read_file(
         verified.artifact_path / _STATE_NAME, _STATE_LIMIT, _STATE_NAME
     )
@@ -1178,6 +1366,7 @@ def resume_training_checkpoint(
 
 
 __all__ = (
+    "TrainingArtifactBinding",
     "TrainingExecutionConfig",
     "TrainingExecutionError",
     "TrainingProgress",

@@ -1,10 +1,12 @@
 import copy
+from dataclasses import replace
 import os
 from pathlib import Path
 import random
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import torch
 from torch import nn
@@ -16,6 +18,11 @@ from kairos import training_execution
 
 TEST_TMP = Path("/data0/hk_data/kairos-zx/.tmp")
 COMMIT = "a" * 40
+MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_REVISION = "a09a35458c702b33eeacc393d103063234e8bc28"
+MODEL_SHA256SUMS_SHA256 = (
+    "3ee6c9510b7e50bfcd46d6df33cafa3e2019f13a6a09bf1d2f9e80cdfe1164e8"
+)
 
 
 class SyntheticEncoder(nn.Module):
@@ -113,6 +120,23 @@ def _config(seed=13, **changes):
     return training_execution.TrainingExecutionConfig(**values)
 
 
+def _binding(core_type=KairosModel, **changes):
+    core_name = "pair-mlp" if core_type is PairMlpBaseline else "kairos"
+    values = {
+        "model_id": MODEL_ID,
+        "model_revision": MODEL_REVISION,
+        "model_sha256sums_sha256": MODEL_SHA256SUMS_SHA256,
+        "dataset_id": "synthetic",
+        "dataset_revision": "b" * 40,
+        "split": "train",
+        "data_artifact_id": "DEV-SYNTHETIC-TRAINING",
+        "data_manifest_sha256": "c" * 64,
+        "core_type": core_name,
+    }
+    values.update(changes)
+    return training_execution.TrainingArtifactBinding(**values)
+
+
 def _bundle(seed=13, core_type=KairosModel):
     generator = torch.Generator(device="cpu")
     training_execution.seed_training(seed, generator)
@@ -191,12 +215,14 @@ class FrozenConfigAndOptimizerTests(TrainingExecutionFixture):
 class CheckpointTests(TrainingExecutionFixture):
     def test_checkpoint_is_private_manifest_last_bound_and_no_replace(self):
         config, adapter, optimizer, scheduler, generator = _bundle()
+        binding = _binding()
         progress = training_execution.TrainingProgress.initial()
         verified = training_execution.save_training_checkpoint(
             self.root,
             "synthetic-step-000000",
             COMMIT,
             config,
+            binding,
             adapter,
             optimizer,
             scheduler,
@@ -204,6 +230,7 @@ class CheckpointTests(TrainingExecutionFixture):
             generator,
         )
         self.assertEqual(verified.progress, progress)
+        self.assertEqual(verified.artifact_binding, binding)
         self.assertEqual(
             {entry.name for entry in verified.artifact_path.iterdir()},
             {"config.json", "state.pt", "manifest.json"},
@@ -222,6 +249,7 @@ class CheckpointTests(TrainingExecutionFixture):
                 "synthetic-step-000000",
                 COMMIT,
                 config,
+                binding,
                 adapter,
                 optimizer,
                 scheduler,
@@ -236,6 +264,7 @@ class CheckpointTests(TrainingExecutionFixture):
             "synthetic-step-000001",
             COMMIT,
             config,
+            _binding(),
             adapter,
             optimizer,
             scheduler,
@@ -257,6 +286,7 @@ class CheckpointTests(TrainingExecutionFixture):
             "synthetic-step-000002",
             COMMIT,
             config,
+            _binding(),
             adapter,
             optimizer,
             scheduler,
@@ -273,11 +303,13 @@ class CheckpointTests(TrainingExecutionFixture):
 
     def test_wrong_model_resume_does_not_mutate_live_state(self):
         config, adapter, optimizer, scheduler, generator = _bundle()
+        binding = _binding()
         training_execution.save_training_checkpoint(
             self.root,
             "synthetic-step-000003",
             COMMIT,
             config,
+            binding,
             adapter,
             optimizer,
             scheduler,
@@ -289,12 +321,13 @@ class CheckpointTests(TrainingExecutionFixture):
         )
         before = trainable_state_dict(other_adapter)
         with self.assertRaisesRegex(
-            training_execution.TrainingExecutionError, "trainable keys"
+            training_execution.TrainingExecutionError, "core type"
         ):
             training_execution.resume_training_checkpoint(
                 self.root,
                 "synthetic-step-000003",
                 COMMIT,
+                binding,
                 other_config,
                 other_adapter,
                 other_optimizer,
@@ -302,6 +335,83 @@ class CheckpointTests(TrainingExecutionFixture):
                 other_generator,
             )
         self.assert_nested_equal(before, trainable_state_dict(other_adapter))
+
+    def test_binding_mismatch_and_config_tamper_fail_closed(self):
+        config, adapter, optimizer, scheduler, generator = _bundle()
+        binding = _binding()
+        verified = training_execution.save_training_checkpoint(
+            self.root,
+            "synthetic-step-000004",
+            COMMIT,
+            config,
+            binding,
+            adapter,
+            optimizer,
+            scheduler,
+            training_execution.TrainingProgress.initial(),
+            generator,
+        )
+        before_model = trainable_state_dict(adapter)
+        before_optimizer = copy.deepcopy(optimizer.state_dict())
+        before_scheduler = copy.deepcopy(scheduler.state_dict())
+        before_loader = generator.get_state().clone()
+        original_read = training_execution._read_file
+        read_names = []
+
+        def recording_read(path, limit, name):
+            read_names.append(name)
+            return original_read(path, limit, name)
+
+        with patch.object(training_execution, "_read_file", side_effect=recording_read):
+            with self.assertRaisesRegex(
+                training_execution.TrainingExecutionError, "binding differs"
+            ):
+                training_execution.resume_training_checkpoint(
+                    self.root,
+                    "synthetic-step-000004",
+                    COMMIT,
+                    replace(binding, data_manifest_sha256="d" * 64),
+                    config,
+                    adapter,
+                    optimizer,
+                    scheduler,
+                    generator,
+                )
+        self.assertNotIn("state.pt", read_names)
+        self.assert_nested_equal(before_model, trainable_state_dict(adapter))
+        self.assert_nested_equal(before_optimizer, optimizer.state_dict())
+        self.assert_nested_equal(before_scheduler, scheduler.state_dict())
+        self.assertTrue(torch.equal(before_loader, generator.get_state()))
+
+        config_path = verified.artifact_path / "config.json"
+        config_path.write_bytes(
+            config_path.read_bytes().replace(b'"synthetic"', b'"tamperedx"')
+        )
+        with self.assertRaisesRegex(
+            training_execution.TrainingExecutionError, "artifact bindings differ"
+        ):
+            training_execution.verify_training_checkpoint(
+                self.root, "synthetic-step-000004"
+            )
+
+    def test_core_binding_is_checked_before_checkpoint_publication(self):
+        config, adapter, optimizer, scheduler, generator = _bundle()
+        with self.assertRaisesRegex(
+            training_execution.TrainingExecutionError, "core type"
+        ):
+            training_execution.save_training_checkpoint(
+                self.root,
+                "synthetic-step-000005",
+                COMMIT,
+                config,
+                _binding(PairMlpBaseline),
+                adapter,
+                optimizer,
+                scheduler,
+                training_execution.TrainingProgress.initial(),
+                generator,
+            )
+        self.assertFalse(self.root.exists())
 
 
 class InterruptedResumeEquivalenceTests(TrainingExecutionFixture):
@@ -315,6 +425,7 @@ class InterruptedResumeEquivalenceTests(TrainingExecutionFixture):
                 config, adapter, optimizer, scheduler, generator = _bundle(
                     core_type=core_type
                 )
+                binding = _binding(core_type)
                 full = training_execution.run_optimizer_steps(
                     adapter,
                     batches,
@@ -348,6 +459,7 @@ class InterruptedResumeEquivalenceTests(TrainingExecutionFixture):
                     checkpoint_id,
                     COMMIT,
                     config,
+                    binding,
                     adapter,
                     optimizer,
                     scheduler,
@@ -368,6 +480,7 @@ class InterruptedResumeEquivalenceTests(TrainingExecutionFixture):
                     self.root,
                     checkpoint_id,
                     COMMIT,
+                    binding,
                     resumed_config,
                     resumed_adapter,
                     resumed_optimizer,
