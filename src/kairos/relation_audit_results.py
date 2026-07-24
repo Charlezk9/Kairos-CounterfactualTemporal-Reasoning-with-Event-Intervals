@@ -17,8 +17,12 @@ from .relation_human_audit import REVIEW_SCHEMA_VERSION, SAMPLE_SIZE
 
 RESULT_SCHEMA_VERSION = "relation-audit-result-v1"
 ADJUDICATION_SCHEMA_VERSION = "relation-audit-adjudication-v1"
+DEVELOPMENT_RESULT_SCHEMA_VERSION = "relation-audit-development-result-v1"
+AGREEMENT_PROJECTION_SCHEMA_VERSION = "relation-audit-agreement-projection-v1"
+DEVELOPMENT_PROVENANCE_STATUS = "USER_ATTESTED / INDEPENDENCE_UNVERIFIED"
 KAPPA_THRESHOLD = 0.80
 VALIDITY_THRESHOLD = 0.95
+_WILSON_Z = 1.959963984540054
 _SUBMISSION_LIMIT = 8 * 1024 * 1024
 _LINE_LIMIT = 64 * 1024
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -263,6 +267,198 @@ class AuditResult:
         return hashlib.sha256(canonical_json(self.to_dict()).encode("utf-8")).hexdigest()
 
 
+@dataclass(frozen=True)
+class DevelopmentAuditResult:
+    packet_manifest_sha256: str
+    audit_items_sha256: str
+    reviewer_a_sha256: str
+    reviewer_b_sha256: str
+    agreement_projection_sha256: str
+    sample_size: int
+    confusion: Mapping[str, int]
+    observed_agreement: float
+    expected_agreement: float
+    cohen_kappa: float | None
+    field_agreement: Mapping[str, Mapping[str, float | int]]
+    valid_count: int
+    validity: float
+    wilson_95_low: float
+    wilson_95_high: float
+    gate_failures: tuple[str, ...]
+    development_gate_passed: bool
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "confusion", MappingProxyType(dict(self.confusion)))
+        object.__setattr__(
+            self,
+            "field_agreement",
+            MappingProxyType(
+                {
+                    field: MappingProxyType(dict(values))
+                    for field, values in self.field_agreement.items()
+                }
+            ),
+        )
+        object.__setattr__(self, "gate_failures", tuple(self.gate_failures))
+
+    def to_dict(self) -> Mapping[str, Any]:
+        return {
+            "schema_version": DEVELOPMENT_RESULT_SCHEMA_VERSION,
+            "status": (
+                "PASSED_DEVELOPMENT"
+                if self.development_gate_passed
+                else "BLOCKED_DEVELOPMENT"
+            ),
+            "provenance_status": DEVELOPMENT_PROVENANCE_STATUS,
+            "human_independence_verified": False,
+            "paper_metric_eligible": False,
+            "input_bindings": {
+                "packet_manifest_sha256": self.packet_manifest_sha256,
+                "audit_items_sha256": self.audit_items_sha256,
+                "reviewer_a_sha256": self.reviewer_a_sha256,
+                "reviewer_b_sha256": self.reviewer_b_sha256,
+                "agreement_projection_sha256": self.agreement_projection_sha256,
+            },
+            "sample_size": self.sample_size,
+            "overall_valid_agreement": {
+                "confusion": dict(self.confusion),
+                "observed": self.observed_agreement,
+                "expected": self.expected_agreement,
+                "cohen_kappa": self.cohen_kappa,
+            },
+            "field_agreement": {
+                key: dict(value) for key, value in self.field_agreement.items()
+            },
+            "agreement_projection": {
+                "valid_count": self.valid_count,
+                "validity": self.validity,
+                "wilson_95": {
+                    "z": _WILSON_Z,
+                    "low": self.wilson_95_low,
+                    "high": self.wilson_95_high,
+                },
+            },
+            "thresholds": {
+                "cohen_kappa_minimum": KAPPA_THRESHOLD,
+                "validity_minimum": VALIDITY_THRESHOLD,
+            },
+            "gate_failures": list(self.gate_failures),
+            "development_gate_passed": self.development_gate_passed,
+        }
+
+    @property
+    def sha256(self) -> str:
+        return hashlib.sha256(canonical_json(self.to_dict()).encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True)
+class DevelopmentAuditEvaluation:
+    projection_payload: bytes
+    result: DevelopmentAuditResult
+
+
+def _wilson_interval(valid_count: int, sample_size: int) -> tuple[float, float]:
+    proportion = valid_count / sample_size
+    z_squared = _WILSON_Z * _WILSON_Z
+    denominator = 1.0 + z_squared / sample_size
+    center = (proportion + z_squared / (2.0 * sample_size)) / denominator
+    radius = (
+        _WILSON_Z
+        * math.sqrt(
+            proportion * (1.0 - proportion) / sample_size
+            + z_squared / (4.0 * sample_size * sample_size)
+        )
+        / denominator
+    )
+    return center - radius, center + radius
+
+
+def evaluate_development_agreement(
+    expected_item_ids: Sequence[str],
+    packet_manifest_sha256: str,
+    audit_items_sha256: str,
+    reviewer_a_payload: bytes,
+    reviewer_b_payload: bytes,
+) -> DevelopmentAuditEvaluation:
+    """Project zero-disagreement labels without claiming human adjudication."""
+
+    item_ids = _expected_ids(expected_item_ids)
+    packet_hash = _hex64(packet_manifest_sha256, "packet manifest SHA256")
+    items_hash = _hex64(audit_items_sha256, "audit items SHA256")
+    reviewer_a = _review_values(reviewer_a_payload, "A", item_ids)
+    reviewer_b = _review_values(reviewer_b_payload, "B", item_ids)
+    a_values = tuple(value["overall_valid"] for value in reviewer_a)
+    b_values = tuple(value["overall_valid"] for value in reviewer_b)
+    if a_values != b_values:
+        _fail("agreement projection requires zero overall disagreements")
+    projection_payload = b"".join(
+        canonical_json(
+            {
+                "schema_version": AGREEMENT_PROJECTION_SCHEMA_VERSION,
+                "audit_item_id": item_id,
+                "overall_valid": valid,
+            }
+        ).encode("utf-8")
+        + b"\n"
+        for item_id, valid in zip(item_ids, a_values)
+    )
+    true_true = sum(a_values)
+    false_false = SAMPLE_SIZE - true_true
+    observed = 1.0
+    expected = (
+        true_true * true_true + false_false * false_false
+    ) / (SAMPLE_SIZE * SAMPLE_SIZE)
+    kappa = None if expected == 1.0 else (observed - expected) / (1.0 - expected)
+    if kappa is not None and not math.isfinite(kappa):
+        _fail("computed Cohen's kappa is non-finite")
+    field_agreement = {}
+    for field in _BOOLEAN_FIELDS:
+        count = sum(
+            first[field] == second[field]
+            for first, second in zip(reviewer_a, reviewer_b)
+        )
+        field_agreement[field] = {
+            "agreement_count": count,
+            "agreement_rate": count / SAMPLE_SIZE,
+        }
+    valid_count = true_true
+    validity = valid_count / SAMPLE_SIZE
+    failures = []
+    if kappa is None:
+        failures.append("cohen-kappa-unavailable")
+    elif kappa < KAPPA_THRESHOLD:
+        failures.append("cohen-kappa-below-threshold")
+    if validity < VALIDITY_THRESHOLD:
+        failures.append("validity-below-threshold")
+    low, high = _wilson_interval(valid_count, SAMPLE_SIZE)
+    result = DevelopmentAuditResult(
+        packet_manifest_sha256=packet_hash,
+        audit_items_sha256=items_hash,
+        reviewer_a_sha256=hashlib.sha256(reviewer_a_payload).hexdigest(),
+        reviewer_b_sha256=hashlib.sha256(reviewer_b_payload).hexdigest(),
+        agreement_projection_sha256=hashlib.sha256(projection_payload).hexdigest(),
+        sample_size=SAMPLE_SIZE,
+        confusion={
+            "both_valid": true_true,
+            "a_valid_b_invalid": 0,
+            "a_invalid_b_valid": 0,
+            "both_invalid": false_false,
+        },
+        observed_agreement=observed,
+        expected_agreement=expected,
+        cohen_kappa=kappa,
+        field_agreement=field_agreement,
+        valid_count=valid_count,
+        validity=validity,
+        wilson_95_low=low,
+        wilson_95_high=high,
+        gate_failures=tuple(failures),
+        development_gate_passed=not failures,
+    )
+    canonical_json(result.to_dict())
+    return DevelopmentAuditEvaluation(projection_payload, result)
+
+
 def evaluate_audit_submissions(
     expected_item_ids: Sequence[str],
     packet_manifest_sha256: str,
@@ -342,11 +538,17 @@ def evaluate_audit_submissions(
 
 
 __all__ = [
+    "AGREEMENT_PROJECTION_SCHEMA_VERSION",
     "ADJUDICATION_SCHEMA_VERSION",
+    "DEVELOPMENT_PROVENANCE_STATUS",
+    "DEVELOPMENT_RESULT_SCHEMA_VERSION",
     "KAPPA_THRESHOLD",
     "RESULT_SCHEMA_VERSION",
     "VALIDITY_THRESHOLD",
     "AuditResult",
+    "DevelopmentAuditEvaluation",
+    "DevelopmentAuditResult",
     "RelationAuditResultError",
     "evaluate_audit_submissions",
+    "evaluate_development_agreement",
 ]
