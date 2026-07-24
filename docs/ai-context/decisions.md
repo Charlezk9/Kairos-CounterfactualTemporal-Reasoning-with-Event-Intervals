@@ -378,3 +378,10 @@
 - 统计：primary Cohen's kappa只基于两 reviewer 的 200 个 `overall_valid`，使用 `(p_o-p_e)/(1-p_e)`；同时记录 2×2 confusion、observed/expected agreement与逐字段 raw agreement。若 `p_e=1`，κ 标记 unavailable而非伪设为1，并 fail gate。adjudicated validity为 true count/N。只有 N=200、κ有限且≥0.80、validity≥0.95 时 `training_gate_passed=true`；阈值边界取包含等号。
 - 输出：结果为 canonical-compatible immutable value，绑定 packet/submission/adjudication hashes、counts、κ、validity、阈值和 gate状态；不包含样本文本或 notes。先只在内存 synthetic fixtures测试 exact pass/fail/undefined/tamper。结果 artifact publisher、production ingestion/paths与训练授权均不在本决定范围，必须在人类文件实际存在后另行冻结。
 - 验证结果：`kairos.relation_audit_results` 已实现纯 bytes 输入的 strict canonical JSONL 解析、A/B slot/identity/Boolean/overall 校验、agreement-preserving adjudication、逐字段 agreement、2×2 confusion、Cohen's kappa 与 adjudicated validity。返回值深层只读；focused 5/5、最终 full 565/565（17.876s）通过，GPU 隐藏、CPU 两线程。测试只使用合成 ID 和填充值；没有读取 production packet、reviewer 模板或样本文本，没有产出正式审计结果。
+
+## D-036：双智能体独立 AI 预审与人类门禁隔离
+
+- 状态：`FROZEN FOR EXECUTION / AI PRE-REVIEW ONLY`。用户于 2026-07-24 明确要求两个智能体独立填写审阅结果并由用户核查准确率。为避免把模型判断伪装成人类盲审，本次输出固定标记为 `AI-A` 与 `AI-B` 预审，不写入或复制 production Reviewer A/B templates，不进入 D-035 evaluator，不计算或报告为 human Cohen's kappa，不解锁训练。
+- 独立性：两个智能体从同一 immutable `audit-items.jsonl` 与 `review-instructions.md` 独立判断，不读取、比较或修改对方输出；分别只写 `docs/ai-context/ai-reviews/reviewer-ai-a.jsonl` 与 `reviewer-ai-b.jsonl`。主智能体只在两者都完成后做 schema/order/overall/hash和聚合检查，不修改单项判断。
+- 输出：exact 200 行、source order、canonical UTF-8 JSONL，schema固定 `gsm8k-relation-ai-pre-review-v1`，slot固定 `AI-A` 或 `AI-B`。字段为既有五项 Boolean、其逻辑与 `overall_valid`、nullable bounded notes、audit item ID、slot与schema；不得包含 question、answer、event text、pair ID或其他样本文本。
+- Git 与使用边界：结果及只含 aggregate counts/hashes 的 summary可进入 Git，供用户逐项核查；production packet保持不可变。即使两个 AI 完全一致，本项目仍保持 `HUMAN REVIEW PENDING`，只有两位人类作者完成原合同后才可计算正式门禁。
