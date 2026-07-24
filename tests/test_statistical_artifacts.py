@@ -43,15 +43,24 @@ def _timeqa_examples():
     )
 
 
-def _spec(dataset, method, completed_at):
-    config = {"generation": {"do_sample": False, "max_new_tokens": 32}}
+def _spec(
+    dataset,
+    method,
+    completed_at,
+    *,
+    config=None,
+    model_id="Qwen/Qwen2.5-7B-Instruct",
+    model_revision=MODEL_REVISION,
+):
+    if config is None:
+        config = {"generation": {"do_sample": False, "max_new_tokens": 32}}
     started_at = "2026-07-23T10:00:00Z"
     return prediction_artifacts.RunSpec(
         run_id=prediction_artifacts.make_run_id(started_at, method, dataset, 13, config),
         dataset=dataset,
         method_name=method,
-        model_id="Qwen/Qwen2.5-7B-Instruct",
-        model_revision=MODEL_REVISION,
+        model_id=model_id,
+        model_revision=model_revision,
         execution_commit="c" * 40,
         seed=13,
         started_at=started_at,
@@ -178,6 +187,123 @@ class StatisticalFixture(unittest.TestCase):
 
 
 class StatisticalPublicationTests(StatisticalFixture):
+    def _rule_graph_input(self, **config_updates):
+        config = {
+            "schema_version": "torque-rule-graph-config-v1",
+            "dataset": "torque-dev",
+            "method": "rule-graph",
+            "model_id": "deterministic-rule-graph",
+            "model_revision": "explicit-before-after-constraint-v1",
+            "seed": 13,
+            "generation": "none",
+            "gold_access": False,
+            "upstream": {
+                "direct": {
+                    "run_id": self.reference.spec.run_id,
+                    "manifest_sha256": self.reference.manifest_sha256,
+                }
+            },
+        }
+        config.update(config_updates)
+        spec = _spec(
+            "torque-dev",
+            "rule-graph",
+            "2026-07-23T10:20:00Z",
+            config=config,
+            model_id="deterministic-rule-graph",
+            model_revision="explicit-before-after-constraint-v1",
+        )
+        prediction = _verified_prediction(
+            spec,
+            {record.record_id: record.prediction for record in self.candidate.records},
+            "5",
+        )
+        metrics = _verified_metrics(
+            prediction, self.examples, "2026-07-23T10:31:00Z", "b"
+        )
+        return statistical_artifacts._RunInput(prediction, metrics)
+
+    def test_only_direct_bound_rule_graph_can_differ_in_model_identity(self):
+        reference = statistical_artifacts._RunInput(
+            self.reference, self.reference_metrics
+        )
+        candidate = self._rule_graph_input()
+        self.assertEqual(
+            statistical_artifacts._validate_pair(reference, candidate),
+            "torque-dev",
+        )
+
+        invalid = self._rule_graph_input(
+            upstream={
+                "direct": {
+                    "run_id": self.reference.spec.run_id,
+                    "manifest_sha256": "f" * 64,
+                }
+            }
+        )
+        with self.assertRaisesRegex(
+            statistical_artifacts.StatisticalArtifactError,
+            "same model revision",
+        ):
+            statistical_artifacts._validate_pair(reference, invalid)
+
+        unrelated = statistical_artifacts._RunInput(
+            self.candidate,
+            self.candidate_metrics,
+        )
+        unrelated_spec = _spec(
+            "torque-dev",
+            "cot",
+            "2026-07-23T10:20:00Z",
+            model_id="unrelated-model",
+            model_revision="unrelated-revision",
+        )
+        unrelated_prediction = _verified_prediction(
+            unrelated_spec,
+            {record.record_id: record.prediction for record in unrelated.prediction.records},
+            "5",
+        )
+        unrelated_metrics = _verified_metrics(
+            unrelated_prediction, self.examples, "2026-07-23T10:31:00Z", "b"
+        )
+        with self.assertRaisesRegex(
+            statistical_artifacts.StatisticalArtifactError,
+            "same model revision",
+        ):
+            statistical_artifacts._validate_pair(
+                reference,
+                statistical_artifacts._RunInput(
+                    unrelated_prediction, unrelated_metrics
+                ),
+            )
+
+    def test_bound_rule_graph_contrast_publishes_and_replays(self):
+        candidate = self._rule_graph_input()
+        self.predictions[candidate.prediction.spec.run_id] = candidate.prediction
+        self.metrics[candidate.prediction.spec.run_id] = candidate.metrics
+        artifact = statistical_artifacts._publish(
+            self.root,
+            self.reference.spec.run_id,
+            candidate.prediction.spec.run_id,
+            20260723,
+            10_000,
+            AGGREGATION_COMMIT,
+            "2026-07-23T10:40:00Z",
+            self.prediction_verifier,
+            self.metrics_verifier,
+            lambda: self.examples,
+            self.gate,
+        )
+        replay = statistical_artifacts._verify(
+            self.root,
+            artifact.comparison_id,
+            self.prediction_verifier,
+            self.metrics_verifier,
+            lambda: self.examples,
+        )
+        self.assertEqual(replay.statistics_sha256, artifact.statistics_sha256)
+        self.assertEqual(replay.manifest_sha256, artifact.manifest_sha256)
+
     def test_publish_and_independent_replay(self):
         artifact = self.publish()
         self.assertEqual(self.gate_calls, [AGGREGATION_COMMIT, AGGREGATION_COMMIT])

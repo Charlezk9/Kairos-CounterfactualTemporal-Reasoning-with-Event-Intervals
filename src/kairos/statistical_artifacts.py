@@ -60,6 +60,10 @@ _BOOTSTRAP_UNITS = {
     "torque-dev": "passage_id-and-cluster_id",
     "timeqa-hard": "record",
 }
+_RULE_GRAPH_METHOD = "rule-graph"
+_RULE_GRAPH_MODEL_ID = "deterministic-rule-graph"
+_RULE_GRAPH_MODEL_REVISION = "explicit-before-after-constraint-v1"
+_RULE_GRAPH_CONFIG_SCHEMA = "torque-rule-graph-config-v1"
 
 
 class StatisticalArtifactError(ValueError):
@@ -169,13 +173,53 @@ def _validate_pair(reference: _RunInput, candidate: _RunInput) -> str:
         raise StatisticalArtifactError("paired runs must use one supported dataset")
     if reference.prediction.spec.seed != candidate.prediction.spec.seed:
         raise StatisticalArtifactError("paired runs must use the same model seed")
-    if (
-        reference.prediction.spec.model_id != candidate.prediction.spec.model_id
-        or reference.prediction.spec.model_revision
-        != candidate.prediction.spec.model_revision
-    ):
+    same_model_revision = (
+        reference.prediction.spec.model_id == candidate.prediction.spec.model_id
+        and reference.prediction.spec.model_revision
+        == candidate.prediction.spec.model_revision
+    )
+    if not same_model_revision and not _is_bound_rule_graph_pair(reference, candidate):
         raise StatisticalArtifactError("paired runs must use the same model revision")
     return dataset
+
+
+def _is_bound_rule_graph_pair(
+    reference: _RunInput, candidate: _RunInput
+) -> bool:
+    """Accept only D-033's Rule-Graph-to-its-Direct-upstream contrast."""
+
+    reference_spec = reference.prediction.spec
+    candidate_spec = candidate.prediction.spec
+    if (
+        reference_spec.method_name != "direct"
+        or candidate_spec.method_name != _RULE_GRAPH_METHOD
+        or candidate_spec.model_id != _RULE_GRAPH_MODEL_ID
+        or candidate_spec.model_revision != _RULE_GRAPH_MODEL_REVISION
+    ):
+        return False
+    config = candidate_spec.config
+    if not isinstance(config, MappingABC) or any(
+        (
+            config.get("schema_version") != _RULE_GRAPH_CONFIG_SCHEMA,
+            config.get("dataset") != "torque-dev",
+            config.get("method") != _RULE_GRAPH_METHOD,
+            config.get("model_id") != _RULE_GRAPH_MODEL_ID,
+            config.get("model_revision") != _RULE_GRAPH_MODEL_REVISION,
+            config.get("seed") != candidate_spec.seed,
+            config.get("generation") != "none",
+            config.get("gold_access") is not False,
+        )
+    ):
+        return False
+    upstream = config.get("upstream")
+    if not isinstance(upstream, MappingABC):
+        return False
+    direct = upstream.get("direct")
+    return bool(
+        isinstance(direct, MappingABC)
+        and direct.get("run_id") == reference_spec.run_id
+        and direct.get("manifest_sha256") == reference.prediction.manifest_sha256
+    )
 
 
 def _make_comparison_id(
