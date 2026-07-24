@@ -1,0 +1,68 @@
+{
+  "schema_version": "kairos-relation-only-internal-dev-evaluation-v1",
+  "status": "INTERNAL-DEV / NOT PAPER-ELIGIBLE",
+  "split": "frozen internal-dev 36 only",
+  "checkpoint_policy": "immutable final step-000031 only; no selection, early stopping or tuning",
+  "paired_unit": "source_id",
+  "relation_label_order": [
+    "precedes",
+    "follows",
+    "overlaps",
+    "contains",
+    "during"
+  ],
+  "numeric_normalizer": {
+    "version": "strict-decimal-v1",
+    "steps": [
+      "input must be a strict UTF-8 string",
+      "strip ASCII space, tab, carriage return and line feed at both ends",
+      "accept only regex ^[+-]?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+      "parse exactly as a base-10 decimal; negative zero equals zero; no exponent, comma, currency, percent, fraction or unit is accepted",
+      "two values match iff their exact decimal values are equal"
+    ],
+    "invalid": "item contribution zero"
+  },
+  "candidate_methods": {
+    "methods": [
+      "kairos",
+      "pair-mlp"
+    ],
+    "empty_pool": "retain invalid-empty-candidate-pool and assign zero to all three common item metrics; candidate recall is zero; only the separately labeled injected-gold answer diagnostic may run",
+    "answer_selection": "for a non-empty pool, if every score is finite choose the greatest score and break exact ties by lowest frozen candidate index; otherwise retain invalid-nonfinite-scores and score all three common item metrics zero",
+    "relation_selection": "read only relation_logits[0,1,:] for event1 source to event2 target, separately for original and counterfactual inputs; require each exact five-logit vector finite, choose greatest logit and break exact ties by lowest relation_label_order index; wrong shape or non-finite vectors make the applicable relation metric zero",
+    "candidate_recall": "one iff at least one valid parsed answer in the exact-deduplicated gold-blind candidate pool matches gold under strict-decimal-v1; invalid raw generations and later train-only gold injection do not count",
+    "gold_injection_sensitivity": "answer-accuracy contribution with exact gold appended at the final candidate position minus contribution on the untouched gold-blind pool, paired by source_id; diagnostic only"
+  },
+  "same_data_sft": {
+    "candidate_manifest": "NOT_APPLICABLE",
+    "candidate_recall": "NOT_APPLICABLE",
+    "gold_injection_sensitivity": "NOT_APPLICABLE",
+    "prediction": "use the separately hashed same-data SFT protocol parser; compare its three string fields under strict-decimal-v1 and exact relation labels"
+  },
+  "aggregate_metrics": [
+    "mean original-answer correctness",
+    "mean exact original-relation correctness",
+    "mean exact counterfactual-relation correctness"
+  ],
+  "uncertainty": {
+    "item_accuracy_interval": "Wilson score interval with z=1.959963984540054 and denominator 36",
+    "bootstrap_seed": 20260725,
+    "bootstrap_resamples": 10000,
+    "resampling": "sample 36 source_id positions with replacement; paired methods use the identical sampled positions; after all three seeds exist, each sampled source contribution is the arithmetic mean of its three seed-level zero-or-one contributions",
+    "confidence_interval": "2.5 and 97.5 percentiles by Hyndman-Fan type 7 linear interpolation over the 10000 paired metric differences",
+    "two_sided_p": "min(1, 2*min((1+count(delta<=0))/10001, (1+count(delta>=0))/10001))"
+  },
+  "holm_family": {
+    "when": "only after seeds 13, 42 and 2026 all verify for all three methods",
+    "hypothesis_ids": [
+      "answer:kairos-minus-pair-mlp",
+      "answer:kairos-minus-same-data-sft",
+      "counterfactual-relation:kairos-minus-pair-mlp",
+      "counterfactual-relation:kairos-minus-same-data-sft",
+      "original-relation:kairos-minus-pair-mlp",
+      "original-relation:kairos-minus-same-data-sft"
+    ],
+    "procedure": "sort raw p ascending and break ties by UTF-8 hypothesis_id; for sorted position i from 1 to 6 compute min(1,(7-i)*p_i), take the cumulative maximum through i, then restore hypothesis_id order"
+  },
+  "failure_policy": "missing, duplicate, extra, non-finite, unbound or unparsable predictions remain immutable typed failures with zero item contribution; aggregation never silently drops an item"
+}

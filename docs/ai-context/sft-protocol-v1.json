@@ -1,0 +1,93 @@
+{
+  "schema_version": "kairos-same-data-sft-protocol-v1",
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "tokenizer_identity": {
+    "tokenizer_config_json_sha256": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "tokenizer_json_sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "generation_config_json_sha256": "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f",
+    "chat_template": "exact chat_template string from the hashed tokenizer_config.json; no override"
+  },
+  "system": "You are a careful temporal reasoning solver. Follow the requested output format exactly.",
+  "user_template": "Given an original and counterfactual math problem plus two events, predict the original answer and the temporal relation from event 1 to event 2 in each version. Output exactly one JSON object with keys answer, counterfactual_relation, original_relation and no other text.\n\nOriginal problem:\n{original_query}\n\nCounterfactual problem:\n{counterfactual_query}\n\nEvent 1:\n{event_1}\n\nEvent 2:\n{event_2}",
+  "event_binding": "event_1 and event_2 are source-order event texts at indices 0 and 1; relations are source event 1 to target event 2",
+  "assistant_target": {
+    "serializer": "kairos.ids.canonical_json",
+    "exact_keys": [
+      "answer",
+      "counterfactual_relation",
+      "original_relation"
+    ],
+    "answer": "exact original_answer string",
+    "relation_values": [
+      "precedes",
+      "follows",
+      "overlaps",
+      "contains",
+      "during"
+    ],
+    "terminal_lf": false
+  },
+  "trainable_parameters": {
+    "base_model": "frozen",
+    "lm_head": "frozen",
+    "peft_version": "0.14.0",
+    "task_type": "CAUSAL_LM",
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "bias": "none",
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "use_cache": false
+  },
+  "training": {
+    "candidate_pool": "NOT_APPLICABLE",
+    "messages": "exact ordered roles system, user, assistant; contents are the frozen system string, rendered user_template and canonical assistant target",
+    "prefix_render": "tokenizer.apply_chat_template([system,user], tokenize=false, add_generation_prompt=true)",
+    "full_render": "tokenizer.apply_chat_template([system,user,assistant], tokenize=false, add_generation_prompt=false)",
+    "tokenization": "tokenize each rendered UTF-8 string with add_special_tokens=false and require full token IDs to start exactly with prefix token IDs",
+    "loss_tokens": "labels are -100 for the exact prefix-token length and equal full token IDs thereafter; supervision therefore includes canonical target tokens and the chat template assistant terminator including <|im_end|> and its following newline; append no separate EOS",
+    "truncation": false,
+    "max_total_tokens": 4096,
+    "overlength": "hard-fail",
+    "seeds": [
+      13,
+      42,
+      2026
+    ],
+    "epochs": 3,
+    "micro_batch": 1,
+    "effective_batch": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.00002,
+    "weight_decay": 0.01,
+    "warmup_fraction": 0.05,
+    "gradient_clip_norm": 1.0
+  },
+  "evaluation": {
+    "messages": "exact ordered roles system, user",
+    "prompt_render": "tokenizer.apply_chat_template([system,user], tokenize=true, add_generation_prompt=true, return_tensors=pt); append no special token manually",
+    "parser": "entire ASCII-whitespace-stripped response must be strict UTF-8 JSON with no duplicate keys or non-finite values, exact three keys and string values; key order and whitespace are not semantic after parsing",
+    "do_sample": false,
+    "max_input_tokens": 4096,
+    "max_new_tokens": 128,
+    "batch_size": 1,
+    "dtype": "bfloat16",
+    "attention_implementation": "sdpa",
+    "eos_token_ids": [
+      151645,
+      151643
+    ],
+    "pad_token_id": 151643,
+    "invalid_response": "all three item metrics are zero and the typed parse failure is retained"
+  }
+}

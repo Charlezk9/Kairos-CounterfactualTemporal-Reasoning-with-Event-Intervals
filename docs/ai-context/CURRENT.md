@@ -1,63 +1,26 @@
 # Current State
 
 - updated_at: 2026-07-25 CST
-- active_phase: reviewer-response-remediation (phase-01 human review pending)
-- phase_status: RUNNING
+- active_phase: audit-gated-development-training
+- phase_status: PLAN_APPROVED_PENDING_FREEZE_COMMIT
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 978b0b4f940a9a84ba1be2fca3383b5bb585fb97
-- last_verified_commit: 978b0b4f940a9a84ba1be2fca3383b5bb585fb97
+- git_head: 4d0cfa19ee8ac29f2176ba173d6491a0853ab2e4
+- last_verified_commit: 4d0cfa19ee8ac29f2176ba173d6491a0853ab2e4
 - last_completed_checkpoint: checkpoints/phase-01-ai-assisted-development-training-copy.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 has no CF answer. User-resolved audit labels are 196 valid/4 invalid, and the user attests two local human reviews are identical, implying conditional κ=1.0 and validity 98%; however no raw formal-A/B files exist in the allowed workspace, so the value is `USER-ATTESTED / ARTIFACT PENDING` and D-035 remains formally incomplete. A verified 366-pair `AI_ASSISTED_USER_CHECKED_DEVELOPMENT_TRAINING_ONLY` copy is available after excluding the four known-invalid pairs; exploratory training is user-authorized but all metrics must be PRELIMINARY. MuSiQue remains policy-blocked, StrategyQA archive-blocked and 2Wiki network-deferred. Production candidate provenance, formal plan and paper-eligible trained runs remain incomplete.
+- blockers: Independent plan audit is APPROVED only for `USER_ATTESTED / DEVELOPMENT ONLY / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; two-human independence provenance remains absent. Private intake, D-038 development result, audit-bound 330/36 partition, candidates, run-input manifests, runner and checkpoints are absent. Relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 将两份真实本地 human formal-A/formal-B JSONL复制到 `src/ab-reviewer-web/results/`（或提供其允许目录内路径），锁定哈希并用D-035重放κ=1.0与validity=98%；在此之前仅可基于366条副本冻结并运行明确标记的 development/preliminary candidate-plan-training链，不能发布 formal论文指标。
+- next_safe_action: 使用 named staging 提交并普通推送已批准的计划、D-038/D-039/D-040、三个协议、独立审计和本状态；从同步 clean commit 建立 mode-0700/0600 private A/B intake，然后实现 D-038 development artifact。模型输出/GPU/训练不得提前。
 - required_reading:
-  - `checkpoints/remaining-reviewer-response-plan.md`
-  - `checkpoints/phase-01-2wiki-source-recovery.md`
-  - `checkpoints/phase-01-relation-human-audit-packet.md`
-  - `checkpoints/phase-01-relation-only-train-artifact.md`
-  - `checkpoints/phase-01-relation-only-supervision-v1.md`
-  - `checkpoints/phase-01-manual-source-acquisition.md`
-  - `checkpoints/phase-01-transfer-eval-contract.md`
-  - `checkpoints/phase-01-prediction-artifacts.md`
-  - `checkpoints/phase-03-kairos-tensor-core.md`
-  - `checkpoints/phase-03-torque-direct-baseline.md`
-  - `checkpoints/phase-03-metrics-artifacts.md`
-  - `checkpoints/phase-03-torque-cot-baseline.md`
-  - `checkpoints/phase-03-timeqa-direct-baseline.md`
-  - `checkpoints/phase-03-timeqa-cot-baseline.md`
-  - `checkpoints/phase-03-paired-bootstrap.md`
-  - `checkpoints/phase-03-torque-cot-verifier-baseline.md`
-  - `checkpoints/phase-03-torque-self-consistency-baseline.md`
-  - `checkpoints/phase-03-torque-llm-graph-baseline.md`
-  - `checkpoints/phase-03-qwen-core-training-adapter.md`
-  - `checkpoints/phase-03-resumable-training-execution.md`
+  - `checkpoints/formal-training-execution-plan.md`
+  - `checkpoints/formal-training-plan-audit.md`
+  - `checkpoints/phase-01-relation-audit-result-gate.md`
+  - `checkpoints/phase-01-ai-assisted-development-training-copy.md`
+  - `checkpoints/phase-03-training-materialization.md`
+  - `checkpoints/phase-03-deterministic-training-plan.md`
   - `checkpoints/phase-03-checkpoint-identity-binding.md`
   - `checkpoints/phase-03-peft-injection-smoke.md`
-  - `checkpoints/phase-03-deterministic-training-plan.md`
-  - `checkpoints/phase-03-torque-rule-graph-baseline.md`
-  - `checkpoints/phase-03-training-materialization.md`
-  - `checkpoints/phase-01-relation-audit-result-gate.md`
-  - `checkpoints/phase-01-independent-ai-pre-review.md`
-  - `checkpoints/phase-01-ai-assisted-development-training-copy.md`
-  - `checkpoints/phase-01-gsm8k-construction-v0.md`
-  - `checkpoints/phase-01-construction-audit-persistence.md`
-  - `checkpoints/phase-01-construction-audit-schema.md`
-  - `checkpoints/phase-01-temporal-construction-v0.md`
-  - `checkpoints/phase-01-data-core.md`
-  - `checkpoints/phase-01-data-acquisition.md`
-  - `checkpoints/phase-01-gsm8k-adapter.md`
-  - `checkpoints/phase-01-gsm8k-conversion.md`
-  - `checkpoints/phase-01-musique-discovery.md`
-  - `checkpoints/phase-01-musique-probe-helper.md`
-  - `checkpoints/phase-01-strategyqa-source-plan.md`
-  - `checkpoints/phase-01-strategyqa-acquisition-helper.md`
-  - `checkpoints/phase-01-strategyqa-runtime-redirect.md`
-  - `checkpoints/phase-01-2wiki-discovery.md`
-  - `checkpoints/phase-01-torque-discovery.md`
-  - `checkpoints/phase-01-timeqa-discovery.md`
   - `decisions.md`
-  - `../implementation/README.md`
   - `../experiments/README.md`
   - `../operations/README.md`

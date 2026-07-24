@@ -394,3 +394,25 @@
 - 派生策略：从370条 verified relation-only official-train artifact按原顺序复制，排除用户裁决为无效的 audit lines 2/6/81/99 对应4个 pair，生成366条。不得补 CF answer；`counterfactual_answer_available=false`、CF answer loss继续 masked。
 - 使用状态：工件固定为 `AI_ASSISTED_USER_CHECKED_DEVELOPMENT_TRAINING_ONLY`，用户授权 development training，但 `formal_experiment_eligible=false`、`paper_metric_eligible=false`、`d035_training_gate_passed=false`。只有真实 A/B bytes验证并发布正式结果后，才可升级同一数据策略或启动论文级 formal training。
 - 工件：`training-data.jsonl` 777,256 bytes、SHA256 `4b5fec2bf46b1b86df9639b0e2cea9bc355e77be04247f5f27fcef3cb725f788`；manifest SHA256 `f24a8e8ef2ee3f5abf75938e620b43a8c2dcb52b52459ac000ba97bc87258b5a`。私有目录0700、文件0600、no extra file，已从源顺序和4项 exclusion完整重放。
+- 2026-07-25 superseding status：A/B bytes 后续由远端 commit `4d0cfa1` 引入并通过结构/哈希检查；但两名独立人类 provenance 仍缺失，因此 D-038 继续将其降级为用户确认的 development evidence。上述“只有 README”仅保留为 D-037 当时的历史状态。
+
+## D-038：用户确认 A/B 的开发审计语义与私有来源
+
+- 状态：`FROZEN PLAN / IMPLEMENTATION PENDING / DEVELOPMENT ONLY`。当前 A/B bytes 仅为 `USER_ATTESTED / INDEPENDENCE_UNVERIFIED`；结构、哈希和完全一致不能证明两个独立人类。缺少两名不同伪名 reviewer 的预比较锁定哈希、slot、时间和独立完成声明时，禁止称为 formal human audit 或 paper-eligible。
+- 零分歧时允许新增独立 schema 的纯算法 `agreement-projection`，逐项复制两份锁定输入完全相同的 overall label；任一分歧立即失败。它不叫 author/human adjudication，不修改 D-035 原合同。预期开发门禁为196/200 valid、conditional κ=1.0、validity=0.98，另报 Wilson 95% CI。
+- raw A/B 与 sidecar 迁移到 mode-0700 的 `/data0/hk_data/kairos-zx/artifacts/audit-intake/...`，文件 mode 0600、regular、nlink=1、no-follow/no-replace。Git 只留 hashes/counts/aggregate；已在 `4d0cfa1` 暴露的 bytes 只通过普通后续提交从 tip 删除，禁止重写历史。
+- 完整发布、验证、分区、评测和安全合同唯一来源为 `checkpoints/formal-training-execution-plan.md`；独立严格审计批准前不得实现 production publisher 或加载模型。
+
+## D-039：GSM8K relation-only 开发候选池冻结
+
+- 状态：`FROZEN PLAN / GENERATION PENDING`。候选 prompt/parser bytes 固定为 `candidate-prompt-v1.json` 的 Git bytes，SHA256 `8632dfbd3f8f2b90c9a897bdb15b232b92705d79c8d8dcfd3f7ea94886f67349`；本地 Qwen revision、chat template、tokenizer/config和全部模型文件须在运行前重放。
+- Direct greedy/max-new 128；CoT greedy/max-new 512；Self-Consistency 为CoT位置0--7、temperature 0.7、top-p 0.9、top-k 0；pool seed 20260725；batch 1；输入超过4096 tokens硬失败；BF16/SDPA；EOS `[151645,151643]`、pad `151643`。per-item seed推导、offline/cache、64-KiB response、512-MiB artifact和2-GiB stage上限按唯一计划执行。
+- train/internal-dev 分开发布且均 gold-blind；仅 train materialization 可记录式 gold injection。internal-dev primary 禁止 gold injection，injected-gold 只作单独 sensitivity diagnostic。8条 smoke 只检查 mechanics，不允许按输出调 prompt/parser/阈值。
+
+## D-040：开发训练完整 provenance、恢复与评测门禁
+
+- 状态：`FROZEN PLAN / IMPLEMENTATION PENDING`。新增 versioned run-input semantic manifest，把 audit/provenance、data/partition、candidate/raw evidence、prompt/tokenizer/model、method/seed/environment/resource与 execution commit 的完整 SHA256 链绑定到 plan/checkpoint；旧 v1/v2 schema 不宣称满足该条件。
+- 366条固定分成 train330/internal-dev36；optimizer只读 train。三轮990 real slots加2 repeat slots，effective batch32，共31 optimizer steps；每5步和step31 immutable checkpoint；显式checkpoint ID恢复，无`latest`，trace/RNG/prefix连续性与manifest-last发布必须可重放。
+- internal-dev只用final step31，不参与selection/early stop/tuning，所有数值为 `INTERNAL-DEV / NOT PAPER-ELIGIBLE`。Same-data SFT 是主比较必做项；未完成时 reviewer primary claim 固定 `DEFERRED`，Kairos-vs-Pair-MLP仅是secondary。允许指标和official-test未来门禁以唯一计划为准。
+- 任何 train/internal-dev 模型输出前必须提交并绑定 `sft-protocol-v1.json` SHA256 `86c1de0b6c47e9e9275771866bc42b6b39b56c0f3b1430a9cfc1fd35225f0d43` 与 `evaluation-protocol-v1.json` SHA256 `b15074103a7940777dd6e39e0aa2f9831ca9fc344affddc102a8a0c3fc88aee1`。SFT target 用项目 sort-key `canonical_json`，键序固定 `answer,counterfactual_relation,original_relation`；SFT 的 candidate manifest/recall/gold-injection sensitivity 均为 `NOT_APPLICABLE`。精确 normalizer、tie/non-finite、bootstrap和六项 Holm family 只以 evaluation v1 合同为准。
+- GPU选择固定 `CUDA_DEVICE_ORDER=PCI_BUS_ID` 与 full UUID `CUDA_VISIBLE_DEVICES`；门禁绑定UUID/PCI/index/name/memory，Torch CUDA初始化后且模型加载前必须通过 CUDA/NVML 再核对唯一可见设备 UUID/PCI，否则停止。
