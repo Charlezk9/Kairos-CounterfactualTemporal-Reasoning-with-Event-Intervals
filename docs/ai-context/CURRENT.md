@@ -4,14 +4,14 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 6a3f18ef1839dcdcf19c58593d809c07eb37f866
-- last_verified_commit: 6a3f18ef1839dcdcf19c58593d809c07eb37f866
-- last_completed_checkpoint: checkpoints/phase-03-peft-injection-smoke.md
+- git_head: 8de516d8b9c3fdb1804b5a7143f55c8cc29fc19a
+- last_verified_commit: 8de516d8b9c3fdb1804b5a7143f55c8cc29fc19a
+- last_completed_checkpoint: checkpoints/phase-03-deterministic-training-plan.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA production training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. TORQUE/TimeQA prompt baselines are verified. Kairos/Pair-MLP tensor cores, PEFT Qwen adapter, CPU resumable execution, v2 checkpoint binding and one-step 7B GPU feasibility are development-verified. D-031 has frozen the deterministic sampler/candidate/batch/cursor contract, but its implementation, production artifact verification and formal runner/runs remain incomplete. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA production training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. TORQUE/TimeQA prompt baselines are verified. Kairos/Pair-MLP tensor cores, PEFT Qwen adapter, CPU resumable execution, v2 checkpoint binding, deterministic sampler/candidate/batch/cursor and one-step 7B GPU feasibility are development-verified. Candidate generation/token materialization, production training-plan publication, formal runner/runs and Rule-Graph remain incomplete. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 在无 production 数据/模型/GPU 的 synthetic-only 边界实现并测试 D-031 deterministic epoch sampler、source-order batch/candidate manifest 与 exact resume cursor；正式训练继续等待两人 relation audit。
+- next_safe_action: 严格对照 D-027 和 TORQUE 已冻结评测合同，先用 synthetic examples 冻结 gold-free Rule-Graph/Constraint-Rerank 规则、候选与失败语义，再实现 CPU 可重放基线；正式 Kairos/Pair-MLP 训练继续等待两人 relation audit。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
   - `checkpoints/phase-01-2wiki-source-recovery.md`
@@ -35,6 +35,7 @@
   - `checkpoints/phase-03-resumable-training-execution.md`
   - `checkpoints/phase-03-checkpoint-identity-binding.md`
   - `checkpoints/phase-03-peft-injection-smoke.md`
+  - `checkpoints/phase-03-deterministic-training-plan.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

@@ -65,14 +65,25 @@ checkpoint to v2 and binds the fixed Qwen revision/model checksum, dataset
 revision/data-manifest checksum and exact Kairos/Pair-MLP core type. Resume
 rejects an expected-binding mismatch before opening the state file.
 
-This layer still consumes an already materialized deterministic batch sequence.
-It does not independently verify production artifacts or authorize formal
-training. PEFT injection and a synthetic one-step 7B GPU smoke are verified,
-but no production runner/checkpoint/result exists. The D-028 execution contract and
+Commit `8de516d8b9c3fdb1804b5a7143f55c8cc29fc19a` adds
+`kairos.training_plan`: source-order candidate/gold bindings, stateless
+seed/epoch SHA256 ordering, explicit effective-batch tail repeats, exact
+micro-batch identities and optimizer-boundary resume cursors. Its execution
+wrapper checks the requested window's example IDs, candidate IDs/mask and answer
+targets before forwarding tensors to the optimizer executor. The training-plan
+manifest hash is the checkpoint data identity and internally binds the source
+artifact.
+
+These layers do not independently read or verify production artifacts and do
+not authorize formal training. Candidate generation/materialization and a
+formal production runner/checkpoint/result remain absent. PEFT injection and a
+synthetic one-step 7B GPU smoke are verified. The D-028 execution contract and
 BF16 correction are recorded in
 `../ai-context/checkpoints/phase-03-resumable-training-execution.md`; the v2
 identity evidence is in
-`../ai-context/checkpoints/phase-03-checkpoint-identity-binding.md`.
+`../ai-context/checkpoints/phase-03-checkpoint-identity-binding.md`, and the
+deterministic manifest/cursor evidence is in
+`../ai-context/checkpoints/phase-03-deterministic-training-plan.md`.
 
 ## CLI 与 manifest
 

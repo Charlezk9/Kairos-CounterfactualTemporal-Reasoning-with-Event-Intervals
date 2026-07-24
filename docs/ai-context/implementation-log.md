@@ -267,3 +267,11 @@
 - focused 9/9 + 9/9、full 533/533（16.746s）通过。首次 GPU smoke 在 model load 前因 CUDA memory-stat initialization 次序失败，无模型/工件；资源复核后不改变代码重试。
 - clean `c68c77a...` 上 physical GPU 4 用 fixed local 7B 和 synthetic batch 32 完成 one-step：392 LoRA tensors、loss 1.96875、gradient norm 203.842285、peak allocated/reserved 15,920,307,712 / 15,934,160,896 bytes；进程退出 0，GPU 回到 11 MiB。
 - 本项不读取 production 数据、不保存 checkpoint/预测/指标，不是 formal run 或论文结果。正式训练仍受人工审计和 sampler/manifest/runner 缺失阻塞。
+
+## 2026-07-24 — Deterministic training manifest and resume cursor
+
+- `d592e5c...` 冻结 D-031：候选/gold 身份、source-order corpus、三轮 SHA256 rank、effective-batch 32 尾部策略和 exact cursor 必须进入同一 canonical manifest；所有真实样本每轮恰好一次，末尾不足仅允许 0--31 个显式 repeat slots。
+- `8de516d...` 实现 `kairos.training_plan`。manifest 绑定 source artifact/revision/commit、去重候选 content SHA/origins、gold target/injection、epoch slots、micro-batch/optimizer-step 与 checkpoint data SHA。from-dict 只能通过最小输入重建后 exact equality。
+- planned execution 在 optimizer 调用前验证本 window 的 example/candidate IDs、candidate mask 和 answer targets；只物化当前 window，避免预先携带全部三轮 tensors。cursor 精确记录 consumed real/repeat slots、completed epochs 和 next example，只接受 optimizer boundary。
+- 首轮 focused 在 test collection 因调用了不存在的执行器别名失败，未运行测试逻辑或模型；改用现有 `run_optimizer_steps` 后 focused 7/7（0.904s）、full 540/540（17.853s）通过，最大 RSS 537,360 KiB。GPU 隐藏，未读取 production 数据/模型，无工件或指标。
+- 该实现消除 sampler/manifest/cursor 工程缺口，但候选生成/物化与 formal runner 仍未实现；两人 relation audit 未完成，正式 Kairos/Pair-MLP 训练仍禁止。

@@ -102,6 +102,8 @@ Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427
 
 `c68c77a...` 完成项目局部 PEFT 0.14.0 注入：real tiny-Qwen 的 LoRA-only 参数、forward/backward、两组 optimizer、state 与 checkpoint/resume 均验证，full 533/533 通过。clean commit 上 fixed local 7B、synthetic batch 32 的单步 GPU smoke 产生 392 个 LoRA tensors，loss 1.96875，峰值分配 15,920,307,712 bytes并正常释放 GPU。该数值仅为实现诊断，不读取 production 数据、不构成模型效果或论文表格证据；正式训练仍等待人工审计和 deterministic runner。
 
+`8de516d...` 完成 D-031 synthetic-only 训练顺序层：source-order 样本、候选 content hash/来源、gold target/补入状态、三轮 SHA256 顺序、显式 tail repeat、micro-batch 身份与 resume cursor 全部进入可独立重建的 canonical manifest。focused 7/7、full 540/540 通过。该项没有读取 production 样本、生成候选、训练或产生指标；它只消除可重现性工程缺口，不是可回应审稿人的效果证据。
+
 TORQUE Self-Consistency 在 `b2f889b...` 冻结为每题 8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13；invalid sample 不投票，normalized span-set plurality 平票取最早 valid sample，八次全失败才输出 sentinel。focused 8/8、full 509/509 后完成正式运行，私有 evidence 支持逐题离线重算投票。该实现是 prompt baseline，不使用 interval/graph 或训练监督。
 
 TORQUE LLM-Graph 在 `99209b4...` 冻结为 gold-free one-pass structured prompt：倒数第二个 non-empty line 是 strict temporal graph JSON，最后一行是 strict answer array；节点须绑定 passage exact spans，五类边须绑定已有节点，答案须引用 graph event。focused 6/6、full 515/515 后完成正式运行，source-bound verifier 逐条重解析。该严格 primary 不在看过 dev 输出后 repair 或放宽。
