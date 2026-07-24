@@ -68,6 +68,7 @@ SAMPLE_COUNT = 8
 TEMPERATURE = 0.7
 TOP_P = 0.9
 TOP_K = 0
+SAMPLING_IMPLEMENTATION = "cpu-float32-top-p-dynamic-cache-v1"
 PAD_TOKEN_ID = 151643
 EOS_TOKEN_IDS = (151645, 151643)
 MIN_FREE_GPU_MIB = 22 * 1024
@@ -424,7 +425,11 @@ def _tokenize(tokenizer: Any, prompt: str) -> Mapping[str, Tensor]:
     ):
         _fail("candidate token tensors are invalid")
     count = int(attention.sum().item())
-    if not 1 <= count <= MAX_INPUT_TOKENS or input_ids.shape[1] != count:
+    if (
+        not 1 <= count <= MAX_INPUT_TOKENS
+        or input_ids.shape[1] != count
+        or bool((attention != 1).any().item())
+    ):
         _fail("candidate input exceeds its frozen token budget")
     return {"input_ids": input_ids.long(), "attention_mask": attention.long()}
 
@@ -436,6 +441,217 @@ def _generated_count(tokens: Tensor) -> int:
         if int(item) in EOS_TOKEN_IDS:
             break
     return count
+
+
+def _cpu_top_p_probabilities(logits: Tensor) -> Tensor:
+    if (
+        not isinstance(logits, Tensor)
+        or logits.device.type != "cpu"
+        or logits.dtype != torch.float32
+        or logits.ndim != 1
+        or logits.numel() < 2
+        or not bool(torch.isfinite(logits).all().item())
+    ):
+        _fail("candidate sampling logits are invalid")
+    scaled = logits / TEMPERATURE
+    sorted_logits, sorted_indices = torch.sort(
+        scaled, dim=-1, descending=False, stable=True
+    )
+    sorted_probabilities = torch.softmax(
+        sorted_logits, dim=-1, dtype=torch.float32
+    )
+    cumulative = torch.cumsum(
+        sorted_probabilities, dim=-1, dtype=torch.float32
+    )
+    remove = cumulative <= (1.0 - TOP_P)
+    remove[-1] = False
+    negative_infinity = torch.full_like(sorted_logits, -torch.inf)
+    sorted_filtered = torch.where(remove, negative_infinity, sorted_logits)
+    filtered = scaled.clone()
+    filtered.scatter_(dim=-1, index=sorted_indices, src=sorted_filtered)
+    probabilities = torch.softmax(filtered, dim=-1, dtype=torch.float32)
+    if (
+        not bool(torch.isfinite(probabilities).all().item())
+        or not bool((probabilities >= 0).all().item())
+        or not bool((probabilities > 0).any().item())
+        or not bool(
+            torch.isclose(
+                probabilities.sum(),
+                torch.tensor(1.0, dtype=torch.float32),
+                rtol=0.0,
+                atol=1e-6,
+            ).item()
+        )
+    ):
+        _fail("candidate sampling distribution is invalid")
+    return probabilities
+
+
+def _sample_cpu_token(logits: Tensor, generator: torch.Generator) -> int:
+    if not isinstance(generator, torch.Generator) or generator.device.type != "cpu":
+        _fail("candidate CPU generator is invalid")
+    probabilities = _cpu_top_p_probabilities(logits)
+    try:
+        sampled = torch.multinomial(
+            probabilities,
+            1,
+            replacement=False,
+            generator=generator,
+        )
+    except RuntimeError as error:
+        raise RelationCandidateError("candidate CPU sampling failed") from error
+    if sampled.dtype != torch.int64 or sampled.shape != (1,):
+        _fail("candidate sampled token is invalid")
+    return int(sampled.item())
+
+
+def _validate_dynamic_cache(
+    cache: Any,
+    expected_length: int,
+    expected_device: torch.device,
+) -> None:
+    try:
+        from transformers.cache_utils import DynamicCache
+    except ImportError as error:
+        raise RelationCandidateError("Transformers DynamicCache is unavailable") from error
+    if (
+        not isinstance(cache, DynamicCache)
+        or cache.get_seq_length() != expected_length
+        or len(cache.key_cache) != 28
+        or len(cache.value_cache) != 28
+    ):
+        _fail("candidate DynamicCache identity or length differs")
+    expected_shape = (1, 4, expected_length, 128)
+    for key, value in zip(cache.key_cache, cache.value_cache):
+        if (
+            not isinstance(key, Tensor)
+            or not isinstance(value, Tensor)
+            or tuple(key.shape) != expected_shape
+            or tuple(value.shape) != expected_shape
+            or key.device != expected_device
+            or value.device != expected_device
+            or key.dtype != torch.bfloat16
+            or value.dtype != torch.bfloat16
+        ):
+            _fail("candidate DynamicCache tensor differs")
+
+
+def _validate_sample_output(
+    output: Any,
+    cache: Any,
+    expected_length: int,
+    expected_device: torch.device,
+) -> Tensor:
+    if getattr(output, "past_key_values", None) is not cache:
+        _fail("candidate forward returned a different cache")
+    _validate_dynamic_cache(cache, expected_length, expected_device)
+    logits = getattr(output, "logits", None)
+    if (
+        not isinstance(logits, Tensor)
+        or logits.ndim != 3
+        or logits.shape[0] != 1
+        or logits.shape[1] != 1
+        or logits.shape[2] < 2
+        or logits.device != expected_device
+        or logits.dtype != torch.bfloat16
+    ):
+        _fail("candidate forward logits differ")
+    result = logits[0, -1].detach().to(device="cpu", dtype=torch.float32)
+    if not bool(torch.isfinite(result).all().item()):
+        _fail("candidate forward logits are non-finite")
+    return result
+
+
+def _incremental_cpu_sample(
+    model: Any,
+    encoded: Mapping[str, Tensor],
+    seed: int,
+    max_new_tokens: int,
+    device: torch.device,
+) -> Tensor:
+    try:
+        from transformers.cache_utils import DynamicCache
+    except ImportError as error:
+        raise RelationCandidateError("Transformers DynamicCache is unavailable") from error
+    if (
+        type(seed) is not int
+        or not 0 <= seed <= 0x7FFFFFFFFFFFFFFF
+        or type(max_new_tokens) is not int
+        or not 1 <= max_new_tokens <= COT_MAX_NEW_TOKENS
+        or not isinstance(device, torch.device)
+    ):
+        _fail("candidate incremental sampling inputs are invalid")
+    input_ids = encoded["input_ids"].to(device)
+    attention_mask = encoded["attention_mask"].to(device)
+    prompt_length = input_ids.shape[1]
+    if (
+        input_ids.dtype != torch.int64
+        or attention_mask.dtype != torch.int64
+        or input_ids.shape != attention_mask.shape
+        or input_ids.shape[0] != 1
+        or not bool((attention_mask == 1).all().item())
+    ):
+        _fail("candidate incremental prompt tensors differ")
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    cache = DynamicCache()
+    cache_position = torch.arange(prompt_length, device=device, dtype=torch.long)
+    position_ids = cache_position.unsqueeze(0)
+    try:
+        with torch.inference_mode():
+            output = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                position_ids=position_ids,
+                past_key_values=cache,
+                use_cache=True,
+                return_dict=True,
+                cache_position=cache_position,
+                num_logits_to_keep=1,
+            )
+            next_logits = _validate_sample_output(
+                output, cache, prompt_length, device
+            )
+            generated = []
+            current_length = prompt_length
+            for step in range(max_new_tokens):
+                token = _sample_cpu_token(next_logits, generator)
+                generated.append(token)
+                if token in EOS_TOKEN_IDS or step + 1 == max_new_tokens:
+                    break
+                token_tensor = torch.tensor(
+                    [[token]], device=device, dtype=torch.long
+                )
+                attention_mask = torch.cat(
+                    (
+                        attention_mask,
+                        torch.ones((1, 1), device=device, dtype=torch.long),
+                    ),
+                    dim=1,
+                )
+                cache_position = torch.tensor(
+                    [current_length], device=device, dtype=torch.long
+                )
+                position_ids = cache_position.unsqueeze(0)
+                output = model(
+                    input_ids=token_tensor,
+                    attention_mask=attention_mask,
+                    position_ids=position_ids,
+                    past_key_values=cache,
+                    use_cache=True,
+                    return_dict=True,
+                    cache_position=cache_position,
+                    num_logits_to_keep=1,
+                )
+                current_length += 1
+                next_logits = _validate_sample_output(
+                    output, cache, current_length, device
+                )
+    except RelationCandidateError:
+        raise
+    except Exception as error:
+        raise RelationCandidateError("candidate incremental forward failed") from error
+    return torch.tensor(generated, dtype=torch.long)
 
 
 def _one_generation(
@@ -453,32 +669,39 @@ def _one_generation(
         seed = _seed(pair.source_id, position.sample_position)
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
-    device_inputs = {key: value.to("cuda:0") for key, value in encoded.items()}
-    arguments = {
-        "max_new_tokens": position.max_new_tokens,
-        "do_sample": position.do_sample,
-        "use_cache": True,
-        "pad_token_id": PAD_TOKEN_ID,
-        "eos_token_id": list(EOS_TOKEN_IDS),
-    }
-    if position.do_sample:
-        arguments.update(temperature=TEMPERATURE, top_p=TOP_P, top_k=TOP_K)
+        tokens = _incremental_cpu_sample(
+            model,
+            encoded,
+            seed,
+            position.max_new_tokens,
+            torch.device("cuda:0"),
+        )
     else:
-        arguments.update(temperature=None, top_p=None, top_k=None)
-    try:
-        with torch.inference_mode():
-            output = model.generate(**device_inputs, **arguments)
-    except Exception as error:
-        raise RelationCandidateError("candidate model generation failed") from error
-    width = encoded["input_ids"].shape[1]
-    if (
-        not isinstance(output, Tensor)
-        or output.ndim != 2
-        or output.shape[0] != 1
-        or not width <= output.shape[1] <= width + position.max_new_tokens
-    ):
-        _fail("candidate generation tensor shape differs")
-    tokens = output[0, width:].detach().cpu()
+        device_inputs = {key: value.to("cuda:0") for key, value in encoded.items()}
+        arguments = {
+            "max_new_tokens": position.max_new_tokens,
+            "do_sample": False,
+            "use_cache": True,
+            "pad_token_id": PAD_TOKEN_ID,
+            "eos_token_id": list(EOS_TOKEN_IDS),
+            "temperature": None,
+            "top_p": None,
+            "top_k": None,
+        }
+        try:
+            with torch.inference_mode():
+                output = model.generate(**device_inputs, **arguments)
+        except Exception as error:
+            raise RelationCandidateError("candidate model generation failed") from error
+        width = encoded["input_ids"].shape[1]
+        if (
+            not isinstance(output, Tensor)
+            or output.ndim != 2
+            or output.shape[0] != 1
+            or not width <= output.shape[1] <= width + position.max_new_tokens
+        ):
+            _fail("candidate generation tensor shape differs")
+        tokens = output[0, width:].detach().cpu()
     try:
         response = tokenizer.decode(
             tokens, skip_special_tokens=True, clean_up_tokenization_spaces=False
@@ -715,6 +938,7 @@ def _config(
             for value in POSITIONS
         ],
         "sampling": {"temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K},
+        "sampling_implementation": SAMPLING_IMPLEMENTATION,
         "max_input_tokens": MAX_INPUT_TOKENS,
         "batch_size": 1,
         "dtype": "bfloat16",

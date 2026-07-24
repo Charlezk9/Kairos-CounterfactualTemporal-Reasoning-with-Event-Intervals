@@ -3,7 +3,11 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from types import SimpleNamespace
 import unittest
+
+import torch
+from transformers.cache_utils import DynamicCache
 
 from kairos.ids import canonical_json
 from kairos import relation_candidates as candidates
@@ -28,6 +32,55 @@ def _evidence(answer_by_position):
             }
         )
     return rows
+
+
+class _CacheModel:
+    def __init__(self, vocabulary_size=20):
+        self.vocabulary_size = vocabulary_size
+        self.prefix_by_cache = {}
+        self.cache_objects = []
+        self.cached_logits = []
+
+    def logits_for_prefix(self, prefix):
+        target = sum(prefix) % self.vocabulary_size
+        values = [-(abs(index - target)) for index in range(self.vocabulary_size)]
+        return torch.tensor(values, dtype=torch.bfloat16)
+
+    def __call__(
+        self,
+        *,
+        input_ids,
+        attention_mask,
+        position_ids,
+        past_key_values,
+        use_cache,
+        return_dict,
+        cache_position,
+        num_logits_to_keep,
+    ):
+        assert isinstance(past_key_values, DynamicCache)
+        assert use_cache and return_dict and num_logits_to_keep == 1
+        identity = id(past_key_values)
+        previous = self.prefix_by_cache.get(identity, [])
+        if not previous:
+            self.cache_objects.append(past_key_values)
+        token_values = [int(value) for value in input_ids[0].tolist()]
+        expected_positions = list(range(len(previous), len(previous) + len(token_values)))
+        assert cache_position.tolist() == expected_positions
+        assert position_ids.tolist() == [expected_positions]
+        prefix = [*previous, *token_values]
+        assert attention_mask.shape == (1, len(prefix))
+        assert bool((attention_mask == 1).all())
+        self.prefix_by_cache[identity] = prefix
+        new_length = len(token_values)
+        keys = torch.zeros((1, 4, new_length, 128), dtype=torch.bfloat16)
+        for layer in range(28):
+            past_key_values.update(keys, keys.clone(), layer)
+        logits = self.logits_for_prefix(prefix)
+        self.cached_logits.append(logits.float())
+        return SimpleNamespace(
+            logits=logits.reshape(1, 1, -1), past_key_values=past_key_values
+        )
 
 
 class RelationCandidateProtocolTests(unittest.TestCase):
@@ -150,6 +203,75 @@ class RelationCandidateProtocolTests(unittest.TestCase):
                 candidates._resource_gate(path, "a" * 40)
         finally:
             shutil.rmtree(temporary_root)
+
+    def test_cpu_top_p_filter_ties_and_generator_lifecycle_are_exact(self):
+        logits = torch.zeros(20, dtype=torch.float32)
+        probabilities = candidates._cpu_top_p_probabilities(logits)
+        self.assertEqual(probabilities[:2].tolist(), [0.0, 0.0])
+        self.assertTrue(bool((probabilities[2:] > 0).all()))
+        self.assertAlmostEqual(float(probabilities.sum()), 1.0, places=6)
+
+        first = torch.Generator(device="cpu")
+        second = torch.Generator(device="cpu")
+        first.manual_seed(12345)
+        second.manual_seed(12345)
+        first_sequence = [
+            candidates._sample_cpu_token(logits, first) for _ in range(12)
+        ]
+        second_sequence = [
+            candidates._sample_cpu_token(logits, second) for _ in range(12)
+        ]
+        self.assertEqual(first_sequence, second_sequence)
+        reset_each_token = []
+        for _ in range(12):
+            reset = torch.Generator(device="cpu")
+            reset.manual_seed(12345)
+            reset_each_token.append(candidates._sample_cpu_token(logits, reset))
+        self.assertNotEqual(first_sequence, reset_each_token)
+
+        with self.assertRaisesRegex(
+            candidates.RelationCandidateError, "sampling logits"
+        ):
+            candidates._cpu_top_p_probabilities(
+                torch.tensor([0.0, float("nan")], dtype=torch.float32)
+            )
+
+    def test_incremental_cache_matches_full_prefix_and_is_isolated(self):
+        prompt = torch.tensor([[3, 1, 4]], dtype=torch.long)
+        encoded = {
+            "input_ids": prompt,
+            "attention_mask": torch.ones_like(prompt),
+        }
+        model = _CacheModel()
+        seed = 777
+        generated = candidates._incremental_cpu_sample(
+            model, encoded, seed, 4, torch.device("cpu")
+        )
+
+        reference_generator = torch.Generator(device="cpu")
+        reference_generator.manual_seed(seed)
+        prefix = prompt[0].tolist()
+        reference_tokens = []
+        reference_logits = []
+        for _ in range(4):
+            logits = model.logits_for_prefix(prefix).float()
+            reference_logits.append(logits)
+            token = candidates._sample_cpu_token(logits, reference_generator)
+            reference_tokens.append(token)
+            prefix.append(token)
+        self.assertEqual(generated.tolist(), reference_tokens)
+        self.assertEqual(len(model.cached_logits), len(reference_logits))
+        for cached, full_prefix in zip(model.cached_logits, reference_logits):
+            self.assertTrue(torch.equal(cached, full_prefix))
+
+        first_cache = model.cache_objects[0]
+        candidates._incremental_cpu_sample(
+            model, encoded, seed + 1, 2, torch.device("cpu")
+        )
+        self.assertEqual(len(model.cache_objects), 2)
+        self.assertIsNot(first_cache, model.cache_objects[1])
+        self.assertEqual(first_cache.get_seq_length(), len(prompt[0]) + 3)
+        self.assertEqual(model.cache_objects[1].get_seq_length(), len(prompt[0]) + 1)
 
 
 if __name__ == "__main__":
