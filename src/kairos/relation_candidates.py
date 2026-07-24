@@ -224,8 +224,15 @@ def _verify_model_files() -> Mapping[str, str]:
         if hasher.hexdigest() != digest:
             _fail("model file SHA256 differs")
         result[relative] = digest
-    if len(result) != 15:
-        _fail("model file count differs")
+    if len(result) != 14:
+        _fail("model SHA256SUMS entry count differs")
+    try:
+        names = {entry.name for entry in os.scandir(MODEL_PATH)}
+    except OSError as error:
+        raise RelationCandidateError("model namespace cannot be scanned") from error
+    if names != set(result).union({"SHA256SUMS"}):
+        _fail("model namespace differs from SHA256SUMS")
+    result["SHA256SUMS"] = MODEL_SHA256SUMS_SHA256
     tokenizer_config = _file_bytes(
         MODEL_PATH / "tokenizer_config.json",
         result.get("tokenizer_config.json", ""),
