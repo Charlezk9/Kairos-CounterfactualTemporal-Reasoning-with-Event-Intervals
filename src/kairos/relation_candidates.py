@@ -227,10 +227,22 @@ def _verify_model_files() -> Mapping[str, str]:
     if len(result) != 14:
         _fail("model SHA256SUMS entry count differs")
     try:
-        names = {entry.name for entry in os.scandir(MODEL_PATH)}
+        entries = tuple(os.scandir(MODEL_PATH))
     except OSError as error:
         raise RelationCandidateError("model namespace cannot be scanned") from error
-    if names != set(result).union({"SHA256SUMS"}):
+    file_names = {
+        entry.name for entry in entries if entry.is_file(follow_symlinks=False)
+    }
+    non_files = {
+        entry.name for entry in entries if not entry.is_file(follow_symlinks=False)
+    }
+    cache_entries = [entry for entry in entries if entry.name == ".cache"]
+    if (
+        file_names != set(result).union({"SHA256SUMS"})
+        or non_files != {".cache"}
+        or len(cache_entries) != 1
+        or not cache_entries[0].is_dir(follow_symlinks=False)
+    ):
         _fail("model namespace differs from SHA256SUMS")
     result["SHA256SUMS"] = MODEL_SHA256SUMS_SHA256
     tokenizer_config = _file_bytes(
