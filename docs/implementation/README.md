@@ -119,6 +119,15 @@ manifest-last training-plan publisher and full deterministic replay. Focused
 authorized before the two-person audit gate succeeds; detailed evidence is in
 `../ai-context/checkpoints/phase-03-training-materialization.md`.
 
+### Human-audit result gate boundary
+
+D-035 freezes a synthetic-only parser and statistic gate for future completed
+Reviewer A/B submissions and an authors-only adjudication. It requires exact
+item order and canonical filled schemas, locks all input hashes, computes
+overall-valid Cohen's kappa and adjudicated validity, and fails when kappa is
+undefined or either threshold is missed. The evaluator may never fill or infer
+human fields, and current production templates remain unread and untouched.
+
 ## CLI 与 manifest
 
 计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation，但尚无统一 CLI 或训练 runner。
