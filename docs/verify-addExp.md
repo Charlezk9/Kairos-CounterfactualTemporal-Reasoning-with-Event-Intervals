@@ -106,6 +106,8 @@ Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427
 
 `9a58155...` 完成 D-034 synthetic-only 候选/token 物化与 plan publisher：typed relation pair、exact candidate proposals 与 gold injection形成 D-031 corpus；单个 micro-batch按需生成 original/CF chat event masks、candidate answer masks、双向 relation targets和 original answer target，并以私有 no-replace/manifest-last 工件完整重放 training plan。focused 9/9、full 560/560 通过。该项仍未读取 production pair/prediction/tokenizer/model、未发布正式 plan或训练；它不提供论文效果数值，也不解除两人人工审计门禁。
 
+`832e755...` 完成 D-035 synthetic-only 人工审计结果门禁：对未来已锁定的 Reviewer A、Reviewer B 与 authors adjudication bytes执行 exact 200 行 canonical JSONL、ID/order/schema/Boolean/hash校验，汇总逐字段 agreement、overall-valid 2×2 confusion、Cohen's kappa 与 adjudicated validity，并仅在 κ≥0.80 且 validity≥95% 时通过。focused 5/5、full 565/565 通过。实现没有读取或填写 production 空白模板，也没有生成正式审计结果；因此本项是审计软件准备，不是人工有效性证据或训练许可。
+
 TORQUE Self-Consistency 在 `b2f889b...` 冻结为每题 8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13；invalid sample 不投票，normalized span-set plurality 平票取最早 valid sample，八次全失败才输出 sentinel。focused 8/8、full 509/509 后完成正式运行，私有 evidence 支持逐题离线重算投票。该实现是 prompt baseline，不使用 interval/graph 或训练监督。
 
 TORQUE LLM-Graph 在 `99209b4...` 冻结为 gold-free one-pass structured prompt：倒数第二个 non-empty line 是 strict temporal graph JSON，最后一行是 strict answer array；节点须绑定 passage exact spans，五类边须绑定已有节点，答案须引用 graph event。focused 6/6、full 515/515 后完成正式运行，source-bound verifier 逐条重解析。该严格 primary 不在看过 dev 输出后 repair 或放宽。
@@ -139,6 +141,8 @@ Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f
 relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no marker / 1,475 extraction rejected / 0 rewrite rejected / 370 retained（4.951%）。370 个 pair/source/original/CF record ID 均唯一；JSONL 为 785,369 bytes，SHA256 `525e3b09c6a6d03942a6bc3e03ebcd1722c3a68f4f224753dbc641f98465c12a`，manifest SHA256 `4e22ff135d97c89ded50a54fc1007f25d9646db67ce112e4637d4e8c8b63674a`，execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`。fresh source-lockstep replay 通过，且没有 test 工件。该工件只支持 original-answer 与 original/inverted-relation supervision；CF answer unavailable/masked，所以这些计数不能进入 CF accuracy/update/consistency 结果。
 
 200 条人工审计准备包已从该 train population 确定性生成：seed 20260723，after/follows 259→140，before/precedes 111→60。items/Reviewer-A/Reviewer-B/instructions/manifest SHA 为 `0f37bc96...` / `3a2618b9...` / `390e7cb5...` / `8ee14494...` / `da5d7fb0...`。两份 reviewer 模板的 event/relation/grammar/non-target/overall 字段全部为 null；因此当前只能报告 `PACKET VERIFIED / HUMAN REVIEW PENDING`，不能报告 Cohen's kappa、有效率或据此训练。两位同伴作者需按包内 instructions 独立填写并锁定完成副本。
+
+D-035 的结果 evaluator 已开发验证，但尚未接收任何 production submission。真实 κ、adjudicated validity 与 gate status 仍全部 unavailable；作者完成 A/B 独立审阅并锁定 bytes 后，需再由作者完成分歧 adjudication，随后另行冻结 production ingestion/result artifact 才能计算和登记。
 
 ## 7. 已有实验复现结果
 

@@ -121,12 +121,17 @@ authorized before the two-person audit gate succeeds; detailed evidence is in
 
 ### Human-audit result gate boundary
 
-D-035 freezes a synthetic-only parser and statistic gate for future completed
-Reviewer A/B submissions and an authors-only adjudication. It requires exact
+D-035 is implemented at commit
+`832e755fbdee9dcff5977142ad0cf7ba29b60399` as a synthetic-only parser and
+statistic gate for future completed Reviewer A/B submissions and an
+authors-only adjudication. It requires exact
 item order and canonical filled schemas, locks all input hashes, computes
 overall-valid Cohen's kappa and adjudicated validity, and fails when kappa is
 undefined or either threshold is missed. The evaluator may never fill or infer
 human fields, and current production templates remain unread and untouched.
+Focused 5/5 and full 565/565 tests pass; this is development verification only,
+not a completed audit or training authorization. Detailed evidence is in
+`../ai-context/checkpoints/phase-01-relation-audit-result-gate.md`.
 
 ## CLI 与 manifest
 

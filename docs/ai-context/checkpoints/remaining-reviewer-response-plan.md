@@ -13,6 +13,12 @@ now `VERIFIED / EXACT SCORE TIE`; its unique evidence is
 same-supervision gap: both human review templates remain blank, so Kairos,
 Pair-MLP and Same-data SFT production training are still prohibited.
 
+The D-035 result evaluator is now `DEVELOPMENT VERIFIED / SYNTHETIC ONLY` at
+`832e755...`: strict completed-submission parsing, hash binding, Cohen's kappa
+and adjudicated-validity thresholds are ready. This closes only the software
+portion of Stage 1B item 2. It does not replace the two independent human
+reviews or authors' adjudication, and no production audit result exists.
+
 ## Objective and claim boundary
 
 The remaining work must answer the reviewers with traceable evidence rather

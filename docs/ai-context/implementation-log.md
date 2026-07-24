@@ -289,3 +289,10 @@
 - `9a58155...` 实现 `kairos.training_materialization`：typed pair与候选 proposal形成 D-031 corpus binding，fake fast tokenizer只按需物化一个含 repeat slots 的 CPU `TrainingBatch`，original/CF 两组 event/relations 与 original answer target严格对齐。
 - 同提交实现 `kairos.training_plan_artifacts`：allowed `/data0` 私有 root、clean Git双门禁、plan/manifest no-replace+fsync、完整 deterministic reconstruction、hash/bytes/namespace/mode/tamper replay。第二门禁失败保留 plan-only partial，不伪装完成。
 - focused 9/9、full 560/560（17.727s）通过，最大 RSS 537,672 KiB，GPU 隐藏、CPU 两线程；测试临时 plan全部清理。没有 production record/candidate/tokenizer/model读取，没有正式 plan、训练或论文指标。
+
+## 2026-07-24 — Synthetic human-audit result gate
+
+- `fbf7de2...` 以 D-035 冻结 completed A/B submissions、authors adjudication、hash binding、overall-valid Cohen's kappa与 adjudicated-validity 门禁；AI 不得读取、填写或裁决 production 模板。
+- `832e755...` 实现 `kairos.relation_audit_results`：exact 200 行 canonical JSONL、slot/ID/order/schema/Boolean/overall 校验、agreement-preserving adjudication、2×2 confusion、逐字段 agreement、κ unavailable处理与包含等号的 0.80/0.95 阈值。
+- 提交前自审发现 frozen result 的嵌套 mapping 仍可变，改为深层只读并增加回归断言；hash 与 canonical output 因而不能被返回后的调用方修改。
+- focused 5/5、最终 full 565/565（17.876s）通过，GPU 隐藏、CPU 两线程。测试只有 synthetic filled bytes；production packet/templates 未读取，正式 κ/validity/result artifact/训练许可均不存在。

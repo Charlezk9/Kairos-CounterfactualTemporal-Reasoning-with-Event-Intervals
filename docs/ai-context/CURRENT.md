@@ -4,14 +4,14 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 9a58155ed4cb608e5b5dbc7b2a5b804002a2571e
-- last_verified_commit: 9a58155ed4cb608e5b5dbc7b2a5b804002a2571e
-- last_completed_checkpoint: checkpoints/phase-03-training-materialization.md
+- git_head: 832e755fbdee9dcff5977142ad0cf7ba29b60399
+- last_verified_commit: 832e755fbdee9dcff5977142ad0cf7ba29b60399
+- last_completed_checkpoint: checkpoints/phase-01-relation-audit-result-gate.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA production training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. TORQUE/TimeQA prompt baselines and the D-032 Rule-Graph structured baseline are verified; Rule-Graph exactly ties Direct on all four metrics with 1,465/1,483 conservative fallbacks. Kairos/Pair-MLP tensor cores, PEFT Qwen adapter, CPU resumable execution, v2 checkpoint binding, deterministic sampler/candidate/batch/cursor, D-034 token materializer/plan publisher and one-step 7B GPU feasibility are development-verified. Production candidate generation/provenance, production training-plan publication and formal trained runs remain incomplete. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. The D-035 result evaluator is synthetic-development-verified, but real Cohen's kappa/validity remain unavailable, so GSM8K LoRA production training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`; 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`. TORQUE/TimeQA prompt baselines and the D-032 Rule-Graph structured baseline are verified; Rule-Graph exactly ties Direct on all four metrics with 1,465/1,483 conservative fallbacks. Kairos/Pair-MLP tensor cores, PEFT Qwen adapter, CPU resumable execution, v2 checkpoint binding, deterministic sampler/candidate/batch/cursor, D-034 token materializer/plan publisher and one-step 7B GPU feasibility are development-verified. Production candidate generation/provenance, production training-plan publication and formal trained runs remain incomplete. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 冻结并仅用 synthetic filled fixtures 实现两份未来人工 reviewer submission 的严格读取、锁定哈希、overall-valid Cohen's kappa 与 adjudicated validity 聚合；不得读取或填写当前全 null production templates，正式 candidate generation/plan/training继续等待人类审计达标。
+- next_safe_action: 等待两位人类作者按现有 instructions 独立填写 Reviewer A/B 并分别锁定 bytes，再由人类作者完成分歧 adjudication；AI 不得代填、推断或裁决。在真实文件存在前不得实现 production ingestion/result publisher，不得生成 production candidates、发布 training plan 或启动训练。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
   - `checkpoints/phase-01-2wiki-source-recovery.md`
@@ -38,6 +38,7 @@
   - `checkpoints/phase-03-deterministic-training-plan.md`
   - `checkpoints/phase-03-torque-rule-graph-baseline.md`
   - `checkpoints/phase-03-training-materialization.md`
+  - `checkpoints/phase-01-relation-audit-result-gate.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`
