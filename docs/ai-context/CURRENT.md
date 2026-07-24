@@ -4,14 +4,14 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 7a4cf6bca04a80e74d2635e180bbe4122ad24704
-- last_verified_commit: 7772f7c0b83557c423456de62a3fd733781e3499
-- last_completed_checkpoint: checkpoints/phase-03-resumable-training-execution.md
+- git_head: 1d80f5d4196a5a89cb1b465f162c5822c07534cb
+- last_verified_commit: 1d80f5d4196a5a89cb1b465f162c5822c07534cb
+- last_completed_checkpoint: checkpoints/phase-03-checkpoint-identity-binding.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`. 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`: four frozen official Dropbox routes/probes returned no HTTP response and the pinned HF mirror failed with OS network unreachable; no dataset byte was accepted. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores, shared synthetic Qwen adapter and CPU resumable execution are development-verified. PEFT is absent from the fixed local environment/cache and dependency expansion lacks separate authorization; checkpoint binding, deterministic production sampler and formal trained runs remain incomplete. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`. 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`: four frozen official Dropbox routes/probes returned no HTTP response and the pinned HF mirror failed with OS network unreachable; no dataset byte was accepted. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores, shared synthetic Qwen adapter, CPU resumable execution and v2 checkpoint identity binding are development-verified. PEFT is absent from the fixed local environment/cache and dependency expansion lacks separate authorization; production artifact verification, deterministic sampler/batch materialization and formal trained runs remain incomplete. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 按 D-029 在 synthetic-only 边界实现并测试 checkpoint 的 model revision、model SHA256SUMS、data manifest 与 core-type binding；不安装 PEFT、不读取 production 样本、不加载 7B、不使用 GPU。完成 clean tests 和关键提交后等待依赖扩充与人工审计授权。
+- next_safe_action: 在不安装依赖、不读取 production 样本、不加载 7B、不使用 GPU 的前提下，先冻结 deterministic epoch sampler、batch/candidate manifest 与 source-order resume contract；正式训练继续等待 PEFT 依赖扩充授权和两人 relation audit。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
   - `checkpoints/phase-01-2wiki-source-recovery.md`
@@ -33,6 +33,7 @@
   - `checkpoints/phase-03-torque-llm-graph-baseline.md`
   - `checkpoints/phase-03-qwen-core-training-adapter.md`
   - `checkpoints/phase-03-resumable-training-execution.md`
+  - `checkpoints/phase-03-checkpoint-identity-binding.md`
   - `checkpoints/phase-01-gsm8k-construction-v0.md`
   - `checkpoints/phase-01-construction-audit-persistence.md`
   - `checkpoints/phase-01-construction-audit-schema.md`

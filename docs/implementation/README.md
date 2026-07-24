@@ -55,11 +55,18 @@ progress, RNG capture/restore and private manifest-last/no-replace checkpoints.
 Both Kairos and Pair-MLP match uninterrupted execution after an interrupted,
 fresh-object resume in CPU synthetic tests; focused 20/20 and full 528/528 pass.
 
+Commit `1d80f5d4196a5a89cb1b465f162c5822c07534cb` advances the synthetic
+checkpoint to v2 and binds the fixed Qwen revision/model checksum, dataset
+revision/data-manifest checksum and exact Kairos/Pair-MLP core type. Resume
+rejects an expected-binding mismatch before opening the state file.
+
 This layer still consumes an already materialized deterministic batch sequence.
-It does not inject PEFT, bind a frozen backbone revision or production data
-manifest, load the 7B model, use a GPU or authorize formal training. The exact
-contract, BF16 interval correction and remaining boundary are recorded only in
-`../ai-context/checkpoints/phase-03-resumable-training-execution.md`.
+It does not independently verify production artifacts, inject PEFT, load the 7B
+model, use a GPU or authorize formal training. The D-028 execution contract and
+BF16 correction are recorded in
+`../ai-context/checkpoints/phase-03-resumable-training-execution.md`; the v2
+identity evidence is in
+`../ai-context/checkpoints/phase-03-checkpoint-identity-binding.md`.
 
 ## CLI 与 manifest
 

@@ -69,6 +69,11 @@ states, but does not yet bind a frozen backbone model revision or production
 data manifest; it must not be used as a formal training checkpoint until those
 bindings are added.
 
+Historical update: D-029 and commit `1d80f5d...` subsequently added v2 model,
+data-manifest and core-type identity binding. That newer layer still does not
+verify a production manifest, implement a sampler/runner or authorize formal
+training; its evidence is in `phase-03-checkpoint-identity-binding.md`.
+
 D-023 remains unchanged: no production GSM8K training may begin before the two
 human audit submissions pass the registered agreement and validity thresholds.
 The next safe action is a read-only local PEFT availability check followed by a

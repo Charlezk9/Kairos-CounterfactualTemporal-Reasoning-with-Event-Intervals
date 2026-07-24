@@ -251,3 +251,11 @@
 - 首轮等价测试发现 interval mask 在 autocast 下把已量化 BF16 坐标提升回 FP32；mask 改为投影坐标 dtype 后保持精确端点恒等式，FP32 行为不变。
 - focused 20/20（1.830s）、full 528/528（18.175s）通过；GPU 隐藏、CPU 两线程，测试 checkpoint 已清理，没有 production 数据/模型读取、正式工件或指标。
 - 当前执行层只消费调用方已物化的 deterministic batches；未实现 sampler/data/candidate/CLI/PEFT/7B/GPU，且 checkpoint 未绑定 frozen backbone revision 或 production data manifest，因此不得用于正式训练。
+
+## 2026-07-24 — Checkpoint artifact identity binding
+
+- 局部 Conda 环境只读检查为 `peft_spec=none` / `peft_version=none`，package cache 无 PEFT；遵守依赖扩充需另行授权的既有约束，没有安装包、加载模型或使用 GPU。
+- `ee66675...` 以 D-029 冻结 fixed Qwen revision/`SHA256SUMS`、data revision/manifest 和 Kairos/Pair-MLP core-type binding；`1d80f5d...` 将 config/state/manifest 原子升级为 v2 并实现该身份对象。
+- 保存前从 live adapter 推导 core；resume 在打开 `state.pt` 前校验 live core 与 expected commit/config/binding，mismatch 不改变 model/optimizer/scheduler/dataloader RNG。
+- focused 8/8（1.735s）、最终 full 530/530（17.316s）通过；GPU 隐藏、CPU 两线程、最大 RSS 499,964 KiB，测试工件清理。环境没有 pytest，故使用仓库既有标准库 unittest，不为测试扩充依赖。
+- binding 只记录调用方给定的 immutable identity；production runner 仍需独立验证实际模型和 data manifest。sampler/batch/candidate/CLI/PEFT/7B/GPU/formal run 仍不存在。

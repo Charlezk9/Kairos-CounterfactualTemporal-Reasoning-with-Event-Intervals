@@ -96,7 +96,9 @@ Kairos tensor core 已在 `c178d15...` 独立实现并通过 14/14 focused、427
 
 `14f7104...` 进一步完成 synthetic-only Qwen-to-core adapter：Kairos/Pair-MLP 共用 original/CF/candidate batch、hidden states、span masks 和三项 loss；只编码 valid candidates，Qwen base decoder 禁用 cache 且不保留所有层 hidden states。LoRA 独立默认固定 rank 16/alpha 32/dropout 0.05，并验证 `q/k/v/o/gate/up/down_proj` 七类 target suffix；当前没有注入 PEFT、加载 7B、持久 checkpoint 或正式训练。focused 7/7、full 522/522 与两个 core 的 synthetic backward 通过。
 
-`7772f7c...` 完成 D-028 synthetic-only 可恢复执行层：严格两组 AdamW、effective-batch accumulation、BF16、scheduler、RNG 和 manifest-last/no-replace checkpoint。Kairos 与 Pair-MLP 的 CPU synthetic uninterrupted 和 interrupted/resumed 路径逐项等价，focused 20/20、full 528/528 通过；同时修复 interval mask 在 autocast 下把 BF16 坐标提升回 FP32 的缺陷，FP32 语义不变。该项不读取 production 数据、不加载 7B、不使用 GPU，也不产生论文指标；checkpoint 尚未绑定 frozen backbone revision 或 production data manifest，不能作为正式训练证据。
+`7772f7c...` 完成 D-028 synthetic-only 可恢复执行层：严格两组 AdamW、effective-batch accumulation、BF16、scheduler、RNG 和 manifest-last/no-replace checkpoint。Kairos 与 Pair-MLP 的 CPU synthetic uninterrupted 和 interrupted/resumed 路径逐项等价，focused 20/20、full 528/528 通过；同时修复 interval mask 在 autocast 下把 BF16 坐标提升回 FP32 的缺陷，FP32 语义不变。该项不读取 production 数据、不加载 7B、不使用 GPU，也不产生论文指标；该 commit 的 v1 checkpoint 当时尚未绑定 frozen backbone revision 或 production data manifest，不能作为正式训练证据。
+
+`1d80f5d...` 随后将 synthetic checkpoint 升级为 v2，绑定 fixed Qwen model/revision/`SHA256SUMS`、dataset revision/data-manifest SHA256 与 Kairos/Pair-MLP core type；resume 在打开 state 前校验 expected binding。focused 8/8、full 530/530 通过。该 binding 仍不等于实际 production manifest verification，也未实现 PEFT、sampler、7B/GPU 或正式训练，因此不产生新的论文效果数值。
 
 TORQUE Self-Consistency 在 `b2f889b...` 冻结为每题 8 个 CoT samples、temperature 0.7、top-p 0.9、seed 13；invalid sample 不投票，normalized span-set plurality 平票取最早 valid sample，八次全失败才输出 sentinel。focused 8/8、full 509/509 后完成正式运行，私有 evidence 支持逐题离线重算投票。该实现是 prompt baseline，不使用 interval/graph 或训练监督。
 
