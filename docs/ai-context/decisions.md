@@ -303,3 +303,13 @@
 - 实现边界：新增 `kairos.training_execution` 及对应测试；不新增读取 production 数据的 CLI，不接触 candidate materialization，不创建正式 checkpoint/run/registry metric，也不改变 D-023 人工门禁。实现差异和验证结果在完成后写入单一 Phase 03 checkpoint。
 - 验证结果：focused training-execution/modeling 20/20、最终 full 528/528 通过；Kairos 与 Pair-MLP 的 CPU BF16 uninterrupted 与 interrupted/resumed 路径在 trainable/optimizer/scheduler/progress/loss/gradient/RNG 上逐项相等。首轮发现并修复 mask dtype 将 BF16 interval coordinates 错误提升回 FP32 的既有 autocast 缺陷；FP32 语义不变。
 - 未完成边界：当前 API 消费调用方已物化的 deterministic batch sequence，不实现 sampler/epoch/data/candidate/CLI/PEFT/7B/GPU。v1 synthetic checkpoint 尚未绑定 frozen backbone revision 与 production data manifest，因此不得用作 formal checkpoint；唯一详细证据见 `checkpoints/phase-03-resumable-training-execution.md`。
+
+## D-029：训练 checkpoint 身份绑定与 PEFT 前置门禁
+
+- 状态：`FROZEN / CHECKPOINT BINDING APPROVED TO IMPLEMENT / PEFT BLOCKED`；冻结父提交为 `7a4cf6bca04a80e74d2635e180bbe4122ad24704`。局部环境只读检查结果为 `peft_spec=none`、`peft_version=none`，局部 Conda/package cache 未发现 PEFT 分发包。本决定不授权安装或升级依赖，不授权读取 production 样本、加载 7B 权重、使用 GPU 或正式训练。
+- 身份对象：新增 canonical `TrainingArtifactBinding`。模型字段固定为 `Qwen/Qwen2.5-7B-Instruct`、revision `a09a35458c702b33eeacc393d103063234e8bc28`、本地 `SHA256SUMS` 文件 SHA256 `3ee6c9510b7e50bfcd46d6df33cafa3e2019f13a6a09bf1d2f9e80cdfe1164e8`；数据字段为 bounded dataset ID、40-hex revision、bounded split、bounded artifact ID 和 lowercase 64-hex immutable data-manifest SHA256；core type 只允许 `kairos` 或 `pair-mlp`。
+- Checkpoint schema：由于不存在需要兼容的正式 checkpoint，config/state/manifest schema 原子升级为 v2。canonical config 和 manifest 都必须包含同一完整 binding；`VerifiedTrainingCheckpoint` 暴露解析后的 binding。state 仍只含受限 tensor/scalar/RNG/progress 对象，不放路径或任意用户对象。
+- 保存门禁：保存前从 `QwenCoreTrainingAdapter.core` 推导实际 core type，并要求与 binding 完全一致；模型/data binding 由调用方提供的冻结 manifest 产生，本层不把一个 hash 声称为已经验证过对应文件。后续 production runner 必须先独立验证实际模型 `SHA256SUMS` 和数据 manifest，再传入 binding。
+- 恢复门禁：resume 必须显式接收 expected binding；在读取和应用 state 前校验 execution commit、config 与 binding 全等，并再次校验 live adapter core type。任何 mismatch 必须在 model/optimizer/scheduler/RNG 状态变化前 fail closed。
+- 验收：Kairos/Pair-MLP 保存、verify、resume 均覆盖；model revision、model checksum、dataset revision、data-manifest hash、split/artifact ID 与 core-type 任一篡改或 expected mismatch 都被拒绝；原 D-028 uninterrupted/resumed 等价继续成立；focused/full tests 通过且测试工件清理。
+- PEFT 后续合同：只有在用户明确授权扩充局部依赖并冻结兼容版本后，才可 lazy-import PEFT，使用 D-028 的 rank 16/alpha 32/dropout 0.05、bias none 和七类 Qwen target modules 注入；注入后必须证明 base 参数冻结、trainable 参数仅为 `lora_` 与 temporal core，并重新跑全量测试。没有真实 PEFT 安装验证前，不创建伪适配层、不执行 7B/GPU smoke。

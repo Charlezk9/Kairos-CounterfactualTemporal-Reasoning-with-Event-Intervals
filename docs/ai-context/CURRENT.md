@@ -4,14 +4,14 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 7772f7c0b83557c423456de62a3fd733781e3499
+- git_head: 7a4cf6bca04a80e74d2635e180bbe4122ad24704
 - last_verified_commit: 7772f7c0b83557c423456de62a3fd733781e3499
 - last_completed_checkpoint: checkpoints/phase-03-resumable-training-execution.md
 - active_run_ids: none
 - running_processes: none
-- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`. 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`: four frozen official Dropbox routes/probes returned no HTTP response and the pinned HF mirror failed with OS network unreachable; no dataset byte was accepted. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores, shared synthetic Qwen adapter and CPU resumable execution are development-verified, but PEFT injection, frozen backbone/data-manifest checkpoint binding, deterministic production sampler and formal trained runs do not exist. TimeQA D-019 remains unchanged.
+- blockers: GSM8K v0 is `VERIFIED / ZERO_RETAINED`; relation-only v1 train artifact and deterministic 200-pair audit packet are verified, but both reviewer templates remain entirely null. Cohen's kappa/validity are unavailable, so GSM8K LoRA training remains blocked and CF-answer metrics are unsupported. MuSiQue remains `BLOCKED_POLICY / TRUSTED_ANCESTOR_CONFLICT`; StrategyQA is `STAGED_ARCHIVE_POLICY_BLOCKED`. 2Wiki is `DEFERRED_NETWORK / SOURCE_UNVERIFIED`: four frozen official Dropbox routes/probes returned no HTTP response and the pinned HF mirror failed with OS network unreachable; no dataset byte was accepted. TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph and TimeQA Direct/CoT plus paired intervals are verified. Kairos/Pair-MLP tensor cores, shared synthetic Qwen adapter and CPU resumable execution are development-verified. PEFT is absent from the fixed local environment/cache and dependency expansion lacks separate authorization; checkpoint binding, deterministic production sampler and formal trained runs remain incomplete. TimeQA D-019 remains unchanged.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 只读检查局部 Conda 环境是否已有 PEFT；随后冻结 backbone model revision、production data manifest/core type 的 checkpoint binding 与 PEFT injection 设计。实现及 clean tests 通过后，才可重新执行资源门禁并考虑单 batch GPU development smoke；不得启动 production 训练。
+- next_safe_action: 按 D-029 在 synthetic-only 边界实现并测试 checkpoint 的 model revision、model SHA256SUMS、data manifest 与 core-type binding；不安装 PEFT、不读取 production 样本、不加载 7B、不使用 GPU。完成 clean tests 和关键提交后等待依赖扩充与人工审计授权。
 - required_reading:
   - `checkpoints/remaining-reviewer-response-plan.md`
   - `checkpoints/phase-01-2wiki-source-recovery.md`
