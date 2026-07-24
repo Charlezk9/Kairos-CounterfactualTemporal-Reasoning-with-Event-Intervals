@@ -4,8 +4,8 @@
 - active_phase: reviewer-response-remediation (phase-01 human review pending)
 - phase_status: RUNNING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 4dba42a2765c8667576d87599269e836755888e8
-- last_verified_commit: 4dba42a2765c8667576d87599269e836755888e8
+- git_head: 978b0b4f940a9a84ba1be2fca3383b5bb585fb97
+- last_verified_commit: 978b0b4f940a9a84ba1be2fca3383b5bb585fb97
 - last_completed_checkpoint: checkpoints/phase-01-ai-assisted-development-training-copy.md
 - active_run_ids: none
 - running_processes: none
