@@ -1,3 +1,21 @@
+# D-042 Deterministic Sampling Amendment Re-audit — 2026-07-25
+
+## D-042 VERDICT
+
+`APPROVED_AMENDMENT`
+
+D-042 已充分修正上一轮的两个 P1 阻塞项，可作为下一次真实 smoke 前的冻结执行契约。该批准仅覆盖计划严谨性，不把此前失败的 mechanics smoke、Direct/CoT 临时输出或任何未发布 stochastic 输出认定为候选实验工件。
+
+批准依据：
+
+- 采样语义已机械化固定：最终一步 logits 在 CPU float32 上除以温度 `0.7`，使用稳定升序 `torch.sort`、float32 `softmax/cumsum`、删除累计概率 `<= 0.1` 的低概率项且始终保留最后一项，再按原词表维度 scatter；`top_k=0` 不执行额外过滤。
+- 随机数生命周期已唯一化：每个 `(source_id, sample_position)` 仅创建并播种一次 CPU `torch.Generator`，跨该样本全部生成 token 复用；唯一抽样原语为 `torch.multinomial(filtered_probs, 1, replacement=False, generator=g)`，禁止逐 token 重置、全局 RNG、跨样本共享及替代抽样实现。
+- KV cache 契约已闭合：每个 SC 位置使用独立且全新的 Transformers 4.48.3 `DynamicCache`；首步完整未填充 prompt 与后续单 token 前向的 attention mask、`cache_position`、`position_ids`、EOS 停止行为和仅解码生成 ID 均已明确；缓存必须为 28 层 CUDA BF16，逐层 K/V 形状为 `[1, 4, current_sequence_length, 128]`，且后续步序列长度严格递增 1。
+- golden gate 已覆盖 CPU 过滤边界、并列 logits、种子重现性、cached 与 fresh full-prefix 的逐 token 一致性，以及不同 SC 位置/记录间的 cache 隔离；非有限值、空分布、缓存复用或形状/位置异常均为硬失败。
+- D-042 未放松严格确定性，也未改变 prompt、模型、数据、parser、证据规则及既定单 GPU/资源边界。
+
+放行条件：在文档与本审计记录提交、推送且工作树 clean 后，先通过新增 unit/golden 与完整测试，再完成资源门禁，才可启动一个前台真实 smoke。若 cached-vs-full-prefix equality 在固定环境中不能成立，必须停止并记录失败；不得私自加入容差、改变 kernel/采样规则或发布结果，任何此类变化都需要新的 amendment 与独立复核。
+
 # D-041 Resource Amendment Re-audit — 2026-07-25
 
 ## D-041 VERDICT

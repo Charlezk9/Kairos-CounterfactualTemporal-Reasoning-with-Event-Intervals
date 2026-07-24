@@ -422,3 +422,9 @@
 - 状态：`FROZEN PRE-OUTPUT AMENDMENT / INDEPENDENT RE-AUDIT APPROVED`。原计划的 selected-GPU free≥24 GiB 在总显存恰为24 GiB的 RTX 3090 上因驱动常驻不可达；2026-07-25 只读观测的完全空闲卡为24,243 MiB，不能满足24 GiB。
 - 新门禁固定 free≥22 GiB、所选 full UUID无 compute process、只运行一个前台任务。既有 clean one-step 7B smoke峰值为15,920,307,712 bytes，因此新门禁仍保留超过7 GiB余量；其他 CPU/RAM/disk/UUID/PCI/model-hash/offline限制完全不变。
 - 本修正在任何 GSM8K candidate/SFT/internal-dev model output前冻结，不改变数据、prompt、parser、metric、seed或训练超参。独立审计批准并提交/推送前不得加载模型。
+
+## D-042：严格确定性 Self-Consistency CPU 采样
+
+- 状态：`FROZEN AFTER FAILED MECHANICS SMOKE / INDEPENDENT RE-AUDIT APPROVED`。第一次8条 smoke 成功加载固定模型并完成 greedy Direct/CoT，但首个 Self-Consistency sample 在 CUDA `cumsum_cuda_kernel` 被 `torch.use_deterministic_algorithms(True)`按预期拒绝；未产生任何 stochastic candidate，也未发布工件，失败不归因于 OOM。
+- 保持 Qwen incremental forward/KV cache 在固定单 GPU；每步只把最终 float32 logits移到CPU。每个`(source_id,sample_position)`只创建并seed一次独立CPU generator，跨该sample全部token持续复用；唯一采样原语是计划中精确固定的`torch.multinomial(..., replacement=False, generator=g)`，禁止逐token重置或改用全局/Categorical/rand+searchsorted。严格确定性不得关闭或改成warn-only。
+- 每个SC position从独立fresh `DynamicCache`开始；full-prompt首步和逐token后续步显式增长attention/cache-position/position-ID，并逐层核验28层CUDA BF16 `[1,4,seq,128]` cache。EOS在下次forward前停止且只decode generated IDs。CPU golden fixtures须锁定过滤边界/tie/seed replay，incremental fixtures须逐token证明cached与fresh full-prefix reference一致并证明cache隔离；重新 real smoke前须独立审计批准并提交/推送。prompt、seed公式、数据、parser、候选顺序、模型和评测不变；D-042不得解释为已有候选结果。

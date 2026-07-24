@@ -206,6 +206,50 @@ train supervision under D-031/D-034 and is recorded per item. Primary
 internal-dev evaluation uses the untouched pool. An injected-gold diagnostic is
 published separately and can only quantify sensitivity.
 
+D-042 fixes the stochastic implementation without relaxing strict
+determinism. The first failed mechanics smoke proved that CUDA
+`cumsum_cuda_kernel` is rejected by `torch.use_deterministic_algorithms(True)`;
+no stochastic candidate was produced or published. Self-Consistency therefore
+uses incremental Qwen forward passes on the selected GPU but moves each final
+step's single float32 logit vector to CPU before filtering and sampling. It
+divides logits by 0.7, performs a stable ascending CPU sort (equal logits retain
+ascending vocabulary-ID order), computes float32 softmax and cumulative mass,
+removes entries whose ascending cumulative probability is at most 0.1 while
+always retaining the final sorted entry (the highest vocabulary ID among an
+exact maximum-logit tie), and scatters negative infinity back in original
+vocabulary order. The exact calls are `torch.sort(..., dim=-1,
+descending=False, stable=True)`, `torch.softmax(..., dim=-1,
+dtype=torch.float32)`, `torch.cumsum(..., dim=-1, dtype=torch.float32)` and a
+dimension-minus-one scatter. After a second float32 softmax, the only sampling
+primitive is `torch.multinomial(filtered_probs, 1, replacement=False,
+generator=g)`. Exactly one CPU `torch.Generator` is created and `manual_seed`ed
+once at the start of each `(source_id, sample_position)` sample; the same
+generator persists across all generated tokens in that sample. It is never
+reset per token, shared across positions or replaced by global RNG,
+`Categorical`, `rand` or search-sorted sampling. Top-k 0 performs no additional
+filter.
+
+Every SC position creates a fresh Transformers 4.48.3 `DynamicCache`; caches
+are never shared across positions or records. The first forward consumes the
+full unpadded prompt with `use_cache=True`, explicit attention mask,
+`cache_position=0..prompt_length-1` and matching `position_ids`. Each later
+forward consumes only the previously selected non-EOS token, grows the full
+attention mask by one and supplies the one-element next cache position and
+matching position ID. The output cache must be that position's cache and must
+have exactly 28 layers; every key/value tensor must remain CUDA BF16 with shape
+`[1,4,current_sequence_length,128]`, and sequence length must grow by exactly
+one after every cached token forward. EOS is appended to generated IDs and
+stops before another forward. Only generated IDs, never prompt IDs, are decoded.
+Any non-finite logits/probabilities, invalid cache/output/attention/position
+shape, device/dtype drift, empty distribution or cache reuse is a hard failure.
+CPU golden tests bind exact filtering, ties and seed replay. Incremental golden
+tests must prove, for every selected token, equality with a fresh full-prefix
+reference's next-token logits and selected token, and must prove cache isolation
+between positions before another real smoke. This amendment changes only the
+deterministic implementation of the already-frozen sampling distribution;
+prompt, pool seed, per-item seed formula, temperature, top-p, top-k, model,
+data, parser and evidence rules do not change.
+
 The artifact binds complete model-file verification, tokenizer/config/chat
 template hashes, prompt hash, all decoding/RNG settings, partition manifests,
 raw evidence and parsed proposals. An 8-record smoke checks mechanics only and
@@ -303,8 +347,10 @@ number enters the paper recommendation section of `verify-addExp.md`.
 8. train matched seed 13, then remaining seeds; evaluate and report;
 9. separately implement an official held-out protocol before any paper claim.
 
-Resource amendment D-041 was frozen before any candidate/model output. It does
-not change prompts, data, metrics or training hyperparameters.
+Resource amendment D-041 was frozen before any candidate/model output. Sampling
+amendment D-042 was frozen after greedy mechanics outputs but before any
+stochastic candidate output or published candidate artifact. Neither changes
+prompts, data, metrics or training hyperparameters.
 
 Stop without deleting or repairing evidence when hashes/facts change, A/B
 disagree, provenance is misrepresented, a verifier fails, an artifact target
