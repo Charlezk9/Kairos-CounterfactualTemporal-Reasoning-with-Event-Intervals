@@ -48,6 +48,8 @@ TORQUE 和 TimeQA 只作冻结后的迁移评测，不用于训练。训练数�
 
 报告 mean/std、10,000 次 paired bootstrap 95% CI、Holm 校正和效应量。主要显著性比较为 Kairos 对最强 same-supervision Baseline；不把定义不同的指标混成一个总平均。
 
+跨方法统计默认要求相同 model ID/revision。唯一已冻结例外是 D-033 的派生 Rule-Graph 对其 config 精确绑定的 Direct 上游；该例外只改变统计资格校验，不改变配对单位、指标、重采样、显著性或多重比较合同，也不把 structured baseline 表述为 same-supervision 主比较。
+
 ## 数据质量
 
 反事实数据至少由两名人类对 200 条分层样本独立审核，检查事件、关系、语法、非目标内容和答案更新。目标为 Cohen's kappa >= 0.80、有效率 >= 95%；未达标则修正规则并用新样本复审。AI 判断不能替代该审计。

@@ -348,3 +348,10 @@
 - 规则图：只解析单句内恰一个、非否定的显式 `A before B` / `A after B` / `Before B, A` / `After B, A`。节点是 anchor 与候选 span 在 passage 中的 exact occurrences，跨左右 clause 建立 directed-before 边并做确定性 transitive closure；候选 span 不是 passage exact substring、与 anchor 重叠或同时被正反路径支持时记为 unknown，不作修复。
 - 候选集和打分：每个上游 answer set 在 TORQUE normalizer 下去重并保留首个 surface。对每个 span 统计 desired-path support、inverse-path contradiction 或 unknown；set score 固定为 `(-contradiction_count, support_count, -unknown_count, -candidate_index)`。只有最优集 `support_count>0` 时才输出该原始候选集；其他所有情况原样回退 Direct。不从 union 自行拼接新答案，并以早候选作平局顺序。
 - 工件与验证：每题保存 bounded canonical rule trace，包括 parser/anchor/edge、十个候选状态和选择/回退理由，`GenerationEvidence` 固定 `NOT_APPLICABLE` 且 token counts 为 0。offline verifier 必须重验三个上游 manifest/SC envelopes、source order和逐题 trace/prediction。先用 synthetic passages 实现/测试，clean commit 后再 CPU 前台发布 TORQUE dev 预测、指标和对 Direct 的固定 paired bootstrap；负结果和高 fallback 率必须保留。
+
+## D-033：派生 Rule-Graph 的配对统计资格
+
+- 状态：`FROZEN FOR IMPLEMENTATION / NARROW EXCEPTION`。D-032 的正式预测与指标已经从 clean `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866` 发布并通过独立 replay；首次统计发布在创建工件前由既有“相同 model revision”门禁拒绝。该拒绝按设计保留为证据，不通过手工脚本绕开。
+- 原则：paired bootstrap 的配对单位、数据、source order、seed、指标、10,000 resamples、CI、p-value 与 Holm family 均不依赖两个方法是否共享模型参数。相同 model ID/revision 仍是 prompt-only 比较的默认资格；只为固定的派生 `rule-graph` 增加一个窄资格，不放宽到任意跨模型比较。
+- 窄资格：candidate 必须同时满足 method=`rule-graph`、model ID=`deterministic-rule-graph`、revision=`explicit-before-after-constraint-v1`、config schema/method/dataset/seed/generation/gold-access 与 D-032 相符，并且 config 中 `upstream.direct.run_id` 和 `manifest_sha256` 必须分别精确等于 reference run 与 reference prediction manifest。reference/candidate 仍必须同 dataset、同 seed、不同 run，且两个预测/指标工件、source order 与逐样本指标均须独立重放。
+- 防扩张：LLM-Graph、Kairos、Pair-MLP、Same-data SFT 或其他不同 model identity 不自动获得该资格；若以后需要跨模型比较，必须另立冻结决定。任何缺失/额外/错误的 Rule-Graph 身份或 Direct provenance 均 fail closed。统计发布前后还必须单独运行 D-032 的专用 offline verifier，证明三个上游工件、SC raw envelopes、逐题 trace 与 prediction 一致。
