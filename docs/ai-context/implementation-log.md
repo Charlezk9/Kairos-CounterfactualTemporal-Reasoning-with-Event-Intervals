@@ -318,3 +318,10 @@
 - clean `06eff003...` 实现 D-038 additive agreement projection与 immutable publisher；任一 overall分歧硬失败，不向 D-035 伪装 authors adjudication。focused 9/9、full 569/569（18.773s）通过，GPU隐藏、CPU两线程。
 - 单次发布与新鲜进程重放通过：196/200 valid，observed/expected 1.0/0.9608，conditional κ=1.0，validity=0.98，Wilson 95% `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。
 - 结果固定 `human_independence_verified=false`、`paper_metric_eligible=false`。下一步只构造 train330/internal-dev36 开发分区，不产生论文结论。
+
+## 2026-07-25 — Audit-bound 330/36 development partition
+
+- `3c026858...` 实现从370条 relation source、audit items与 D-038 projection全链重放的 v2 publisher；4个排除 pair只能由 audit ID join推导，不接受手写 exclusion list。
+- pure partition tests 3/3、full 572/572（18.842s）通过。production derive得到366条、train330/internal-dev36；完整数据 SHA `4b5fec2b...` 与旧副本相同。
+- clean commit 单次发布后新鲜进程重放通过；train/dev/partition/manifest SHA为 `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`，全部0700/0600且nlink=1。
+- internal-dev禁止 optimizer/gold injection/selection/tuning，所有结果仍 `NOT PAPER-ELIGIBLE`；CF answer继续 unavailable。

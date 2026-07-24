@@ -146,7 +146,7 @@ D-035 的 authors-adjudication evaluator 已开发验证，但没有接收可证
 
 按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
 
-Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。366条 development-only副本的数据/manifest SHA仍为 `4b5fec2b...` / `f24a8e8e...`，CF answer unavailable/masked；下一步从审计链重建并冻结 train330/internal-dev36。
+Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。`3c026858...` 已从370条源数据和该审计链重建366条并冻结 train330/internal-dev36；data/train/dev/partition/manifest SHA为 `4b5fec2b...` / `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`。internal-dev不进入optimizer/gold injection/selection，CF answer仍 unavailable/masked。
 
 ## 7. 已有实验复现结果
 
