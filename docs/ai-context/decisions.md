@@ -327,3 +327,13 @@
 - 停止条件：若 wheel 元数据不符、安装引起既有包版本变化、`pip check`/import/synthetic tests 失败、`/data0` 低于 120 GiB、无合适 GPU 或预计单卡内存超过安全余量，则保留证据并停止，不升级其他依赖、不更换未经冻结版本、不启动正式训练。
 - 安装与验证结果：官方 wheel 374,831 bytes、SHA256 `2f04f3a870c3baf30f15e7dcaa5dd70d3e54cfdd146d3c6c187735d3ae0a0700`；仅新增 `peft==0.14.0`，核心依赖版本逐项未变，import 与 `pip check` 通过。实现覆盖 real tiny-Qwen PEFT forward/backward、optimizer/state/checkpoint；focused 9/9 + 9/9、full 533/533 通过。
 - GPU smoke：clean `c68c77a...` 上使用 physical GPU 4、本地固定 7B、synthetic batch 32 完成一个 optimizer step；392 LoRA tensors，loss 1.96875，peak allocated 15,920,307,712 bytes，退出后 GPU 回到 11 MiB。首次仅因 CUDA 统计初始化次序在 model load 前失败且无工件；最终证据与边界唯一记录于 `checkpoints/phase-03-peft-injection-smoke.md`。
+
+## D-031：确定性训练顺序、候选绑定与精确恢复游标
+
+- 状态：`FROZEN FOR IMPLEMENTATION / SYNTHETIC ONLY`；冻结父提交为 `6a3f18ef1839dcdcf19c58593d809c07eb37f866`。本决定不授权读取 production 数据、候选预测或模型，不授权 GPU 或正式训练；D-023 人工审计门禁不变。
+- Source/candidate binding：训练 corpus 必须绑定 dataset revision、不可变 source artifact ID/manifest SHA256 和 clean execution commit。每个样本按 source artifact 顺序保存连续 `source_order_index`、example/source/original/CF record IDs 与 canonical record SHA256；任一身份或 hash 重复即 fail closed。
+- 候选合同：候选保留去重后的首次出现顺序，每项绑定 example ID、exact UTF-8 content SHA256 和有序来源集 `direct/cot/self-consistency/gold`。manifest 同时绑定 gold-answer SHA256、target index 和 `gold_injected`；若补 gold，它必须是末项且来源仅为 `gold`，未补时 target 不得声称 gold 来源。评测禁止 gold 的规则不因训练 manifest 改变。
+- Epoch sampler：seed 仅为 `13/42/2026`，固定 3 epochs。每个 epoch 对 `(corpus_sha256, seed, epoch, source_order_index, example_id)` 的 canonical payload 做 SHA256 rank，以 `(rank, source_order_index, example_id)` 排序；不使用 Python/Torch shuffle 或 worker 时序决定样本顺序。所有真实样本在每轮恰好出现一次。
+- Batch/tail policy：继承 D-028 的 effective batch 32 及固定 micro-batch divisor。三轮序列后若不足 32，只允许用独立 padding-rank 的确定性前缀补齐，且仅补 `0..31` 个 slot；这些 slot 必须显式标记 `repeat_padding=true`。不静默 drop 样本，不隐式改变最后一步的 effective batch。正式报告必须披露真实/repeat slot 计数。
+- Manifest/cursor：canonical manifest 必须完整列出 source-order examples/candidates、epoch slots、repeat-padding slots、micro-batch 和 optimizer-step 归属，并可由最小输入独立重建后 exact equality 验证。恢复只允许 optimizer boundary；cursor 同时绑定 next micro-batch、optimizer steps、consumed total/real/repeat slots、completed epochs 和 next example，任一不一致即在取样或模型变更前失败。
+- Checkpoint binding：未来 production runner 传入 D-029 `TrainingArtifactBinding.data_manifest_sha256` 的必须是本训练 manifest 的 SHA256；该 manifest 内部再绑定源数据 manifest，从而使候选、顺序、tail policy 和 source artifact 一起进入 checkpoint 身份。实现只先做 pure/synthetic 结构、严格 round-trip/tamper/cursor 测试与 CPU full suite。
