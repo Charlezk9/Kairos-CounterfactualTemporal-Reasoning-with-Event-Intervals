@@ -2,6 +2,25 @@
 
 正式运行采用追加式登记。每个条目必须包含 run ID、状态、方法、数据集/split、数据 revision/SHA256、样本数、模型 revision、Git commit/dirty、配置哈希、seed、GPU、起止时间、退出状态以及预测/指标/checkpoint/日志路径与 SHA256。
 
+## Development training runs
+
+### `kairos-s13-416dbd7-attempt-01`
+
+- status: `COMPLETE / FRESH REPLAY VERIFIED / DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`
+- method: independent Kairos relation-only reimplementation; Qwen2.5-7B-Instruct LoRA plus interval projection, five-relation graph and candidate scorer; micro-batch 1, gradient accumulation 32, 31 optimizer steps
+- training data: GSM8K upstream revision `3101c7d5072418e28b9008a6636bde82a006892c`; audit-bound relation-only artifact population 366 split into train 330 / internal-dev 36; train SHA256 `073b4c65a5343ce459c9ecf89cfec844900e52cf7c7a8e6b563640a7468194ee`, partition manifest SHA256 `0631e02c6ff0e61cfba616fc262198cf7578170f80733b7debcca5a770acf4d4`, candidate manifest SHA256 `bdf45755a08dae3e0cb4478f2c5c038c8eb519f57b34d8f8e007d0de20581e2e`; optimizer consumed train only; three fixed train empty generated pools used D-043 gold-singleton materialization; CF answer unavailable/masked
+- model: `Qwen/Qwen2.5-7B-Instruct`, revision `a09a35458c702b33eeacc393d103063234e8bc28`
+- execution: clean synchronized commit `416dbd77314494c3bbd525bb4a8d0e25f5450583`, seed 13, physical GPU 5, UUID `GPU-1389a4f1-ca5a-d380-1de3-ebb3f55c9b29`, PCI `00000000:89:00.0`, started `2026-07-25T07:39:57Z`, finalization resource observation `2026-07-25T08:12:11Z`, exit 0
+- plan/exposure: 3 epochs, 990 real slots + 2 repeat-padding slots = 992 sample exposures; immutable checkpoints at steps 5/10/15/20/25/30/31; final checkpoint `step-000031`
+- training diagnostics: step-1 loss/gradient norm `5.6595306396484375` / `48.517330169677734`; step-31 loss/gradient norm `3.031139776110649` / `13.773099899291992`; command-reported peak allocated/reserved CUDA bytes `16983472128` / `17339252736`. These are development optimization diagnostics, not evaluation metrics.
+- run input: ID `kairos-gsm8k-relation-s13-416dbd773144`; manifest SHA256 `b9dd459af4be9ee9b39447b4230888a49f9bfc503f5cadc81e48cea282df1606`
+- training plan: ID `training-plan-gsm8k-relation-only-v1-s13-mb1-2d14989edf6f`; manifest SHA256 `ad02839c99e885a66cdcc2945f2782dc2b743d4f142fb0728bb02a7239461643`; semantic SHA256 `2d14989edf6f47c569bc86bf782985503e60621520518ec76f90c0218c4f5b25`
+- attempt gate: `/data0/hk_data/kairos-zx/artifacts/resource-gates/kairos-s13-416dbd7-attempt-01/resource-gate.json`; SHA256 `6e54101bdb2a1eaf6ad02972ce4b8e56a38b3bcda2bec00015156ca1b1477a23`
+- immutable artifact: `/data0/hk_data/kairos-zx/artifacts/training-runs/kairos-s13-416dbd7-attempt-01`, approximately 3.2 GiB, files mode 0600/nlink 1
+- SHA256: run-config `aa0a29c8b1a423abe7bad50826d28e00186d587f0a5c7c50be600cc5a4a4fbe4`; trace `261a8d5a1e9a5be5df455268995e6446e6c7897a55076056709c7b07dc7104cc`; final state `d2e6fe9f435ff98cf3c5d954cca9d1927d1a4dfd03703e51fbfc6242859a0169`; ancestry `50118414502905754b9abb9ab74dc1d3a10481ba8fe890208061da7df2920655`; manifest `f9314e4a3ea6afa9147146364560c21b57d3c0c258a3c1655429f9673fbbf1ce`
+- verification: real-record inspect and one-step GPU smoke passed before plan publication; training exited with 31/31 steps; a separate finalizer verified checkpoint receipts, trace prefixes, recursive ancestry and GPU release; a third fresh process independently returned `TRAINING_RUN_COMPLETE_DEVELOPMENT_ONLY` with the same manifest/trace hashes; selected SHA256 values were also checked directly from disk
+- eligibility: no evaluation metric was produced. Missing two-human independence provenance and unavailable CF answers prohibit paper use, official CF metrics and any reviewer-response claim.
+
 ## Formal model runs
 
 ### `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`
@@ -212,7 +231,8 @@ D-005/D-005-A 的语义与实现历史位于 `decisions.md` 和阶段检查点�
 | `DEV-P01-RELATION-AUDIT-RESULT-20260724` | 2026-07-24 | D-035 strict completed-review/adjudication parser and Cohen's-kappa/validity gate; synthetic only | contract `fbf7de2bff1d680d4d650d503637631adce73843`; implementation `832e755fbdee9dcff5977142ad0cf7ba29b60399` | focused 5/5 in 0.382s; full 565/565 in 17.876s; GPU hidden/two CPU threads; pass/boundary/undefined/low-kappa/low-validity/schema/order/hash/immutability cases passed | none; no production submissions read |
 | `DEV-P01-USER-ATTESTED-AUDIT-20260725` | 2026-07-25 | D-038 zero-disagreement algorithmic projection and immutable development-only result replay | implementation/execution `06eff003309cb67e0b71167043e4a41b04351856` | focused 9/9; full 569/569 in 18.773s; fresh-process production replay passed; 196/200 valid, conditional kappa 1.0, validity 0.98, Wilson 95% `[0.949713,0.992196]`; not paper-eligible | manifest `c501f37697e5254a274075e0a5d017472b960240b436e5a5acdd65c4d1c4afe7`; private artifact registered below |
 | `DEV-P03-GSM8K-CANDIDATE-POOL-20260725` | 2026-07-25 | frozen gold-blind Direct/CoT/8xSC candidate pool for train330/internal-dev36 | execution `67f995d1fe6082837c02fab2899c70f2449a888d`; D-042 implementation same commit | fresh full source/evidence/parser/model/resource replay passed; 726,637 generated tokens; 1,334/3,660 typed parse errors; train empty pools 3, internal-dev empty pools 0 | manifest `bdf45755a08dae3e0cb4478f2c5c038c8eb519f57b34d8f8e007d0de20581e2e`; private artifact `/data0/hk_data/kairos-zx/artifacts/relation-candidates/gsm8k-relation-qwen25-7b-pool-v1` |
-| `DEV-P03-PRODUCTION-TRAINING-RUNNER-20260725` | 2026-07-25 | provenance-bound, attempt-isolated and explicitly resumable Kairos development training runner | milestone commit containing this registry row; parent candidate milestone `3856f0126bd48ce91548ffc466540788541ff908` | focused 21/21; full 594/594 in 19.103s; five-round strict read-only audit `APPROVED_IMPLEMENTATION`; no real model load/run yet | none |
+| `DEV-P03-PRODUCTION-TRAINING-RUNNER-20260725` | 2026-07-25 | provenance-bound, attempt-isolated and explicitly resumable Kairos development training runner | implementation commit `416dbd77314494c3bbd525bb4a8d0e25f5450583`; parent candidate milestone `3856f0126bd48ce91548ffc466540788541ff908` | focused 21/21; full 594/594 in 19.103s; five-round strict read-only audit `APPROVED_IMPLEMENTATION`; later exercised by registered development run `kairos-s13-416dbd7-attempt-01` | `/data0/hk_data/kairos-zx/artifacts/training-runs/kairos-s13-416dbd7-attempt-01` |
+| `DEV-P03-FIRST-KAIROS-TRAINING-20260725` | 2026-07-25 | first complete seed-13 Kairos relation-only development training with 7 immutable checkpoints and fresh replay | execution commit `416dbd77314494c3bbd525bb4a8d0e25f5450583`; documentation milestone commit containing this row | 31/31 optimizer steps; finalizer pass; independent fresh `verify-run` pass; manifest `f9314e4a...`; `NOT PAPER-ELIGIBLE` | `/data0/hk_data/kairos-zx/artifacts/training-runs/kairos-s13-416dbd7-attempt-01` |
 
 这些 development 条目不是正式 run，不产生可进入论文的数值。
 

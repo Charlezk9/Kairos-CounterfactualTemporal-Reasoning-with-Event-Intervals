@@ -340,3 +340,11 @@
 - 每次attempt使用独立run ID与同名no-replace fresh resource gate；首checkpoint前失败可在新namespace从零重试。显式resume只写新run，并以source-config SHA、递归ancestry SHA和每checkpoint trace receipt锁定恢复链；failure artifact也有独立verifier。
 - 固定局部Conda/cache/tmp/offline/CUBLAS/hash/thread环境与resource gate no-follow路径被入口强制。`.conda/.condarc` 为0600/nlink1，SHA256 `280d122f...`，不修改全局Conda或shell。
 - focused 21/21、full 594/594（19.103s）通过。严格只读实现审计经五轮P1修复后返回 `APPROVED_IMPLEMENTATION`；没有读取official test、加载7B、使用GPU或创建训练工件。
+
+## 2026-07-25 — First replayable Kairos development training
+
+- runner 以 clean、与origin同步的 `416dbd77314494c3bbd525bb4a8d0e25f5450583` 执行。real-record inspect确认train 330、D-043空池3条、optimizer steps 31；独立one-step GPU smoke通过且未发布artifact。
+- run-input `kairos-gsm8k-relation-s13-416dbd773144` 与seed-13 plan在新鲜进程分别验证；随后为唯一attempt `kairos-s13-416dbd7-attempt-01` 捕获同名fresh gate `6e54101b...`，使用physical GPU 5/full UUID单前台运行。
+- 训练完成31/31 optimizer steps、992 exposures，按steps 5/10/15/20/25/30/31发布7个immutable checkpoint。step1/31 loss为5.65953064/3.03113978；这些仅是开发优化诊断，不是效果指标。
+- 训练进程正常退出后GPU释放。独立finalizer验证checkpoint receipts、full-trace prefixes、递归ancestry和post-resource后manifest-last；第三个fresh进程再次 `verify-run`，返回相同 final checkpoint、manifest `f9314e4a...` 与trace `261a8d5a...`。
+- 工件约3.2 GiB，文件0600/nlink1；最终state SHA `d2e6fe9f...`。两人独立人工审计provenance仍缺失，CF answer仍unavailable，因此run固定为 `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`，未运行internal-dev或任何论文指标。

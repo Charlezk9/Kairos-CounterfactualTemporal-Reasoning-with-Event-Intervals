@@ -2,7 +2,7 @@
 
 ## Status
 
-`IMPLEMENTED / CPU TESTED / INDEPENDENT IMPLEMENTATION AUDIT APPROVED`
+`IMPLEMENTED / CPU TESTED / INDEPENDENT IMPLEMENTATION AUDIT APPROVED / REAL RUN SUPERSEDED`
 
 This checkpoint records implementation readiness only. No production run-input,
 training plan, checkpoint or training metric was created while the repository
@@ -48,6 +48,8 @@ three and ordered pair-ID SHA256
 - GPU/model loaded: no.
 
 Real-record materialization, one-step GPU smoke and the complete 31-step run
-must each execute later from a synchronized clean commit. Every resulting
-artifact is fixed to `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; missing
-two-human independence provenance is not upgraded by this runner.
+subsequently executed from synchronized clean commit `416dbd773144...` and
+passed fresh replay. The authoritative execution evidence is
+`phase-03-first-development-training.md`. Every resulting artifact remains
+fixed to `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; missing two-human
+independence provenance is not upgraded by the successful run.

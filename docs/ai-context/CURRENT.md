@@ -1,17 +1,17 @@
 # Current State
 
-- updated_at: 2026-07-25 CST
+- updated_at: 2026-07-25 16:58 CST
 - active_phase: audit-gated-development-training
-- phase_status: RUNNER_APPROVED_COMMIT_PENDING
+- phase_status: FIRST_DEVELOPMENT_TRAINING_VERIFIED
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 3856f0126bd48ce91548ffc466540788541ff908
-- last_verified_commit: 3856f0126bd48ce91548ffc466540788541ff908
-- last_completed_checkpoint: checkpoints/phase-03-development-training-runner.md
+- git_head: 416dbd77314494c3bbd525bb4a8d0e25f5450583
+- last_verified_commit: 416dbd77314494c3bbd525bb4a8d0e25f5450583
+- last_completed_checkpoint: checkpoints/phase-03-first-development-training.md
 - active_run_ids: none
 - running_processes: none
-- blockers: Runner implementation passed 594 CPU/GPU-hidden tests and independent strict audit returned APPROVED_IMPLEMENTATION with no P0/P1. A named commit/push, clean-commit real-record inspection and one-step GPU smoke remain required before the first 31-step run. Two-human independence provenance remains absent, so every output is development-only and paper eligibility is blocked; relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
+- blockers: First seed-13 Kairos relation-only training run is complete and independently replay-verified, but two-human independence provenance remains absent. The run, checkpoints and all future evaluation derived from it remain `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`; relation-only v1 has no CF answer, so CF-answer metrics remain prohibited. Same-data SFT, Pair-MLP, seeds 42/2026 and model evaluation have not run.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 使用命名文件提交并普通推送已批准 runner；确认 HEAD/origin 同步且 clean 后依次执行 real-record inspect、独立资源 gate 与 one-step GPU smoke。smoke 和资源复核通过后才发布 run-input/plan，再为每个唯一 attempt run ID 捕获同名 fresh gate并启动 seed-13 31-step 训练。
+- next_safe_action: 在本训练结果文档提交并普通推送、确认 clean/synchronized 后，先冻结并审计 `step-000031` 的 internal-dev evaluation 执行计划；不得在计划冻结前运行模型评测，也不得将开发评测升级为论文证据。
 - required_reading:
   - `checkpoints/formal-training-execution-plan.md`
   - `checkpoints/formal-training-plan-audit.md`
@@ -23,6 +23,7 @@
   - `checkpoints/phase-03-peft-injection-smoke.md`
   - `checkpoints/phase-03-development-candidate-pool.md`
   - `checkpoints/phase-03-development-training-runner.md`
+  - `checkpoints/phase-03-first-development-training.md`
   - `decisions.md`
   - `../experiments/README.md`
   - `../operations/README.md`

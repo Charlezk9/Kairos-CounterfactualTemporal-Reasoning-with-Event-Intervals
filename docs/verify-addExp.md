@@ -1,14 +1,14 @@
 # Kairos 补充实验技术与结果报告
 
-> 状态：PHASE 01/03 RUNNING
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据与 GSM8K 开发候选工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency、LLM-Graph 与 Rule-Graph 正式结果；Kairos 与匹配监督 Baseline 尚未形成训练结果。
+> 状态：PHASE 01/03 RUNNING — FIRST KAIROS DEVELOPMENT TRAINING COMPLETE
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据与 GSM8K 开发候选工件、首个经独立重放验证的 Kairos seed-13 开发训练工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency、LLM-Graph 与 Rule-Graph 正式结果；Kairos 尚无评测指标，匹配监督 Baseline 尚未训练。
 
 ## 1. 文档状态与执行摘要
 
-- 当前阶段：Phase 01 data remediation 与 Phase 03 baseline evaluation 并行；GSM8K source/example conversion、construction v0 replay 和六类 baseline 已完成
+- 当前阶段：Phase 01 data remediation 与 Phase 03 model/baseline evaluation 并行；GSM8K source/example conversion、construction v0 replay、六类 baseline 和首个 Kairos seed-13 development training 已完成
 - 复现性质：independent reimplementation
 - 已完成实验：TORQUE Direct/CoT/CoT+Verifier/Self-Consistency/LLM-Graph/Rule-Graph，TimeQA-Hard Direct/CoT，以及各 candidate 对 Direct 的配对 bootstrap/Holm 校正
-- 当前结论：尚不能验证论文 Kairos 核心效果；当前 TORQUE CoT、CoT+Verifier 与 strict LLM-Graph 均低于 Direct，Self-Consistency 与 Direct 无可支持差异，Rule-Graph 与 Direct 四项得分精确相同，TimeQA 结果被严格格式失败主导；GSM8K 保守 v0 为 0 retained，不能直接用于完整 CF-answer 训练
+- 当前结论：尚不能验证论文 Kairos 核心效果；首轮训练只证明冻结的 relation-only 开发管线可执行和可重放，没有评测指标且固定为 `NOT PAPER-ELIGIBLE`。当前 TORQUE CoT、CoT+Verifier 与 strict LLM-Graph 均低于 Direct，Self-Consistency 与 Direct 无可支持差异，Rule-Graph 与 Direct 四项得分精确相同，TimeQA 结果被严格格式失败主导；GSM8K 保守 v0 为 0 retained，不能直接用于完整 CF-answer 训练
 
 ## 2. 复现范围、版本与 Git commit
 
@@ -136,7 +136,7 @@ Construction v0 的已验证漏斗为：
 | `VERIFIED DATA ARTIFACT / ZERO_RETAINED` | `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` | train | 7,473 | 1,845 (24.69%) | 370 (4.95%) | 0 | 0 | `3944bb56d5c16a11482de39c5f0295936b6ac035` |
 | `VERIFIED DATA ARTIFACT / ZERO_RETAINED` | `PROC-P01-GSM8K-CONSTRUCTION-V0-20260723` | test | 1,319 | 361 (27.37%) | 79 (5.99%) | 0 | 0 | `3944bb56d5c16a11482de39c5f0295936b6ac035` |
 
-Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f6540fe04361cdb346` / `41edd3255de9e6b3c9f6df4a7d2ca9f05d6dc7ad33a65f2f7d3b044e8a15412f`；test 为 `14393b5e2c8aace358babaaf38e37bd2d4e8fcbcdd52452127b3bf49b9f6a4e4` / `dda773ba105b59eb5d4e27fe8ea4ea0dcc2b661b4c639a2d3cd2ba297f9a129c`。这里的 `VERIFIED DATA ARTIFACT` 不等于实验效果 `VERIFIED`。两人 200 条人工审计与 Cohen's kappa 尚未完成；在该审计达到冻结阈值前不得开始 GSM8K LoRA 训练。
+Train audit/manifest SHA256 为 `a4b38dd3ba6b8b597732744af74b5e16fe464a98f2b8c1f6540fe04361cdb346` / `41edd3255de9e6b3c9f6df4a7d2ca9f05d6dc7ad33a65f2f7d3b044e8a15412f`；test 为 `14393b5e2c8aace358babaaf38e37bd2d4e8fcbcdd52452127b3bf49b9f6a4e4` / `dda773ba105b59eb5d4e27fe8ea4ea0dcc2b661b4c639a2d3cd2ba297f9a129c`。这里的 `VERIFIED DATA ARTIFACT` 不等于实验效果 `VERIFIED`。两名不同人类独立完成 200 条审计的 provenance 与正式 human κ 尚不可用；D-038 只放行明确降级的 development training，仍不能解锁 paper-eligible 训练或指标。
 
 relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no marker / 1,475 extraction rejected / 0 rewrite rejected / 370 retained（4.951%）。370 个 pair/source/original/CF record ID 均唯一；JSONL 为 785,369 bytes，SHA256 `525e3b09c6a6d03942a6bc3e03ebcd1722c3a68f4f224753dbc641f98465c12a`，manifest SHA256 `4e22ff135d97c89ded50a54fc1007f25d9646db67ce112e4637d4e8c8b63674a`，execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`。fresh source-lockstep replay 通过，且没有 test 工件。该工件只支持 original-answer 与 original/inverted-relation supervision；CF answer unavailable/masked，所以这些计数不能进入 CF accuracy/update/consistency 结果。
 
@@ -144,17 +144,23 @@ relation-only v1 只对 official train 发布，结果为 7,473 raw → 5,628 no
 
 D-035 的 authors-adjudication evaluator 已开发验证，但没有接收可证明为两位独立人类的 production submission。D-038 后续以不同 schema 对零分歧 A/B 做纯算法 agreement projection，只产生 development gate；它不向 D-035 传入伪造 authors adjudication。正式 human κ、authors-adjudicated validity 与 paper gate 仍 unavailable。
 
-按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
+按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁 paper-eligible 训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
 
-Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。`3c026858...` 已从370条源数据和该审计链重建366条并冻结 train330/internal-dev36；data/train/dev/partition/manifest SHA为 `4b5fec2b...` / `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`。internal-dev不进入optimizer/gold injection/selection，CF answer仍 unavailable/masked。clean `67f995d...` 随后发布共享 gold-blind候选池，生成726,637 tokens并保留1,334/3,660 typed parse errors；train/internal-dev候选 SHA为 `e5955a6a...` / `101fd821...`，manifest为 `bdf45755...`，fresh replay通过。train有3/330空池、internal-dev为0/36；D-043在不修改候选工件的前提下冻结显式 train-only gold-singleton物化，仍待独立批准与实现。
+Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。`3c026858...` 已从370条源数据和该审计链重建366条并冻结 train330/internal-dev36；data/train/dev/partition/manifest SHA为 `4b5fec2b...` / `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`。internal-dev不进入optimizer/gold injection/selection，CF answer仍 unavailable/masked。clean `67f995d...` 随后发布共享 gold-blind候选池，生成726,637 tokens并保留1,334/3,660 typed parse errors；train/internal-dev候选 SHA为 `e5955a6a...` / `101fd821...`，manifest为 `bdf45755...`，fresh replay通过。train有3/330空池、internal-dev为0/36；D-043随后通过独立严格审计和实现测试，并在首个seed-13训练中只对固定3条实施train-only gold-singleton物化，未修改候选工件。
 
 ## 7. 已有实验复现结果
 
-待运行。每行同时给出 `REPORTED`、重实现值、95% CI、差异、判定、run ID 和 commit。
+论文效果指标仍待运行。当前只完成首轮开发训练，下面数值是优化诊断而非 accuracy/F1，不可与论文报告值比较：
+
+| Status | Method | Data revision / split / N | Seed | Steps / exposures | Step-1 loss | Step-31 loss | Run / commit |
+|---|---|---|---:|---:|---:|---:|---|
+| `COMPLETE / FRESH REPLAY VERIFIED / NOT PAPER-ELIGIBLE` | Kairos relation-only development training | GSM8K `3101c7d...` audit-bound train / 330 | 13 | 31 / 992 | 5.659531 | 3.031140 | `kairos-s13-416dbd7-attempt-01` / `416dbd773144...` |
+
+该run使用micro-batch 1、gradient accumulation 32、3 epochs和2个deterministic repeat-padding slots；检查点固定在5/10/15/20/25/30/31。final state/trace/manifest SHA为 `d2e6fe9f...` / `261a8d5a...` / `f9314e4a...`，独立finalizer与第三个fresh `verify-run` 均通过。尚未运行internal-dev、TORQUE、TimeQA或official test评测，所以本节仍没有Kairos效果指标、95% CI或论文复现判定。
 
 ## 8. 新增 Baseline 结果
 
-Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Kairos 开发路径的 330/36 partition与共享候选已完成；D-043、run-input v2、runner和实际训练尚未完成。Same-data SFT与Pair-MLP仍待运行，故审稿主比较继续 `DEFERRED`，任何后续内部验证结果不得进入论文。
+Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Kairos 开发路径的 330/36 partition、共享候选、D-043、run-input v2、runner及首个seed-13训练均已完成并重放验证，但尚无Kairos评测。Same-data SFT与Pair-MLP仍待训练，故审稿主比较继续 `DEFERRED`，任何内部验证结果不得进入论文。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
@@ -242,7 +248,7 @@ Rule-Graph 已提供不含样本原文的聚合失败画像：42.8% 因 question
 | Reviewer concern | Planned evidence | Status |
 |---|---|---|
 | 非标准 temporal 数据集 | TORQUE、TimeQA-Hard | TORQUE 六个正式 baselines、TimeQA 两个 prompt baselines 与 paired inference 均 VERIFIED；TimeQA 为 strict-format failure-dominated result |
-| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；Rule-Graph VERIFIED exact-score-tie；matched-supervision methods 仅获 development-only 审计许可，runner/training仍未完成 |
+| Baseline 弱/监督不公平 | CoT+Verifier、Self-Consistency、Same-data SFT、Pair-MLP、LLM-Graph、Rule-Graph | PARTIAL：CoT+Verifier/LLM-Graph VERIFIED negative；Self-Consistency VERIFIED no-supported-difference；Rule-Graph VERIFIED exact-score-tie；Kairos首个seed-13 development training已验证但尚无评测；Same-data SFT/Pair-MLP及三seed主比较仍未完成 |
 | marker/template artifact | explicit/implicit、held-out、answer-unchanged | PLANNED |
 | 数据构造不透明 | 构造漏斗、哈希、人工审计 | PARTIAL：v0 漏斗/哈希 VERIFIED；用户确认的开发审计已重放，但两名独立人类 provenance 仍缺失，不能作为论文人工审计证据 |
 | interval 可解释性不足 | interval/graph 可视化与消融 | PLANNED |
@@ -259,6 +265,6 @@ relation-only train data artifact 为 `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`
 
 GSM8K 开发候选池 execution commit 为 `67f995d1fe6082837c02fab2899c70f2449a888d`，train/internal-dev candidate SHA为 `e5955a6a...` / `101fd821...`，raw evidence SHA为 `928bb795...` / `d9e1d72b...`，manifest为 `bdf45755...`。它是 gold-blind训练输入工件，不是模型训练结果或论文指标。
 
-Kairos development training runner 已通过 focused 21/21、full 594/594 与五轮独立严格实现审计（`APPROVED_IMPLEMENTATION`）。它绑定完整 run-input、每-attempt fresh resource gate、31-step计划、显式checkpoint恢复与trace ancestry；当前尚未执行首轮训练，因此这里没有训练loss、checkpoint或Kairos指标。未来该runner产生的数值仍固定为 `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`，不能替代缺失的两人独立人工审计。
+Kairos development training runner 已通过 focused 21/21、full 594/594 与五轮独立严格实现审计（`APPROVED_IMPLEMENTATION`）。clean execution commit `416dbd773144...` 随后完成 real-record inspect、one-step GPU smoke和seed-13 31-step训练；run `kairos-s13-416dbd7-attempt-01` 具有7个immutable checkpoints，final state/trace/manifest SHA为 `d2e6fe9f...` / `261a8d5a...` / `f9314e4a...`，独立finalizer与fresh `verify-run` 均通过。该run仍固定为 `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`，未产生Kairos评测指标，不能替代缺失的两人独立人工审计。
 
 对应审计包为 `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723`，execution commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb`，manifest SHA `da5d7fb0...`；这是待人工填写的 packet，不是审计结论。
