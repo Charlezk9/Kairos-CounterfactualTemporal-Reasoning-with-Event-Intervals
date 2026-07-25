@@ -206,6 +206,21 @@ train supervision under D-031/D-034 and is recorded per item. Primary
 internal-dev evaluation uses the untouched pool. An injected-gold diagnostic is
 published separately and can only quantify sensitivity.
 
+Post-publication replay found exactly three empty generated pools among train330
+and none among internal-dev36. D-043 is the sole amendment for this observed
+case. The immutable gold-blind candidate artifact is not changed. A versioned
+production train materializer may convert only those three verified empty pools
+to a singleton original-gold candidate with `origin=gold`,
+`gold_injected=true` and target index zero; its answer-ranking loss contribution
+is therefore zero while original/CF relation supervision remains active. The
+run-input v2 binds policy `train-empty-generated-pool-gold-only-injection-v1`,
+empty count 3 and ordered pair-ID-list SHA256
+`22b4edc8c53acf2971d1d618da17388ea34c759188fab4b32ed41f384d22161a`.
+Any count/hash drift, an internal-dev empty pool or use outside train fails.
+The default D-034 API continues to reject empty generated proposals; D-043
+requires an explicit versioned path and independent approval before code or
+training.
+
 D-042 fixes the stochastic implementation without relaxing strict
 determinism. The first failed mechanics smoke proved that CUDA
 `cumsum_cuda_kernel` is rejected by `torch.use_deterministic_algorithms(True)`;

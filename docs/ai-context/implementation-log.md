@@ -325,3 +325,10 @@
 - pure partition tests 3/3、full 572/572（18.842s）通过。production derive得到366条、train330/internal-dev36；完整数据 SHA `4b5fec2b...` 与旧副本相同。
 - clean commit 单次发布后新鲜进程重放通过；train/dev/partition/manifest SHA为 `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`，全部0700/0600且nlink=1。
 - internal-dev禁止 optimizer/gold injection/selection/tuning，所有结果仍 `NOT PAPER-ELIGIBLE`；CF answer继续 unavailable。
+
+## 2026-07-25 — Frozen GSM8K relation candidate pool
+
+- D-042 在 clean `67f995d...` 上通过 focused 6/6 与 full 578/578；第二次8条 mechanics smoke完成15,296 tokens、25 parse errors且不发布工件。
+- production 前台任务使用 physical GPU 5/full UUID，完成 train330/internal-dev36 的 Direct、CoT与8个SC位置：726,637 generated tokens、1,334/3,660 typed parse errors。结束后 GPU 回到11 MiB，Git仍与origin同步 clean。
+- manifest-last工件经新鲜 GPU-hidden进程完整重放；train/dev candidate SHA为 `e5955a6a...` / `101fd821...`，manifest为 `bdf45755...`，权限0700/0600、nlink=1。
+- train有3个空生成池，internal-dev为0；没有修改 immutable gold-blind工件。独立 runner审计因此阻塞训练，D-043先冻结显式 train-only gold-singleton策略并等待复审。

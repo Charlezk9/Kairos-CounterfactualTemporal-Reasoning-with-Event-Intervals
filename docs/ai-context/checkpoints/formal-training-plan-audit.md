@@ -618,3 +618,25 @@ All items below must be true before the named boundary:
   branch tip does not erase that history; history rewrite remains prohibited.
 - External-dataset source/network blockers remain outside this narrow training
   path and must remain visible as `DEFERRED`, not be silently treated as solved.
+# D-043 Empty Candidate Pool Amendment Re-audit — 2026-07-25
+
+## D-043 VERDICT
+
+`APPROVED_AMENDMENT`
+
+D-043 closes the prior P1 without changing the immutable gold-blind candidate
+artifact. The exception is limited to the three fresh-verified empty pools in
+train330 and binds their count, source-order ID-list SHA256, candidate/evidence
+hashes and versioned policy in run-input v2. Any drift fails closed.
+
+Only the explicit production train materializer may create a singleton original
+gold candidate with `origin=gold`, `gold_injected=true` and target zero. Its
+answer-ranking cross entropy is zero while original and counterfactual relation
+supervision remain active. The default D-034 API continues to reject empty
+generated pools; internal-dev, predictions and metrics never receive gold
+injection. Synthetic golden and tamper tests remain mandatory before execution.
+
+The transitive run-input-to-plan-to-checkpoint binding and the two-stage design
+in which a fresh finalizer records GPU release and writes the run manifest last
+have no additional P0/P1 finding. Approval is strictly
+`DEVELOPMENT / NOT PAPER-ELIGIBLE` and does not promote human provenance.

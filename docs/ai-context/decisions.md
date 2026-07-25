@@ -405,7 +405,7 @@
 
 ## D-039：GSM8K relation-only 开发候选池冻结
 
-- 状态：`FROZEN PLAN / GENERATION PENDING`。候选 prompt/parser bytes 固定为 `candidate-prompt-v1.json` 的 Git bytes，SHA256 `8632dfbd3f8f2b90c9a897bdb15b232b92705d79c8d8dcfd3f7ea94886f67349`；本地 Qwen revision、chat template、tokenizer/config和全部模型文件须在运行前重放。
+- 状态：`COMPLETE / DEVELOPMENT ONLY / FRESH REPLAY VERIFIED`。候选 prompt/parser bytes 固定为 `candidate-prompt-v1.json` 的 Git bytes，SHA256 `8632dfbd3f8f2b90c9a897bdb15b232b92705d79c8d8dcfd3f7ea94886f67349`；本地 Qwen revision、chat template、tokenizer/config和全部模型文件须在运行前重放。
 - Direct greedy/max-new 128；CoT greedy/max-new 512；Self-Consistency 为CoT位置0--7、temperature 0.7、top-p 0.9、top-k 0；pool seed 20260725；batch 1；输入超过4096 tokens硬失败；BF16/SDPA；EOS `[151645,151643]`、pad `151643`。per-item seed推导、offline/cache、64-KiB response、512-MiB artifact和2-GiB stage上限按唯一计划执行。
 - train/internal-dev 分开发布且均 gold-blind；仅 train materialization 可记录式 gold injection。internal-dev primary 禁止 gold injection，injected-gold 只作单独 sensitivity diagnostic。8条 smoke 只检查 mechanics，不允许按输出调 prompt/parser/阈值。
 
@@ -428,3 +428,10 @@
 - 状态：`FROZEN AFTER FAILED MECHANICS SMOKE / INDEPENDENT RE-AUDIT APPROVED`。第一次8条 smoke 成功加载固定模型并完成 greedy Direct/CoT，但首个 Self-Consistency sample 在 CUDA `cumsum_cuda_kernel` 被 `torch.use_deterministic_algorithms(True)`按预期拒绝；未产生任何 stochastic candidate，也未发布工件，失败不归因于 OOM。
 - 保持 Qwen incremental forward/KV cache 在固定单 GPU；每步只把最终 float32 logits移到CPU。每个`(source_id,sample_position)`只创建并seed一次独立CPU generator，跨该sample全部token持续复用；唯一采样原语是计划中精确固定的`torch.multinomial(..., replacement=False, generator=g)`，禁止逐token重置或改用全局/Categorical/rand+searchsorted。严格确定性不得关闭或改成warn-only。
 - 每个SC position从独立fresh `DynamicCache`开始；full-prompt首步和逐token后续步显式增长attention/cache-position/position-ID，并逐层核验28层CUDA BF16 `[1,4,seq,128]` cache。EOS在下次forward前停止且只decode generated IDs。CPU golden fixtures须锁定过滤边界/tie/seed replay，incremental fixtures须逐token证明cached与fresh full-prefix reference一致并证明cache隔离；重新 real smoke前须独立审计批准并提交/推送。prompt、seed公式、数据、parser、候选顺序、模型和评测不变；D-042不得解释为已有候选结果。
+
+## D-043：训练空候选池的显式 gold-only 物化修正
+
+- 状态：`FROZEN AMENDMENT / INDEPENDENT RE-AUDIT APPROVED / IMPLEMENTATION PENDING`。D-039 的 immutable gold-blind 工件经 fresh replay 后，train 330 条中恰有 3 条没有任何成功解析的生成候选；internal-dev 36 条均非空。train 空池 pair ID 的 source-order canonical list SHA256 为 `22b4edc8c53acf2971d1d618da17388ea34c759188fab4b32ed41f384d22161a`。不得删除这 3 条、修改 prompt/parser、伪造生成候选或把 gold 写回候选工件。
+- 版本化训练策略为 `train-empty-generated-pool-gold-only-injection-v1`：只在 train materialization 中，且仅当 verified generated pool 为空时，追加恰好一个内容为 original gold、origin 为 `gold` 的候选，令 `gold_injected=true`、target index 0。该 singleton 的 answer-ranking cross entropy 必为 0；original/CF relation loss仍有效。非空池继续执行 D-034 的既有去重/末尾 gold 注入；internal-dev、预测和指标始终禁止 gold 注入。
+- run-input v2 必须绑定空池 count=3、上述 ordered-ID hash、候选 manifest/evidence全哈希和策略版本；count/hash漂移、internal-dev 空池、非 train 调用或默认 D-034 API 接受空池均 fail closed。D-034 默认合同保持拒绝空 generated proposals；新增显式 production-only 路径与 schema，不静默改变旧调用方。
+- 实施门禁：先由独立严格审计批准本 amendment；随后以 synthetic golden/tamper tests证明默认拒绝、显式 singleton、非空行为不变、身份/target绑定及 internal-dev拒绝。候选工件、数据 split、31-step计划、超参、评测和 `NOT PAPER-ELIGIBLE` 状态均不改变。

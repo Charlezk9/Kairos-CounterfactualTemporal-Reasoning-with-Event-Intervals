@@ -1,7 +1,7 @@
 # Kairos 补充实验技术与结果报告
 
 > 状态：PHASE 01/03 RUNNING
-> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency、LLM-Graph 与 Rule-Graph 正式结果；Kairos 与匹配监督 Baseline 尚未形成正式结果。
+> 本文件是同伴作者引用补充实验的唯一汇总来源。当前已有可重放数据与 GSM8K 开发候选工件，以及 TORQUE/TimeQA 的 Direct、CoT、CoT+Verifier、TORQUE Self-Consistency、LLM-Graph 与 Rule-Graph 正式结果；Kairos 与匹配监督 Baseline 尚未形成训练结果。
 
 ## 1. 文档状态与执行摘要
 
@@ -146,7 +146,7 @@ D-035 的 authors-adjudication evaluator 已开发验证，但没有接收可证
 
 按用户要求，两个隔离智能体另行完成了明确标记的 AI-A/AI-B 预审，供作者检查审阅标准，而非正式人工审计。两者 overall-valid true为115/200与174/200，overall agreement为137/200（68.5%），AI-only diagnostic Cohen's κ=0.2913；event-span validity有61项分歧。该低一致性暴露了 span 判定口径的不稳定性，不能进入论文有效率、不能替代两位人类作者，也不能解锁训练。固定结果与哈希见 `docs/ai-context/ai-reviews/summary.json`。
 
-Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。`3c026858...` 已从370条源数据和该审计链重建366条并冻结 train330/internal-dev36；data/train/dev/partition/manifest SHA为 `4b5fec2b...` / `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`。internal-dev不进入optimizer/gold injection/selection，CF answer仍 unavailable/masked。
+Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁决后得到196/200 valid（98%）与4项 invalid。后续 A/B bytes 已进入 mode-0700/0600 private intake并由 D-038 严格重放：overall observed/expected agreement为1.0/0.9608、条件κ=1.0、validity=0.98、Wilson 95% CI `[0.949713,0.992196]`；projection/result/manifest SHA为 `ae8bc796...` / `df7310e8...` / `c501f376...`。但没有证据证明两名不同人类独立完成 A/B，因此状态严格为 `PASSED_DEVELOPMENT / USER_ATTESTED / INDEPENDENCE_UNVERIFIED / NOT PAPER-ELIGIBLE`，不是正式 human κ 或 authors adjudication。`3c026858...` 已从370条源数据和该审计链重建366条并冻结 train330/internal-dev36；data/train/dev/partition/manifest SHA为 `4b5fec2b...` / `073b4c65...` / `63041d7e...` / `cfc1894e...` / `0631e02c...`。internal-dev不进入optimizer/gold injection/selection，CF answer仍 unavailable/masked。clean `67f995d...` 随后发布共享 gold-blind候选池，生成726,637 tokens并保留1,334/3,660 typed parse errors；train/internal-dev候选 SHA为 `e5955a6a...` / `101fd821...`，manifest为 `bdf45755...`，fresh replay通过。train有3/330空池、internal-dev为0/36；D-043在不修改候选工件的前提下冻结显式 train-only gold-singleton物化，仍待独立批准与实现。
 
 ## 7. 已有实验复现结果
 
@@ -154,7 +154,7 @@ Claude Code 的第二组独立 AI 预审有6项 overall分歧，用户逐项裁�
 
 ## 8. 新增 Baseline 结果
 
-Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Same-data SFT、Pair-MLP 与 Kairos 已获 development-only 审计路径许可，仍待 330/36 partition、共享候选、runner 与实际训练；其内部验证结果不得进入论文。
+Direct、CoT、CoT+Verifier、Self-Consistency、structured LLM-Graph 与 deterministic Rule-Graph 正式 run 均已完成，并通过 immutable prediction、machine-readable metrics 和配对统计工件的三层离线重放。TORQUE CoT、CoT+Verifier 与 LLM-Graph 均显著低于 Direct；Self-Consistency 的四项 CI 均跨零；Rule-Graph 的四项逐配对差和 CI 均精确为零。所有结果保留且未据此调 prompt/parser/rule。TimeQA strict 的小幅正差异由格式失败主导。Kairos 开发路径的 330/36 partition与共享候选已完成；D-043、run-input v2、runner和实际训练尚未完成。Same-data SFT与Pair-MLP仍待运行，故审稿主比较继续 `DEFERRED`，任何后续内部验证结果不得进入论文。
 
 ## 9. TORQUE 与 TimeQA-Hard 结果
 
@@ -256,5 +256,7 @@ Rule-Graph 已提供不含样本原文的聚合失败画像：42.8% 因 question
 首个正式模型 run 为 Direct `20260723T094748Z-direct-torque-dev-s13-ec6ea450f14d`，execution/aggregation commit 为 `eae442b...` / `61e96bc...`，prediction/evidence/manifest 与 metrics/manifest SHA 见 registry。第二个为 CoT `20260723T100959Z-cot-torque-dev-s13-05e077299faf`，execution/aggregation commit 均为 `21b4eea...`，metrics/manifest SHA 为 `7c14f0d4...` / `f8af11f7...`。第三个为 TimeQA Direct `20260723T103403Z-direct-timeqa-hard-s13-7ad791b6f907`，execution/aggregation commit 均为 `709f712...`，metrics/manifest SHA 为 `0e769343...` / `e05b4c01...`。第四个为 TimeQA CoT `20260723T111209Z-cot-timeqa-hard-s13-99f5a0a0aa14`，execution/aggregation commit 均为 `50c6456cf91123868398ba66c35e4879f06196d4`；prediction/evidence/manifest SHA 为 `1c738c4e...` / `b8a48c76...` / `d3f3d753...`，metrics/manifest SHA 为 `da4637f1...` / `e7646799...`。第五个为 TORQUE CoT+Verifier `20260723T142222Z-cot-verifier-torque-dev-s13-5edec173ee35`，execution/aggregation commit 均为 `e09a40fa9e192bb92971be61e795cbfabcb3117d`，prediction/evidence/manifest SHA 为 `a0993605...` / `d5a3c7fd...` / `7e84484e...`，metrics/manifest SHA 为 `a3577a84...` / `9e84a5ac...`。第六个为 TORQUE Self-Consistency `20260723T152808Z-self-consistency-torque-dev-s13-f3846fed035d`，execution/aggregation commit 均为 `b2f889b02893d99751ee9aabacdb3038a3456e1e`；prediction/evidence/manifest SHA 为 `f7faf46c...` / `5bde295d...` / `be449eeb...`，metrics/manifest SHA 为 `22ec0d76...` / `7857e01a...`。第七个为 TORQUE LLM-Graph `20260723T165048Z-llm-graph-torque-dev-s13-d52c57809644`，execution/aggregation commit 均为 `99209b4445df3a25fe678e3223cceac2c84e0041`；prediction/evidence/manifest SHA 为 `64a6c2e7...` / `f8a82934...` / `c2573cfb...`，metrics/manifest SHA 为 `6ce16c3a...` / `cbe181d4...`。第八个为 CPU-only TORQUE Rule-Graph `20260724T064739Z-rule-graph-torque-dev-s13-45fe8931e946`，execution/metrics commit 为 `dcc96b74634cc5b339da8e1fe21e5c2bb40c4866`；prediction/evidence/manifest SHA 为 `c46527bf...` / `c2d55bee...` / `ff2eb503...`，metrics/manifest SHA 为 `f4d4d1a4...` / `5ec53db7...`。通用统计实现 commit 为 `db6efe20a6317edac47343d1c713e9f4ec51263b`，Rule-Graph provenance exception/统计 commit 为 `fdc4f92132a4c2a72256297a4abddd05210dd265`；TORQUE CoT comparison SHA 为 `38646b82...` / `d1b08455...`，TimeQA comparison 为 `d1b5c7a9...` / `a44331e9...`，TORQUE verifier comparison 为 `fd2ae14c...` / `19f411f6...`，TORQUE Self-Consistency comparison 为 `8918c83b...` / `d1712be7...`，TORQUE LLM-Graph comparison 为 `234e2d7b...` / `691b3259...`，TORQUE Rule-Graph comparison 为 `ea5a5f80...` / `3e26f09b...`。所有完整值见 registry。数据获取与 processed/construction artifact 的完整追踪也以 registry 为准。
 
 relation-only train data artifact 为 `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`，execution commit `5f0b31ed27b9aa582259a61bfc0f4b7dd11cd578`，JSONL/manifest SHA 为 `525e3b09...` / `4e22ff13...`；它不是 formal model run 或论文效果数值。
+
+GSM8K 开发候选池 execution commit 为 `67f995d1fe6082837c02fab2899c70f2449a888d`，train/internal-dev candidate SHA为 `e5955a6a...` / `101fd821...`，raw evidence SHA为 `928bb795...` / `d9e1d72b...`，manifest为 `bdf45755...`。它是 gold-blind训练输入工件，不是模型训练结果或论文指标。
 
 对应审计包为 `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723`，execution commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb`，manifest SHA `da5d7fb0...`；这是待人工填写的 packet，不是审计结论。

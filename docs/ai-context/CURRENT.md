@@ -2,16 +2,16 @@
 
 - updated_at: 2026-07-25 CST
 - active_phase: audit-gated-development-training
-- phase_status: AUDIT_BOUND_PARTITION_VERIFIED_CANDIDATES_PENDING
+- phase_status: CANDIDATE_POOL_VERIFIED_D043_APPROVED_RUNNER_PENDING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 3c02685845f54475b7bca834200aa584b02e4a6c
-- last_verified_commit: 3c02685845f54475b7bca834200aa584b02e4a6c
-- last_completed_checkpoint: checkpoints/phase-01-audit-bound-development-partition.md
+- git_head: 67f995d1fe6082837c02fab2899c70f2449a888d
+- last_verified_commit: 67f995d1fe6082837c02fab2899c70f2449a888d
+- last_completed_checkpoint: checkpoints/phase-03-development-candidate-pool.md
 - active_run_ids: none
 - running_processes: none
-- blockers: D-038 and audit-bound train330/internal-dev36 are verified only for development; two-human independence provenance remains absent, so paper eligibility is blocked. Candidate pool, run-input manifests, runner and checkpoints are absent. Relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
+- blockers: Candidate pool fresh replay and D-043 independent approval passed; explicit production-only gold-singleton materialization, run-input v2, runner and checkpoints are absent. Two-human independence provenance remains absent, so paper eligibility is blocked; relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并普通推送 partition checkpoint/registry/status；从同步 clean commit 严格解析三个冻结协议并实现 D-039 candidate publisher/verifier，先 synthetic 与8-record mechanics smoke，再通过资源/模型/UUID门禁执行一次前台离线生成。训练不得提前。
+- next_safe_action: 提交并普通推送候选里程碑与 D-043 approval；再从同步 clean commit 实现 run-input v2、显式 train-only empty-pool materialization 与 production runner，完成 synthetic/real-record/GPU smoke。正式训练不得提前。
 - required_reading:
   - `checkpoints/formal-training-execution-plan.md`
   - `checkpoints/formal-training-plan-audit.md`
@@ -21,6 +21,7 @@
   - `checkpoints/phase-03-deterministic-training-plan.md`
   - `checkpoints/phase-03-checkpoint-identity-binding.md`
   - `checkpoints/phase-03-peft-injection-smoke.md`
+  - `checkpoints/phase-03-development-candidate-pool.md`
   - `decisions.md`
   - `../experiments/README.md`
   - `../operations/README.md`
