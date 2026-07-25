@@ -332,3 +332,11 @@
 - production 前台任务使用 physical GPU 5/full UUID，完成 train330/internal-dev36 的 Direct、CoT与8个SC位置：726,637 generated tokens、1,334/3,660 typed parse errors。结束后 GPU 回到11 MiB，Git仍与origin同步 clean。
 - manifest-last工件经新鲜 GPU-hidden进程完整重放；train/dev candidate SHA为 `e5955a6a...` / `101fd821...`，manifest为 `bdf45755...`，权限0700/0600、nlink=1。
 - train有3个空生成池，internal-dev为0；没有修改 immutable gold-blind工件。独立 runner审计因此阻塞训练，D-043先冻结显式 train-only gold-singleton策略并等待复审。
+
+## 2026-07-25 — Provenance-bound development training runner
+
+- 实现 `kairos.production_training`：完整 data/candidate/protocol/model-file/method/runtime/run-input重放、seed-13 31-step计划、steps 5/10/15/20/25/30/31 checkpoints、trace、post-resource、manifest-last finalize与fresh verify。
+- D-043仅由私有 train capability处理固定3个空池；默认D-034、internal-dev和非空调用保持fail closed。singleton answer CE为0，original/CF relation loss继续有效。
+- 每次attempt使用独立run ID与同名no-replace fresh resource gate；首checkpoint前失败可在新namespace从零重试。显式resume只写新run，并以source-config SHA、递归ancestry SHA和每checkpoint trace receipt锁定恢复链；failure artifact也有独立verifier。
+- 固定局部Conda/cache/tmp/offline/CUBLAS/hash/thread环境与resource gate no-follow路径被入口强制。`.conda/.condarc` 为0600/nlink1，SHA256 `280d122f...`，不修改全局Conda或shell。
+- focused 21/21、full 594/594（19.103s）通过。严格只读实现审计经五轮P1修复后返回 `APPROVED_IMPLEMENTATION`；没有读取official test、加载7B、使用GPU或创建训练工件。

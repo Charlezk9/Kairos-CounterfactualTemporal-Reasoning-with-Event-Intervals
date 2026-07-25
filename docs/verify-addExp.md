@@ -259,4 +259,6 @@ relation-only train data artifact 为 `PROC-P01-GSM8K-RELATION-ONLY-V1-20260723`
 
 GSM8K 开发候选池 execution commit 为 `67f995d1fe6082837c02fab2899c70f2449a888d`，train/internal-dev candidate SHA为 `e5955a6a...` / `101fd821...`，raw evidence SHA为 `928bb795...` / `d9e1d72b...`，manifest为 `bdf45755...`。它是 gold-blind训练输入工件，不是模型训练结果或论文指标。
 
+Kairos development training runner 已通过 focused 21/21、full 594/594 与五轮独立严格实现审计（`APPROVED_IMPLEMENTATION`）。它绑定完整 run-input、每-attempt fresh resource gate、31-step计划、显式checkpoint恢复与trace ancestry；当前尚未执行首轮训练，因此这里没有训练loss、checkpoint或Kairos指标。未来该runner产生的数值仍固定为 `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE`，不能替代缺失的两人独立人工审计。
+
 对应审计包为 `AUDIT-P01-GSM8K-RELATION-ONLY-200-20260723`，execution commit `6f56fcb31b07d0c2be095a4aa7d4ea69e2be72cb`，manifest SHA `da5d7fb0...`；这是待人工填写的 packet，不是审计结论。

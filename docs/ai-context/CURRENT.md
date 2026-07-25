@@ -2,16 +2,16 @@
 
 - updated_at: 2026-07-25 CST
 - active_phase: audit-gated-development-training
-- phase_status: CANDIDATE_POOL_VERIFIED_D043_APPROVED_RUNNER_PENDING
+- phase_status: RUNNER_APPROVED_COMMIT_PENDING
 - git_branch: experiment/reproduction-additional-evaluation
-- git_head: 67f995d1fe6082837c02fab2899c70f2449a888d
-- last_verified_commit: 67f995d1fe6082837c02fab2899c70f2449a888d
-- last_completed_checkpoint: checkpoints/phase-03-development-candidate-pool.md
+- git_head: 3856f0126bd48ce91548ffc466540788541ff908
+- last_verified_commit: 3856f0126bd48ce91548ffc466540788541ff908
+- last_completed_checkpoint: checkpoints/phase-03-development-training-runner.md
 - active_run_ids: none
 - running_processes: none
-- blockers: Candidate pool fresh replay and D-043 independent approval passed; explicit production-only gold-singleton materialization, run-input v2, runner and checkpoints are absent. Two-human independence provenance remains absent, so paper eligibility is blocked; relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
+- blockers: Runner implementation passed 594 CPU/GPU-hidden tests and independent strict audit returned APPROVED_IMPLEMENTATION with no P0/P1. A named commit/push, clean-commit real-record inspection and one-step GPU smoke remain required before the first 31-step run. Two-human independence provenance remains absent, so every output is development-only and paper eligibility is blocked; relation-only v1 has no CF answer, so CF-answer metrics remain prohibited.
 - audit_mode: relaxed — 单智能体直接推进，不再要求每步双智能体审计。安全边界（路径限制、资源门禁、`.githooks/pre-commit`）不变。
-- next_safe_action: 提交并普通推送候选里程碑与 D-043 approval；再从同步 clean commit 实现 run-input v2、显式 train-only empty-pool materialization 与 production runner，完成 synthetic/real-record/GPU smoke。正式训练不得提前。
+- next_safe_action: 使用命名文件提交并普通推送已批准 runner；确认 HEAD/origin 同步且 clean 后依次执行 real-record inspect、独立资源 gate 与 one-step GPU smoke。smoke 和资源复核通过后才发布 run-input/plan，再为每个唯一 attempt run ID 捕获同名 fresh gate并启动 seed-13 31-step 训练。
 - required_reading:
   - `checkpoints/formal-training-execution-plan.md`
   - `checkpoints/formal-training-plan-audit.md`
@@ -22,6 +22,7 @@
   - `checkpoints/phase-03-checkpoint-identity-binding.md`
   - `checkpoints/phase-03-peft-injection-smoke.md`
   - `checkpoints/phase-03-development-candidate-pool.md`
+  - `checkpoints/phase-03-development-training-runner.md`
   - `decisions.md`
   - `../experiments/README.md`
   - `../operations/README.md`

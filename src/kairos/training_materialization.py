@@ -35,6 +35,7 @@ from .training_plan import (
 SCHEMA_VERSION = "relation-training-materialization-v1"
 DATASET_ID = "gsm8k-relation-only-v1"
 MAX_TOKENS = 32_768
+EMPTY_POOL_POLICY = "train-empty-generated-pool-gold-only-injection-v1"
 _GENERATED_ORIGINS = frozenset({"direct", "cot", "self-consistency"})
 _ORIGIN_ORDER = {value: index for index, value in enumerate(
     ("direct", "cot", "self-consistency", "gold")
@@ -191,6 +192,60 @@ def bind_relation_pair(
             "training example binding rejected materialized proposals"
         ) from error
     return BoundTrainingRecord(pair, binding, texts)
+
+
+def _bind_authorized_empty_train_pair(
+    pair: RelationOnlyPair,
+    proposals: Sequence[CandidateProposal],
+    source_order_index: int,
+    *,
+    partition: str,
+    policy: str,
+    authorized_pair_ids: frozenset[str],
+) -> BoundTrainingRecord:
+    """Apply the private D-043 capability without weakening D-034."""
+
+    values = tuple(_sequence(proposals, "candidate proposals"))
+    if partition != "train" or policy != EMPTY_POOL_POLICY:
+        _fail("empty generated pool is not authorized for this materialization")
+    if values:
+        _fail("D-043 capability accepts only an empty generated train pool")
+    if not isinstance(pair, RelationOnlyPair):
+        _fail("relation-only pair is invalid")
+    if (
+        not isinstance(authorized_pair_ids, frozenset)
+        or not authorized_pair_ids
+        or any(not isinstance(value, str) for value in authorized_pair_ids)
+        or pair.pair_id not in authorized_pair_ids
+    ):
+        _fail("empty train pair is outside the verified D-043 capability")
+    if (
+        isinstance(source_order_index, bool)
+        or not isinstance(source_order_index, int)
+        or not 0 <= source_order_index <= 10_000_000
+    ):
+        _fail("source order index is invalid")
+    gold = _text(pair.original_answer, "gold answer")
+    gold_hash = _content_sha256(gold)
+    try:
+        candidate = CandidateBinding.from_text(pair.pair_id, gold, ("gold",))
+        binding = TrainingExampleBinding(
+            source_order_index=source_order_index,
+            example_id=pair.pair_id,
+            source_id=pair.source_id,
+            original_record_id=pair.original_record_id,
+            counterfactual_record_id=pair.counterfactual_record_id,
+            record_sha256=sha256_canonical(pair.to_dict()),
+            gold_answer_sha256=gold_hash,
+            candidates=(candidate,),
+            answer_target_index=0,
+            gold_injected=True,
+        )
+    except ValueError as error:
+        raise TrainingMaterializationError(
+            "D-043 singleton binding rejected materialized gold"
+        ) from error
+    return BoundTrainingRecord(pair, binding, (gold,))
 
 
 def build_relation_training_corpus(
@@ -461,6 +516,7 @@ def materialize_micro_batch(
 
 __all__ = [
     "DATASET_ID",
+    "EMPTY_POOL_POLICY",
     "MAX_TOKENS",
     "SCHEMA_VERSION",
     "BoundTrainingRecord",

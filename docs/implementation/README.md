@@ -74,10 +74,17 @@ targets before forwarding tensors to the optimizer executor. The training-plan
 manifest hash is the checkpoint data identity and internally binds the source
 artifact.
 
-These layers do not independently read or verify production artifacts and do
-not authorize formal training. Candidate generation/materialization and a
-formal production runner/checkpoint/result remain absent. PEFT injection and a
-synthetic one-step 7B GPU smoke are verified. The D-028 execution contract and
+These lower layers do not independently read or verify production artifacts.
+`kairos.production_training` now supplies the development-only production
+orchestrator: full provenance replay, D-043 train-only empty-pool handling,
+resource/GPU identity gates, immutable run-input and plan publication, the
+frozen 31-step seed-13 execution, seven optimizer-boundary checkpoints, a
+bounded trace, post-exit resource evidence, manifest-last finalization and
+fresh offline verification. The implementation has passed synthetic/CPU tests;
+real-record inspection, the one-step GPU smoke and the first complete run are
+separate execution gates and are not implied by this implementation status.
+All outputs remain `DEVELOPMENT / INTERNAL-DEV / NOT PAPER-ELIGIBLE` because
+two-human independence provenance is absent. The D-028 execution contract and
 BF16 correction are recorded in
 `../ai-context/checkpoints/phase-03-resumable-training-execution.md`; the v2
 identity evidence is in
@@ -135,7 +142,7 @@ not a completed audit or training authorization. Detailed evidence is in
 
 ## CLI 与 manifest
 
-计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation，但尚无统一 CLI 或训练 runner。
+计划接口：`prepare-data`、`generate-candidates`、`train`、`evaluate`、`aggregate`、`build-author-report`。每个正式 run 必须写 manifest，包含 Git commit/dirty、配置哈希、数据与模型 revision、seed、资源、起止时间、输出路径和 SHA256。预测工件的已实现底层为 `kairos.prediction_artifacts`：固定 TORQUE dev/TimeQA-Hard binding、完整 source-order JSONL、raw generation evidence、clean Git 双门禁、manifest-last/no-replace 和 offline replay；v1 commit 为 `f12efa05459daa982b4a5583abf22d48e38b9a1a`，首个 production artifact 使用 `f45c9e8c1adeee4f357ab7823ce1dbf287ff5d37` 冻结的 v2。`kairos.metrics_artifacts` 在 `61e96bc58cd13bb4f5dc997ee678b86e81d9044a` 增加 prediction-bound immutable metric publication/reaggregation。`kairos.prompting`、`kairos.backbone` 与 `kairos.generation` 已覆盖 Direct/CoT 严格输出、Qwen span binding 和本地 greedy generation；`kairos.production_training` 提供本轮冻结的开发训练 CLI 与证据链，但尚未实现统一的全项目 CLI、训练后评测、聚合或作者报告命令。
 
 正式实验只能从 clean commit 启动；dirty-tree smoke test 标为 `development-only`，不能进入论文结果。
 

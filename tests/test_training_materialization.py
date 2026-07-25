@@ -5,14 +5,16 @@ import unittest
 import torch
 
 from kairos.ids import make_stable_id
-from kairos.modeling import IGNORE_RELATION_INDEX, RELATION_TO_INDEX
+from kairos.modeling import IGNORE_RELATION_INDEX, RELATION_TO_INDEX, kairos_loss
 from kairos.relation_supervision import construct_gsm8k_relation_only
 from kairos.relation_supervision_artifacts import REVISION
 from kairos.schema import AnswerType, SplitAssignment, TemporalExample
 from kairos.training_materialization import (
     BoundTrainingRecord,
     CandidateProposal,
+    EMPTY_POOL_POLICY,
     TrainingMaterializationError,
+    _bind_authorized_empty_train_pair,
     bind_relation_pair,
     build_relation_training_corpus,
     materialize_micro_batch,
@@ -150,6 +152,76 @@ class CandidateBindingTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(TrainingMaterializationError, "source order"):
             _corpus(records)
+
+    def test_d043_empty_pool_is_explicit_train_only_singleton_gold(self):
+        pair = _pair(3)
+        with self.assertRaisesRegex(TrainingMaterializationError, "non-empty"):
+            bind_relation_pair(pair, (), 0)
+        for partition, policy in (
+            ("internal-dev", EMPTY_POOL_POLICY),
+            ("train", "wrong-policy"),
+        ):
+            with self.subTest(partition=partition, policy=policy):
+                with self.assertRaisesRegex(
+                    TrainingMaterializationError, "not authorized"
+                ):
+                    _bind_authorized_empty_train_pair(
+                        pair,
+                        (),
+                        0,
+                        partition=partition,
+                        policy=policy,
+                        authorized_pair_ids=frozenset({pair.pair_id}),
+                    )
+        with self.assertRaisesRegex(TrainingMaterializationError, "capability"):
+            _bind_authorized_empty_train_pair(
+                pair,
+                (),
+                0,
+                partition="train",
+                policy=EMPTY_POOL_POLICY,
+                authorized_pair_ids=frozenset({"another-pair"}),
+            )
+        with self.assertRaisesRegex(TrainingMaterializationError, "only an empty"):
+            _bind_authorized_empty_train_pair(
+                pair,
+                (CandidateProposal("wrong", "direct"),),
+                0,
+                partition="train",
+                policy=EMPTY_POOL_POLICY,
+                authorized_pair_ids=frozenset({pair.pair_id}),
+            )
+        record = _bind_authorized_empty_train_pair(
+            pair,
+            (),
+            0,
+            partition="train",
+            policy=EMPTY_POOL_POLICY,
+            authorized_pair_ids=frozenset({pair.pair_id}),
+        )
+        self.assertEqual(record.candidate_texts, (pair.original_answer,))
+        self.assertEqual(record.binding.answer_target_index, 0)
+        self.assertTrue(record.binding.gold_injected)
+        self.assertEqual(record.binding.candidates[0].origins, ("gold",))
+
+        pair_mask = torch.tensor([[[False, True], [True, False]]])
+        relation_targets = torch.tensor(
+            [[[IGNORE_RELATION_INDEX, 0], [1, IGNORE_RELATION_INDEX]]]
+        )
+        losses = kairos_loss(
+            torch.tensor([[2.0]]),
+            torch.tensor([[True]]),
+            torch.tensor([0]),
+            torch.zeros((1, 2, 2, 5)),
+            pair_mask,
+            relation_targets,
+            torch.zeros((1, 2, 2, 5)),
+            pair_mask,
+            relation_targets,
+        )
+        self.assertEqual(float(losses["answer_loss"]), 0.0)
+        self.assertGreater(float(losses["relation_loss"]), 0.0)
+        self.assertGreater(float(losses["counterfactual_relation_loss"]), 0.0)
 
 
 class TokenMaterializationTests(unittest.TestCase):
